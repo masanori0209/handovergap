@@ -12,6 +12,7 @@
 - [x] sample dataset included
 - [x] schema.sql included
 - [x] examples included
+- [x] live TiDB Developer Tier validation completed
 
 ## GitHub Description
 
@@ -36,6 +37,7 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 - [x] `handovergap evaluate`
 - [x] `handovergap evaluate --compare`
 - [x] `handovergap schema --dialect tidb`
+- [x] `python harness/validation/tidb_live_check.py --create-schema`
 
 ## Evaluation
 
