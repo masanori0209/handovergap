@@ -17,13 +17,13 @@
 
 ## GitHub Setup Required
 
-- [ ] Push repository to `masanori0209/handovergap`
-- [ ] Confirm default branch name used by README image links
+- [x] Push repository to `masanori0209/handovergap`
+- [x] Confirm default branch name used by README image links
 - [ ] Enable the `testpypi` GitHub environment
 - [ ] Configure TestPyPI Trusted Publisher for `.github/workflows/test-publish.yml`
 - [ ] Enable the `pypi` GitHub environment with required human approval
 - [ ] Configure PyPI Trusted Publisher for `.github/workflows/publish.yml`
-- [ ] Confirm CI passes on GitHub
+- [x] Confirm CI passes on GitHub
 
 ## Publication Approval Required
 
@@ -35,7 +35,7 @@
 
 ## Contest Handoff
 
-- [ ] Add final GitHub URL to the Zenn article
+- [x] Add final GitHub URL to the Zenn article
 - [ ] Add final PyPI URL to the Zenn article
 - [ ] Add hosted demo or video URL if available
 - [ ] Publish the Zenn article

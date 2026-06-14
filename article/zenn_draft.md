@@ -156,6 +156,8 @@ handovergap evaluate --compare
 
 英語を主READMEとし、日本語READMEも同梱します。
 
+GitHub: https://github.com/masanori0209/handovergap
+
 ```bash
 pip install handovergap
 handovergap demo

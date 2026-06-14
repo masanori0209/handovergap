@@ -3,12 +3,12 @@
 ## Repository
 
 - [x] Repository name: handovergap
-- [ ] Description set
+- [x] Description set
 - [x] README polished
 - [x] LICENSE present
 - [x] pyproject.toml present
 - [x] tests present
-- [ ] GitHub Actions passing
+- [x] GitHub Actions passing
 - [x] sample dataset included
 - [x] schema.sql included
 - [x] examples included
@@ -55,7 +55,7 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 - [x] evaluation table
 - [x] competitor positioning
 - [x] limitations
-- [ ] link to GitHub
+- [x] link to GitHub
 - [ ] link to PyPI
 - [ ] link to demo/video if available
 
