@@ -320,7 +320,7 @@
           <h1>Correct memories are not always transferable.</h1>
           <p class="lead">
             HandoverGap detects missing tacit context in otherwise correct RAG memories,
-            checks the successor role, and blocks unsafe transfer with clarification questions.
+            checks the successor responsibility profile, and blocks unsafe transfer with clarification questions.
           </p>
           <div class="actions">
             <a class="button primary" href="#install">Start using it</a>
@@ -348,7 +348,7 @@
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
               <h3>Run the built-in demo</h3>
-              <p>See a valid memory that is unsafe to transfer to a CS successor.</p>
+              <p>See a valid memory that is unsafe to transfer without the successor's required context.</p>
               <pre><code>handovergap demo</code></pre>
             </article>
             <article class="card">
@@ -364,10 +364,10 @@
           <h2>CLI Usage</h2>
           <div class="grid two">
             <article class="card">
-              <h3>Detect gaps for a role</h3>
+              <h3>Detect gaps for a handover profile</h3>
               <p>
-                `detect` checks a built-in fictional scenario against a successor role such as
-                CS, Engineer, or Sales.
+                `detect` checks a built-in fictional scenario against a successor responsibility
+                profile. `CS`, `Engineer`, and `Sales` are packaged presets, not a fixed industry taxonomy.
               </p>
               <pre><code>handovergap detect --scenario S001 --role CS</code></pre>
             </article>
@@ -389,7 +389,7 @@
               <span class="kicker">Default</span>
               <h3>Local bilingual Streamlit demo</h3>
               <p>
-                The UI opens in Japanese by default and can switch to English. Local sample mode
+                The UI opens in Japanese by default and can switch to English. Local-sample mode
                 runs the real deterministic detector on fictional handover cases.
               </p>
               <pre><code>pip install "handovergap[demo]"

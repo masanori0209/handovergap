@@ -21,14 +21,14 @@ A normal RAG system may retrieve:
 For Company A, use CSV for this release. The API will come in the next phase.
 ```
 
-The statement can be correct while still being unsafe for a customer-support successor. They may not know:
+The statement can be correct while still being unsafe for a successor who must answer customers. They may not know:
 
 - whether the customer was informed;
 - what “this release” covers;
 - what support is authorized to promise;
 - what fallback or escalation path to use.
 
-HandoverGap performs role-conditioned slot checks, blocks unsafe transfer, and generates clarification questions.
+HandoverGap performs successor-profile-conditioned slot checks, blocks unsafe transfer, and generates clarification questions. The packaged dataset uses Support, Engineering, and Sales handover profiles as examples; the thesis is not limited to those business functions.
 
 ## Quickstart
 
@@ -51,7 +51,7 @@ pip install "handovergap[demo]"
 handovergap serve
 ```
 
-The demo defaults to Japanese and includes an English language switch. The default **Local sample** mode runs the real deterministic HandoverGap detector against bundled fictional handover cases. It compares:
+The demo defaults to Japanese and includes an English language switch. The default local-sample mode runs the real deterministic HandoverGap detector against bundled fictional handover cases. It compares:
 
 - `naive_rag`: answers directly;
 - `hybrid_rag`: adds related evidence;
@@ -65,6 +65,8 @@ handovergap serve
 ```
 
 Set `OPENAI_API_KEY` plus either `HANDOVERGAP_TIDB_URL` or the `TIDB_HOST` / `TIDB_USER` / `TIDB_PASSWORD` environment variables. In **Live OpenAI + TiDB** mode, the app asks the selected model to fill role-required slots, runs HandoverGap on those filled slots, and persists slot-fill attempts, context gaps, and transfer assessments to TiDB.
+
+In the current MVP, `CS`, `Engineer`, and `Sales` are built-in role profiles used to demonstrate different successor responsibilities. They are not meant to imply that HandoverGap only works for those departments; custom role/slot taxonomies are the natural extension point beyond the packaged benchmark.
 
 ## Evaluation
 
@@ -182,7 +184,7 @@ MIT
 
 ## 日本語
 
-HandoverGap RAGは、正しい業務記憶に不足している暗黙前提を、引き継ぎ先の役割ごとに検出します。
+HandoverGap RAGは、正しい業務記憶に不足している暗黙前提を、引き継ぎ先の責任範囲ごとに検出します。
 
 > 正しい記憶でも、引き継げるとは限らない。
 

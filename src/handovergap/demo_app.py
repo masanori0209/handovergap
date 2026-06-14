@@ -20,51 +20,72 @@ COPY = {
     "日本語": {
         "thesis": "正しい記憶を、後任が安全に使える形へ検査する。",
         "scenario": "ケース",
-        "role": "引き継ぎ先",
+        "role": "引き継ぎプロファイル",
+        "role_note": "CS/技術/商談はデモ用プリセットです。特定業界ではなく、後任の責任範囲ごとに必要な前提を変える例です。",
         "mode": "実行モード",
-        "local": "Local sample",
-        "live": "Live OpenAI + TiDB",
-        "run_live": "実LLMでslot fillingしてTiDBへ保存",
+        "model": "OpenAIモデル",
+        "prompt_profile": "プロンプト設定",
+        "local": "ローカルサンプル",
+        "live": "実LLM + TiDB",
+        "run_live": "実LLMでスロット抽出してTiDBへ保存",
         "memory": "取得された記憶",
         "task": "後任のタスク",
-        "pipeline": "RAG handover pipeline",
-        "retrieved": "Retrieved memory",
-        "slot_fill": "Semantic slot filling",
-        "gap_check": "Role gap check",
-        "persist": "TiDB audit store",
+        "pipeline": "RAG引き継ぎパイプライン",
+        "retrieved": "記憶の取得",
+        "slot_fill": "意味的スロット抽出",
+        "gap_check": "役割別ギャップ検査",
+        "persist": "TiDB監査保存",
         "direct_answer": "取得記憶だけで回答すると、欠けた前提を見落とします。",
-        "evidence_answer": "関連証拠を添えても、役割ごとの必須slotは残ります。",
-        "handover_answer": "後任に必要なslotを検査し、不足があれば回答を止めます。",
+        "evidence_answer": "関連証拠を添えても、プロファイルごとの必須スロットは残ります。",
+        "handover_answer": "後任に必要なスロットを検査し、不足があれば回答を止めます。",
         "answer": "処理結果",
         "evidence": "検索された証拠",
         "status": "転送可否",
         "score": "転送可能性",
-        "gaps": "不足slot",
+        "gaps": "不足スロット",
         "questions": "確認質問",
-        "slot_audit": "Slot filling audit",
-        "slot": "slot",
+        "slot_audit": "スロット抽出の監査",
+        "slot": "スロット",
         "slot_status": "状態",
-        "filled": "filled",
-        "missing": "missing",
+        "filled": "充足",
+        "missing": "不足",
         "rationale": "判定理由",
-        "comparison": "Benchmark snapshot",
+        "comparison": "ベンチマーク概要",
         "method": "手法",
         "scenarios": "件数",
-        "tgr": "Gap Recall",
-        "utp": "Unsafe Prevention",
-        "coverage": "Question Coverage",
-        "no_gaps": "必須slotは充足しています。",
+        "tgr": "ギャップ検出率",
+        "utp": "不安全転送の防止率",
+        "coverage": "質問カバレッジ",
+        "no_gaps": "必須スロットは充足しています。",
         "no_questions": "追加確認は不要です。",
-        "live_hint": "OPENAI_API_KEY と TiDB接続情報がある場合だけ実行します。未設定ならLocal sampleで動きます。",
-        "live_success": "実LLMのslot filling結果を使って検出しました。",
+        "live_hint": "OPENAI_API_KEY と TiDB接続情報がある場合だけ実行します。未設定ならローカルサンプルで動きます。",
+        "live_success": "実LLMのスロット抽出結果を使って検出しました。",
         "tidb_success": "TiDBへ監査行を保存しました。",
         "tidb_skip": "TiDB接続情報がないため、永続化はスキップしました。",
+        "local_detail": "ローカル / 同梱スロット",
+        "retrieved_detail": "記憶 + 証拠",
+        "gap_check_detail": "プロファイル別の必須スロット",
+        "local_status": "ローカル",
+        "live_status": "実行済み",
+        "deterministic_detail": "決定的ルール / 同梱スロット",
+        "optional_detail": "任意",
+        "safe_assumption": "安全と仮定",
+        "evidence_added": "証拠を追加",
+        "blocked": "回答保留",
+        "caption": "naive不足={naive} · hybrid不足={hybrid} · handovergap不足={handovergap} · 実行={mode}",
+        "local_mode": "ローカル",
+        "live_mode": "実LLM",
+        "local_filled": "ローカルサンプルで充足",
+        "local_missing": "ローカルサンプルでは不足",
     },
     "English": {
         "thesis": "Checks whether correct memory is safe for a successor to use.",
         "scenario": "Case",
-        "role": "Successor",
+        "role": "Handover profile",
+        "role_note": "Support, engineering, and sales are demo presets. They are examples of successor responsibility profiles, not a fixed industry taxonomy.",
         "mode": "Run mode",
+        "model": "OpenAI model",
+        "prompt_profile": "Prompt profile",
         "local": "Local sample",
         "live": "Live OpenAI + TiDB",
         "run_live": "Run live slot filling and persist to TiDB",
@@ -102,6 +123,91 @@ COPY = {
         "live_success": "Detected gaps from live LLM slot filling.",
         "tidb_success": "Persisted audit rows to TiDB.",
         "tidb_skip": "Skipped persistence because TiDB connection settings were not found.",
+        "local_detail": "local / bundled slots",
+        "retrieved_detail": "memory + evidence",
+        "gap_check_detail": "profile-required slots",
+        "local_status": "local",
+        "live_status": "live",
+        "deterministic_detail": "deterministic / bundled slots",
+        "optional_detail": "optional",
+        "safe_assumption": "SAFE ASSUMPTION",
+        "evidence_added": "EVIDENCE ADDED",
+        "blocked": "BLOCKED",
+        "caption": "naive gaps={naive} · hybrid gaps={hybrid} · handovergap gaps={handovergap} · mode={mode}",
+        "local_mode": "local",
+        "live_mode": "live",
+        "local_filled": "provided by local sample",
+        "local_missing": "missing in local sample",
+    },
+}
+
+ROLE_LABELS = {
+    "日本語": {
+        "CS": "サポート引き継ぎ",
+        "Engineer": "技術運用引き継ぎ",
+        "Sales": "商談引き継ぎ",
+    },
+    "English": {
+        "CS": "Support handover",
+        "Engineer": "Engineering handover",
+        "Sales": "Sales handover",
+    },
+}
+
+SOURCE_TYPE_LABELS = {
+    "日本語": {
+        "crm_note": "CRMメモ",
+        "incident_note": "障害メモ",
+        "support_macro": "サポート文面案",
+        "runbook": "運用手順書",
+        "pull_request": "プルリクエスト",
+        "planning_note": "計画メモ",
+        "email_summary": "メール要約",
+        "legal_note": "法務メモ",
+    },
+    "English": {},
+}
+
+LOCALIZED_SCENARIO_TEXT = {
+    "日本語": {
+        "D-CS-01": {
+            "memory": "架空テナント Northstar Retail は6月請求だけCSV出力で回避する。API修正は四半期締め後の予定だが確定ではない。",
+            "handover_task": "回答権限を守りながら、請求CSV回避策への追加問い合わせに対応する",
+            "evidence": [
+                "CS記録では、財務管理者は6月のみCSV出力になることを把握済み。ただしAPI時期について承認済みの外部向け文面は記録されていない。",
+                "技術側はAPI不具合が調査中であることを確認。CSV出力に失敗した場合、サポートは請求IDを集めて請求オンコールへエスカレーションする。",
+                "文面案: 「6月分はCSVで提供し、API問題は技術チームが調査中です」。",
+            ],
+        },
+        "D-ENG-01": {
+            "memory": "架空プロジェクト Partner Sync では、プレミアムテナント向けwebhook再試行を有効化した。ただしエラー分類が安定するまでAPI backfillは手動で行う。",
+            "handover_task": "夜間当番がwebhook失敗を復旧し、API backfillへ進める条件を判断する",
+            "evidence": [
+                "運用手順書PS-42には、再試行上限、タイムアウト挙動、重複イベントの既知症状、partner-sync-oncallへのエスカレーション先がある。",
+                "PR #1842 はプレミアムテナントのwebhookだけに再試行の冪等性を追加。ロールバックコマンドとダッシュボードリンクも含まれる。",
+                "重複イベント率が2週間0.1%未満で安定したら、backfill自動化を再検討する。",
+            ],
+        },
+        "D-SALES-01": {
+            "memory": "架空アカウント ElmWorks には更新時に旧analytics価格を提示できる可能性がある。ただしデータ保持の覚書を法務が確認した場合に限る。",
+            "handover_task": "更新見積の商談を引き継ぎ、顧客へ約束できる範囲を判断する",
+            "evidence": [
+                "顧客は今週中の更新見積を期待している。旧単価は社内希望だが、データ保持の覚書はまだ法務承認されていない。",
+                "顧客には見積を準備中とだけ伝えており、価格例外はまだ約束していない。",
+                "承認は保留中。Salesは覚書がクリアされるまで旧価格を約束してはいけない。",
+            ],
+        },
+    },
+    "English": {
+        "D-CS-01": {
+            "handover_task": "Respond to follow-up questions about the invoice CSV workaround without overstepping support authority",
+        },
+        "D-ENG-01": {
+            "handover_task": "Recover webhook failures during on-call and decide when API backfill can move forward",
+        },
+        "D-SALES-01": {
+            "handover_task": "Take over a renewal quote and decide what can safely be promised to the customer",
+        },
     },
 }
 
@@ -237,13 +343,22 @@ def render_app() -> None:
 
     store = InMemoryStore(DEMO_SCENARIOS)
     scenarios = store.list_scenarios()
-    selected_label = st.sidebar.selectbox(copy["scenario"], [f"{s.scenario_id} · {s.handover_task}" for s in scenarios])
+    localized_scenarios = [_localized_scenario(s, language) for s in scenarios]
+    selected_label = st.sidebar.selectbox(
+        copy["scenario"],
+        [f"{s.scenario_id} · {s.handover_task}" for s in localized_scenarios],
+    )
     selected_id = selected_label.split(" · ", 1)[0]
-    source_scenario = next(item for item in scenarios if item.scenario_id == selected_id)
-    role = st.sidebar.segmented_control(copy["role"], ["CS", "Engineer", "Sales"], default=source_scenario.successor_role)
+    source_scenario = next(item for item in localized_scenarios if item.scenario_id == selected_id)
+    role_labels = ROLE_LABELS[language]
+    role_options = list(role_labels.values())
+    default_role_label = role_labels[source_scenario.successor_role]
+    selected_role_label = st.sidebar.segmented_control(copy["role"], role_options, default=default_role_label)
+    st.sidebar.caption(copy["role_note"])
+    role = _role_from_label(selected_role_label or default_role_label, language)
     run_mode = st.sidebar.radio(copy["mode"], [copy["local"], copy["live"]], index=0)
-    model = st.sidebar.text_input("OpenAI model", value=os.getenv("OPENAI_SLOT_MODEL", "gpt-5-mini"))
-    prompt_profile = st.sidebar.selectbox("Prompt profile", ["auto", "baseline", "gpt5_strict"], index=0)
+    model = st.sidebar.text_input(copy["model"], value=os.getenv("OPENAI_SLOT_MODEL", "gpt-5-mini"))
+    prompt_profile = st.sidebar.selectbox(copy["prompt_profile"], ["auto", "baseline", "gpt5_strict"], index=0)
 
     scenario = source_scenario.model_copy(update={"successor_role": role or source_scenario.successor_role})
     live_requested = run_mode == copy["live"]
@@ -296,8 +411,12 @@ def render_app() -> None:
     _render_benchmark(copy)
 
     st.caption(
-        f"naive gaps={len(naive.gap_slots)} · hybrid gaps={len(hybrid.gap_slots)} · "
-        f"handovergap gaps={len(result.gaps)} · mode={'live' if live_state else 'local'}"
+        copy["caption"].format(
+            naive=len(naive.gap_slots),
+            hybrid=len(hybrid.gap_slots),
+            handovergap=len(result.gaps),
+            mode=copy["live_mode"] if live_state else copy["local_mode"],
+        )
     )
 
 
@@ -414,17 +533,51 @@ def _memory_item_id(scenario_id: str) -> int:
     return int(hashlib.sha256(scenario_id.encode()).hexdigest()[:12], 16)
 
 
+def _localized_scenario(scenario: HandoverScenario, language: str) -> HandoverScenario:
+    localized = LOCALIZED_SCENARIO_TEXT.get(language, {}).get(scenario.scenario_id, {})
+    evidence_texts = localized.get("evidence")
+    evidence_events = scenario.evidence_events
+    if evidence_texts:
+        source_labels = SOURCE_TYPE_LABELS.get(language, {})
+        evidence_events = [
+            EvidenceEvent(
+                source_type=source_labels.get(event.source_type, event.source_type),
+                content=evidence_texts[index],
+            )
+            for index, event in enumerate(scenario.evidence_events)
+        ]
+    return scenario.model_copy(
+        update={
+            "memory": localized.get("memory", scenario.memory),
+            "handover_task": localized.get("handover_task", scenario.handover_task),
+            "evidence_events": evidence_events,
+        }
+    )
+
+
+def _role_from_label(label: str, language: str) -> str:
+    for role, display_label in ROLE_LABELS[language].items():
+        if label == display_label:
+            return role
+    return "CS"
+
+
 def _render_pipeline(copy: dict[str, str], live_state: dict[str, Any] | None) -> None:
-    status = live_state["status"] if live_state else "local"
+    status = copy["live_status"] if live_state and live_state.get("status") == "ok" else copy["local_status"]
     model = live_state.get("model", "deterministic") if live_state else "deterministic"
     usage = live_state.get("usage", {}) if live_state else {}
     st.markdown(f'<h2 class="section-title">{copy["pipeline"]}</h2>', unsafe_allow_html=True)
     cols = st.columns(4, gap="small")
     steps = [
-        (copy["retrieved"], "memory + evidence"),
-        (copy["slot_fill"], f"{model} / {live_state.get('prompt_profile', 'provided_slots') if live_state else 'provided_slots'}"),
-        (copy["gap_check"], "role-required slots"),
-        (copy["persist"], f"{live_state.get('tidb_rows', 0)} rows" if live_state else "optional"),
+        (copy["retrieved"], copy["retrieved_detail"]),
+        (
+            copy["slot_fill"],
+            f"{model} / {live_state.get('prompt_profile', 'provided_slots')}"
+            if live_state
+            else copy["deterministic_detail"],
+        ),
+        (copy["gap_check"], copy["gap_check_detail"]),
+        (copy["persist"], f"{live_state.get('tidb_rows', 0)} rows" if live_state else copy["optional_detail"]),
     ]
     for col, (title, detail) in zip(cols, steps, strict=True):
         col.markdown(
@@ -442,13 +595,13 @@ def _render_method_comparison(copy: dict[str, str], scenario: HandoverScenario, 
     st.markdown('<div class="method-grid">', unsafe_allow_html=True)
     naive_col, hybrid_col, gap_col = st.columns(3, gap="small")
     with naive_col:
-        _method_card("Naive RAG", scenario.memory, copy["direct_answer"], "SAFE ASSUMPTION", danger=False)
+        _method_card("Naive RAG", scenario.memory, copy["direct_answer"], copy["safe_assumption"], danger=False)
     with hybrid_col:
         evidence = " / ".join(event.source_type for event in scenario.evidence_events[:3])
-        _method_card("Hybrid RAG", evidence, copy["evidence_answer"], "EVIDENCE ADDED", danger=False)
+        _method_card("Hybrid RAG", evidence, copy["evidence_answer"], copy["evidence_added"], danger=False)
     with gap_col:
         blocked = result.transferability_status == "blocked"
-        status = "BLOCKED / 回答保留" if blocked else result.transferability_status.upper()
+        status = copy["blocked"] if blocked else result.transferability_status.upper()
         _method_card("HandoverGap RAG", status, copy["handover_answer"], f'{copy["score"]}: {result.transferability_score:.2f}', danger=blocked)
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -476,7 +629,7 @@ def _render_slot_audit(copy: dict[str, str], scenario: HandoverScenario, live_st
             {
                 copy["slot"]: slot,
                 copy["slot_status"]: copy["filled"] if filled else copy["missing"],
-                copy["rationale"]: rationale or ("provided by local sample" if filled else "missing in local sample"),
+                copy["rationale"]: rationale or (copy["local_filled"] if filled else copy["local_missing"]),
             }
         )
     st.dataframe(rows, width="stretch", hide_index=True)

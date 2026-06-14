@@ -12,7 +12,9 @@ def test_demo_renders_japanese_default_and_three_method_comparison() -> None:
     assert "Naive RAG" in markdown
     assert "Hybrid RAG" in markdown
     assert "HandoverGap RAG" in markdown
-    assert "RAG handover pipeline" in markdown
+    assert "RAG引き継ぎパイプライン" in markdown
+    assert "スロット抽出の監査" in markdown
+    assert "RAG handover pipeline" not in markdown
 
 
 def test_demo_language_switch_renders_english_thesis() -> None:
