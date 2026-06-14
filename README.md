@@ -47,11 +47,20 @@ pip install "handovergap[demo]"
 handovergap serve
 ```
 
-The demo defaults to Japanese and includes an English language switch. It compares:
+The demo defaults to Japanese and includes an English language switch. The default **Local sample** mode runs the real deterministic HandoverGap detector against bundled fictional handover cases. It compares:
 
 - `naive_rag`: answers directly;
 - `hybrid_rag`: adds related evidence;
 - `handovergap`: withholds unsafe answers and asks questions.
+
+For a live semantic slot-filling demo with OpenAI and TiDB audit persistence:
+
+```bash
+pip install "handovergap[live]"
+handovergap serve
+```
+
+Set `OPENAI_API_KEY` plus either `HANDOVERGAP_TIDB_URL` or the `TIDB_HOST` / `TIDB_USER` / `TIDB_PASSWORD` environment variables. In **Live OpenAI + TiDB** mode, the app asks the selected model to fill role-required slots, runs HandoverGap on those filled slots, and persists slot-fill attempts, context gaps, and transfer assessments to TiDB.
 
 ## Evaluation
 
@@ -159,6 +168,7 @@ python3 -m venv .venv
 - Slot-filling stress profiles simulate LLM variance; they are not a replacement for a live LLM evaluation.
 - Live OpenAI slot filling is optional and not required for first-run usage.
 - Live OpenAI slot filling is model-sensitive; current holdout results differ materially between `gpt-4.1-mini` and `gpt-5-mini`.
+- The Streamlit demo uses fictional handover cases. Live mode exercises OpenAI slot filling and TiDB audit persistence, but it is still a local demo rather than a production retrieval service.
 - Semantic equivalence scoring for generated questions is not implemented in the MVP.
 - Live TiDB integration requires the optional `tidb` extra and a configured database.
 

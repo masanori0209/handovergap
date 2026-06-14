@@ -8,11 +8,11 @@ def test_demo_renders_japanese_default_and_three_method_comparison() -> None:
 
     assert not app.exception
     markdown = "\n".join(item.value for item in app.markdown)
-    assert "正しい記憶でも、引き継げるとは限らない。" in markdown
+    assert "正しい記憶を、後任が安全に使える形へ検査する。" in markdown
     assert "Naive RAG" in markdown
     assert "Hybrid RAG" in markdown
     assert "HandoverGap RAG" in markdown
-    assert "BLOCKED" in markdown
+    assert "RAG handover pipeline" in markdown
 
 
 def test_demo_language_switch_renders_english_thesis() -> None:
@@ -22,4 +22,4 @@ def test_demo_language_switch_renders_english_thesis() -> None:
     app.button_group[0].set_value("English").run(timeout=30)
 
     markdown = "\n".join(item.value for item in app.markdown)
-    assert "Correct memories are not always transferable." in markdown
+    assert "Checks whether correct memory is safe for a successor to use." in markdown

@@ -35,6 +35,7 @@ dev = ["build>=1", "pytest>=8", "ruff>=0.5", "twine>=5"]
 demo = ["streamlit>=1.30"]
 tidb = ["sqlalchemy>=2", "pymysql>=1", "python-dotenv>=1"]
 openai = ["openai>=1"]
+live = ["streamlit>=1.30", "openai>=1", "sqlalchemy>=2", "pymysql>=1", "python-dotenv>=1"]
 
 [project.scripts]
 handovergap = "handovergap.cli:app"

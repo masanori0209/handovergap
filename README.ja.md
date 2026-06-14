@@ -36,7 +36,16 @@ pip install "handovergap[demo]"
 handovergap serve
 ```
 
-デモは日本語がデフォルトで、英語へ切り替えられます。Naive RAG、Hybrid RAG、HandoverGap RAGを同じ記憶で比較します。
+デモは日本語がデフォルトで、英語へ切り替えられます。デフォルトの **Local sample** mode は、架空の引き継ぎケースに対して実際の決定的HandoverGap検出器を動かし、Naive RAG、Hybrid RAG、HandoverGap RAGを比較します。
+
+OpenAIによるsemantic slot fillingとTiDBへの監査保存まで含める場合:
+
+```bash
+pip install "handovergap[live]"
+handovergap serve
+```
+
+`OPENAI_API_KEY` と、`HANDOVERGAP_TIDB_URL` または `TIDB_HOST` / `TIDB_USER` / `TIDB_PASSWORD` を設定してください。**Live OpenAI + TiDB** modeでは、選択したモデルがrole-required slotを埋め、その結果をHandoverGapに通し、slot fill attempt、context gap、transfer assessmentをTiDBへ保存します。
 
 ![日本語Streamlitデモ](docs/assets/demo-ja.png)
 
@@ -113,6 +122,7 @@ python harness/validation/tidb_live_check.py --create-schema
 - slot filling stress profileはLLMの揺れを模擬するもので、実LLM評価の代替ではありません。
 - OpenAI実接続slot fillingは任意で、初回利用には不要です。
 - OpenAI実接続slot fillingはモデル依存で、現在のholdoutでは `gpt-4.1-mini` と `gpt-5-mini` の結果が大きく異なります。
+- Streamlitデモは架空の引き継ぎケースを使います。Live modeではOpenAI slot fillingとTiDB audit persistenceを実行しますが、本番検索サービスではなくローカルデモです。
 - 質問の意味的同値判定は未実装です。
 - ライブTiDB接続はoptional dependencyです。
 
