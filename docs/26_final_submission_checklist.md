@@ -17,6 +17,8 @@
 - [x] slot filling stress evaluation included
 - [x] optional live OpenAI slot filling validation completed
 - [x] gpt-5-mini live slot filling validation and cost documented
+- [x] Streamlit Live OpenAI + TiDB demo mode completed
+- [x] Live demo TiDB persistence verified after `0.1.3` URL handling fix
 
 ## GitHub Description
 
@@ -69,6 +71,7 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 - [x] limitations
 - [x] link to GitHub
 - [x] link to PyPI
+- [x] live demo instructions documented
 - [ ] link to demo/video if available
 
 ## Final Article Title

@@ -11,6 +11,8 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
+Latest tested release: `handovergap==0.1.3`
+
 A normal RAG system may retrieve:
 
 ```text

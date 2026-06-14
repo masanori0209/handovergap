@@ -64,3 +64,22 @@ The tuned `gpt5_strict` prompt used 4,351 input tokens and 8,803 output tokens, 
 ## Important Limitation
 
 These are results on small synthetic benchmarks. The holdout split, slot-filling stress profiles, and live OpenAI check expose real limitations, but they are still not a substitute for independent real-world annotation or online production validation.
+
+## Live Demo Smoke Check
+
+The Streamlit demo has two modes:
+
+- `Local sample`: runs the deterministic HandoverGap detector against fictional handover cases without OpenAI or TiDB.
+- `Live OpenAI + TiDB`: fills role-required slots with OpenAI, runs HandoverGap on the filled slots, and persists slot-fill attempts, context gaps, and transfer assessments to TiDB.
+
+Observed after the `0.1.3` patch:
+
+| Check | Result |
+|---|---|
+| TiDB Cloud API project lookup | 1 project, 1 cluster |
+| Cluster | `handovergap-free-dev` |
+| Cluster status | `AVAILABLE` |
+| SQL connection | `8.0.11-TiDB-v8.5.3-serverless` |
+| Existing HandoverGap tables | 11/11 present |
+| Live demo OpenAI run | `gpt-5-mini` succeeded |
+| Live demo TiDB persistence | 8 rows inserted |

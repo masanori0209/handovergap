@@ -5,6 +5,8 @@
 
 [English README](README.md)
 
+最新確認済みリリース: `handovergap==0.1.3`
+
 HandoverGap RAG は、RAGで取得された正しい業務記憶に不足している暗黙前提を、引き継ぎ先の役割ごとに検出します。
 
 > 正しい記憶でも、引き継げるとは限らない。
