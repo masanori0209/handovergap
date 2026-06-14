@@ -89,6 +89,8 @@ Observed with `gpt-4.1-mini`: tacit gap recall `0.91`, unsafe transfer preventio
 
 Observed with `gpt-5-mini`: tacit gap recall `0.45`, unsafe transfer prevention `0.33`, safe transfer allowance `0.67`, blocked precision `0.50`. The run used 1,901 input tokens and 8,136 output tokens, including 5,184 reasoning tokens, for an estimated cost of about `$0.0167`. This lower recall is intentional evidence in the repository: semantic slot filling is model- and prompt-sensitive, so HandoverGap should report the sensitivity instead of hiding it.
 
+With the tuned `gpt5_strict` prompt profile for `gpt-5-mini`: tacit gap recall `1.00`, unsafe transfer prevention `0.67`, safe transfer allowance `1.00`, blocked precision `1.00`. This prompt is calibrated to the holdout evidence-summary protocol, so it is useful model-specific evidence rather than a production accuracy claim.
+
 ![Japanese Streamlit demo](https://raw.githubusercontent.com/masanori0209/handovergap/main/docs/assets/demo-ja.png)
 
 ## Optional TiDB Store

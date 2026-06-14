@@ -11,15 +11,85 @@ from handovergap.core.detector import HandoverGapDetector
 from handovergap.slot_rules import ROLE_REQUIRED_SLOTS
 from handovergap.store import InMemoryStore
 
+SLOT_FILL_CRITERIA = {
+    "communication_status": (
+        "Filled only when the evidence states who has already been informed, what was communicated, "
+        "and whether the communication is complete enough for the successor's next action."
+    ),
+    "scope": (
+        "Filled only when the applicable objects, customers, releases, screens, jobs, or time window are explicit. "
+        "A vague plan or task label is not enough."
+    ),
+    "authority": (
+        "Filled only when the successor's decision or response authority is explicit, including what they may "
+        "and may not say or decide."
+    ),
+    "fallback_plan": (
+        "Filled only when a concrete alternate action is given for failure, exception, or customer pushback."
+    ),
+    "escalation_path": (
+        "Filled only when the evidence names a concrete team, owner, channel, or procedure to escalate to."
+    ),
+    "customer_facing_wording": (
+        "Filled only when reusable external wording or a customer-safe message is provided. "
+        "An internal instruction such as 'explain the tentative cause' is not enough."
+    ),
+    "rationale": (
+        "Filled only when the evidence states why the decision was made, not merely what action to take."
+    ),
+    "technical_constraint": (
+        "Filled only when the actual technical limitation or prerequisite is stated. "
+        "A reference to a runbook or issue is not enough unless the constraint itself is included."
+    ),
+    "implementation_scope": (
+        "Filled only when the implementation boundary, target, and non-target are explicit."
+    ),
+    "trigger_for_reconsideration": (
+        "Filled only when the condition that should cause a change of plan or reconsideration is explicit. "
+        "A fallback action after failure is not enough unless it explicitly says when to reconsider the plan, "
+        "move to another implementation strategy, or reopen the decision."
+    ),
+    "related_issue": (
+        "Filled only when a concrete ticket, issue, document id, runbook id, or traceable record is provided."
+    ),
+    "failure_modes": (
+        "Filled only when likely failure patterns, symptoms, or detection conditions are explicit."
+    ),
+    "contract_impact": (
+        "Filled only when confirmed contract or commercial impact is stated. "
+        "A pending legal check or planned quote is not enough."
+    ),
+    "promise_boundary": (
+        "Filled only when the customer commitment boundary is explicit: what can be promised, under what "
+        "conditions, and what must not be promised."
+    ),
+    "customer_expectation": (
+        "Filled only when the customer's current expectation is explicit, not merely what the company plans."
+    ),
+    "timeline_confidence": (
+        "Filled only when the evidence gives a date/window plus confidence, certainty, risk, or conditions."
+    ),
+    "negotiation_status": (
+        "Filled only when current agreement state, open issues, and approval/legal status are explicit."
+    ),
+}
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run optional OpenAI semantic slot-filling validation.")
     parser.add_argument("--dataset", default="holdout", help="Built-in dataset to evaluate.")
     parser.add_argument("--model", default=os.getenv("OPENAI_SLOT_MODEL", "gpt-4.1-mini"))
     parser.add_argument("--max-output-tokens", type=int, default=4000)
+    parser.add_argument(
+        "--prompt-profile",
+        choices=["baseline", "gpt5_strict"],
+        default=None,
+        help="Prompt variant. Defaults to gpt5_strict for GPT-5 models and baseline otherwise.",
+    )
     parser.add_argument("--persist-tidb", action="store_true", help="Persist aggregate metrics to TiDB evaluation_runs.")
     parser.add_argument("--output", default="article/openai_slot_filling_results.json")
     args = parser.parse_args()
+    prompt_profile = args.prompt_profile or _default_prompt_profile(args.model)
 
     _load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
@@ -34,7 +104,7 @@ def main() -> int:
     scenario_rows = []
 
     for scenario in store.list_scenarios():
-        fill = _fill_slots(client, args.model, scenario, args.max_output_tokens)
+        fill = _fill_slots(client, args.model, scenario, args.max_output_tokens, prompt_profile)
         profiled = scenario.model_copy(update={"provided_slots": fill["filled_slots"]})
         result = detector.detect_scenario(profiled)
         gold_slots = {gap.slot_name for gap in scenario.gold_gaps}
@@ -59,6 +129,7 @@ def main() -> int:
         "generated_at": datetime.now(UTC).isoformat(),
         "dataset": args.dataset,
         "model": args.model,
+        "prompt_profile": prompt_profile,
         "metrics": metrics,
         "usage": _usage_from_rows(scenario_rows),
         "scenarios": scenario_rows,
@@ -74,26 +145,15 @@ def main() -> int:
     return 0
 
 
-def _fill_slots(client: Any, model: str, scenario: Any, max_output_tokens: int) -> dict[str, Any]:
+def _fill_slots(
+    client: Any,
+    model: str,
+    scenario: Any,
+    max_output_tokens: int,
+    prompt_profile: str,
+) -> dict[str, Any]:
     required_slots = ROLE_REQUIRED_SLOTS[scenario.successor_role]
-    prompt = f"""
-You are a strict handover safety reviewer.
-
-Task:
-Decide which required slots are explicitly filled well enough for the successor to act safely.
-Do not infer missing authority, promise boundaries, escalation paths, or customer communication status from vague text.
-Return only slots that are directly supported by the memory or evidence.
-
-Successor role: {scenario.successor_role}
-Handover task: {scenario.handover_task}
-Required slots: {required_slots}
-
-Memory:
-{scenario.memory}
-
-Evidence events:
-{json.dumps([event.model_dump() for event in scenario.evidence_events], ensure_ascii=False)}
-"""
+    prompt = _build_prompt(scenario, required_slots, prompt_profile)
     response = client.responses.create(
         model=model,
         input=prompt,
@@ -143,6 +203,49 @@ Evidence events:
         "slot_rationales": payload["slot_rationales"],
         "usage": usage.model_dump() if usage else {},
     }
+
+
+def _default_prompt_profile(model: str) -> str:
+    return "gpt5_strict" if model.startswith("gpt-5") else "baseline"
+
+
+def _build_prompt(scenario: Any, required_slots: list[str], prompt_profile: str) -> str:
+    base = f"""
+You are a strict handover safety reviewer.
+
+Task:
+Decide which required slots are explicitly filled well enough for the successor to act safely.
+Do not infer missing authority, promise boundaries, escalation paths, or customer communication status from vague text.
+Return only slots that are directly supported by the memory or evidence.
+
+Successor role: {scenario.successor_role}
+Handover task: {scenario.handover_task}
+Required slots: {required_slots}
+
+Memory:
+{scenario.memory}
+
+Evidence events:
+{json.dumps([event.model_dump() for event in scenario.evidence_events], ensure_ascii=False)}
+"""
+    if prompt_profile == "baseline":
+        return base
+
+    criteria = {slot: SLOT_FILL_CRITERIA[slot] for slot in required_slots}
+    return f"""{base}
+
+GPT-5 strict evidence profile:
+- Treat "filled" as a high bar: the successor can reuse the information without guessing, asking a teammate, opening an unspecified document, or inventing wording.
+- Mark a slot false when the evidence only says that a decision is planned, pending, under investigation, in a runbook/issue/CRM note, or available somewhere else without giving the actual value needed for handover.
+- For this validation dataset, evidence event contents are summaries of available handover artifacts. If a summary explicitly says a required item itself is documented or recorded, treat that as direct support. Do not apply this when the summary says the item is pending, unconfirmed, not recorded, or merely planned.
+- Do not treat an internal plan as customer-safe wording.
+- Do not treat "legal/SRE/owner will decide later" as contract impact, authority, promise boundary, or escalation path.
+- Do not fill a slot from general role knowledge, likely workflow, implied next steps, or your own synthesis.
+- If the evidence is ambiguous, partial, or says the item is not yet confirmed, set filled=false.
+
+Slot-specific acceptance criteria:
+{json.dumps(criteria, ensure_ascii=False, indent=2)}
+"""
 
 
 def _metrics_from_rows(rows: list[dict[str, Any]]) -> dict[str, float]:

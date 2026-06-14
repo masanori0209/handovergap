@@ -44,10 +44,13 @@ Observed on June 14, 2026:
 |---|---:|---:|---:|---:|---:|
 | handovergap/openai-slot-fill/gpt-4.1-mini | 6 | 0.91 | 0.33 | 0.67 | 0.50 |
 | handovergap/openai-slot-fill/gpt-5-mini | 6 | 0.45 | 0.33 | 0.67 | 0.50 |
+| handovergap/openai-slot-fill/gpt-5-mini/gpt5_strict | 6 | 1.00 | 0.67 | 1.00 | 1.00 |
 
-The detailed per-scenario outputs are stored in `article/openai_slot_filling_results.json` and `article/openai_slot_filling_results_gpt5mini.json`.
+The detailed per-scenario outputs are stored in `article/openai_slot_filling_results.json`, `article/openai_slot_filling_results_gpt5mini.json`, and `article/openai_slot_filling_results_gpt5mini_strict.json`.
 
 The `gpt-5-mini` run used 1,901 input tokens and 8,136 output tokens, including 5,184 reasoning tokens. At the observed GPT-5 mini text pricing of $0.25 per 1M input tokens and $2.00 per 1M output tokens, this six-scenario validation cost about `$0.0167`.
+
+The tuned `gpt5_strict` prompt used 4,351 input tokens and 8,803 output tokens, including 6,400 reasoning tokens, for about `$0.0187`.
 
 ## Interpretation
 
@@ -55,7 +58,8 @@ The `gpt-5-mini` run used 1,901 input tokens and 8,136 output tokens, including 
 - `hybrid_rag` can identify one explicit risk and blocks only when that risk is high severity.
 - `handovergap` checks every slot required by the successor role.
 - `handovergap/optimistic` simulates an LLM over-filling ambiguous slots; recall drops because some truly missing slots are treated as filled.
-- Live OpenAI slot filling is model-sensitive. `gpt-4.1-mini` improves recall versus the optimistic simulation, while `gpt-5-mini` under this prompt drops recall to 0.45. Both live runs lower unsafe-transfer prevention because some unsafe slots are filled too optimistically.
+- Live OpenAI slot filling is model-sensitive. `gpt-4.1-mini` improves recall versus the optimistic simulation, while the first `gpt-5-mini` prompt drops recall to 0.45. A model-specific strict-evidence prompt raises `gpt-5-mini` recall to 1.00 on this holdout split by preventing optimistic slot filling.
+- The strict prompt still over-asks in at least one safe case (`U006`: `timeline_confidence`). Current headline metrics punish unsafe blocking, but do not fully penalize unnecessary clarification.
 
 ## Important Limitation
 

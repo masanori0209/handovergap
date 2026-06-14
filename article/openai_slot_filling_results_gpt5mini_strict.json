@@ -1,0 +1,387 @@
+{
+  "generated_at": "2026-06-14T22:09:45.659826+00:00",
+  "dataset": "holdout",
+  "model": "gpt-5-mini",
+  "prompt_profile": "gpt5_strict",
+  "metrics": {
+    "scenarios": 6,
+    "tacit_gap_recall": 1.0,
+    "unsafe_transfer_prevention": 0.6666666666666666,
+    "safe_transfer_allowance": 1.0,
+    "blocked_precision": 1.0
+  },
+  "usage": {
+    "input_tokens": 4351,
+    "output_tokens": 8803,
+    "reasoning_tokens": 6400,
+    "total_tokens": 13154
+  },
+  "scenarios": [
+    {
+      "scenario_id": "U001",
+      "successor_role": "CS",
+      "unsafe_transfer_label": true,
+      "llm_filled_slots": [],
+      "gold_gap_slots": [
+        "authority",
+        "customer_facing_wording",
+        "escalation_path",
+        "fallback_plan"
+      ],
+      "predicted_gap_slots": [
+        "authority",
+        "communication_status",
+        "customer_facing_wording",
+        "escalation_path",
+        "fallback_plan",
+        "scope"
+      ],
+      "missed_gold_gap_slots": [],
+      "transferability_status": "blocked",
+      "slot_rationales": [
+        {
+          "slot_name": "communication_status",
+          "filled": false,
+          "reason": "記録は「一次連絡は送付済み」とのみ記載。誰に/誰が/何を伝えたかの具体内容や伝達の完了範囲が示されておらず、後続がそのまま再利用できる情報がないため不十分。"
+        },
+        {
+          "slot_name": "scope",
+          "filled": false,
+          "reason": "障害対象の顧客、サービス、時間帯、リリース等の適用範囲が明記されていない。曖昧なタスクラベルのみで後続が安全に行動できないため未記載と判断。"
+        },
+        {
+          "slot_name": "authority",
+          "filled": false,
+          "reason": "誰が何を決定・承認できるか（後続の権限範囲）が示されていない。恒久対応は調査後に判断とあるが、決定権者や範囲は明記されていないため不可。"
+        },
+        {
+          "slot_name": "fallback_plan",
+          "filled": false,
+          "reason": "失敗時や顧客対応での代替手段や具体的な対応策が記載されていない。暫定対応を案内する旨のみで、明確なフォールバックは示されていない。"
+        },
+        {
+          "slot_name": "escalation_path",
+          "filled": false,
+          "reason": "エスカレーション先のチーム、オーナー、連絡チャネルや手順が明記されていない。誰に上げるべきかが示されていないため不可。"
+        },
+        {
+          "slot_name": "customer_facing_wording",
+          "filled": false,
+          "reason": "support_macroは「お客様には暫定原因として案内する」とのみ示す内部指示であり、再利用可能な対外用文言（顧客向けの具体的メッセージ）は提供されていない。"
+        }
+      ],
+      "usage": {
+        "input_tokens": 753,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 938,
+        "output_tokens_details": {
+          "reasoning_tokens": 448
+        },
+        "total_tokens": 1691
+      }
+    },
+    {
+      "scenario_id": "U002",
+      "successor_role": "Engineer",
+      "unsafe_transfer_label": false,
+      "llm_filled_slots": [
+        "failure_modes",
+        "related_issue",
+        "technical_constraint"
+      ],
+      "gold_gap_slots": [],
+      "predicted_gap_slots": [
+        "implementation_scope",
+        "rationale",
+        "trigger_for_reconsideration"
+      ],
+      "missed_gold_gap_slots": [],
+      "transferability_status": "needs_clarification",
+      "slot_rationales": [
+        {
+          "slot_name": "rationale",
+          "filled": false,
+          "reason": "メモ・証拠ともに『なぜその判断をするか（理由）』は記載されていません。実行手順と連絡先のみで、決定の根拠は示されていません。"
+        },
+        {
+          "slot_name": "technical_constraint",
+          "filled": true,
+          "reason": "証拠（Runbook R-42 の要約）に「制約」が記載されていると明示されています（R-42: … 制約 … を記載）。具体値は本文に示されていませんが、要件としてRunbookに制約が記録されているため、技術的制約が文書化されていると判断できます。"
+        },
+        {
+          "slot_name": "implementation_scope",
+          "filled": false,
+          "reason": "Runbookが『対象ジョブ』を記載するとあるものの、実装の境界（対象と非対象の明示的な範囲）が証拠中に列挙されておらず、後続者がその境界を推測せずに動けるほど明示されていません。"
+        },
+        {
+          "slot_name": "trigger_for_reconsideration",
+          "filled": false,
+          "reason": "メモは「失敗時はSRE当番へ連絡する」と記載していますが、計画を見直す具体的条件（いつ方針を変更する／別手段に移行するか）は明示されていません。"
+        },
+        {
+          "slot_name": "related_issue",
+          "filled": true,
+          "reason": "証拠にR-42が『関連issue』を記載していると明示されています。関連記録がRunbook R-42にあることが明示されているため、関連issueの存在が確認できると判断しました（具体のチケット番号は証拠文には列挙されていませんが、Runbook R-42という文書IDが参照可能です）。"
+        },
+        {
+          "slot_name": "failure_modes",
+          "filled": true,
+          "reason": "証拠（Runbook R-42 の要約）に『失敗時症状』が記載されていると明示されています。具体の症状一覧は記載されていませんが、失敗モード／症状がRunbookに文書化されていることが明示されています。"
+        }
+      ],
+      "usage": {
+        "input_tokens": 741,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 2690,
+        "output_tokens_details": {
+          "reasoning_tokens": 2112
+        },
+        "total_tokens": 3431
+      }
+    },
+    {
+      "scenario_id": "U003",
+      "successor_role": "Sales",
+      "unsafe_transfer_label": true,
+      "llm_filled_slots": [
+        "customer_expectation"
+      ],
+      "gold_gap_slots": [
+        "contract_impact",
+        "negotiation_status",
+        "promise_boundary"
+      ],
+      "predicted_gap_slots": [
+        "contract_impact",
+        "negotiation_status",
+        "promise_boundary",
+        "timeline_confidence"
+      ],
+      "missed_gold_gap_slots": [],
+      "transferability_status": "blocked",
+      "slot_rationales": [
+        {
+          "slot_name": "contract_impact",
+          "filled": false,
+          "reason": "CRM note says estimate will use the old unit price but also states legal confirmation for exceptions is incomplete. Acceptance criteria require a confirmed commercial/contract impact; pending legal review means this is not confirmed."
+        },
+        {
+          "slot_name": "promise_boundary",
+          "filled": false,
+          "reason": "No explicit customer commitment boundary is documented (what can/cannot be promised and under what conditions is not stated)."
+        },
+        {
+          "slot_name": "customer_expectation",
+          "filled": true,
+          "reason": "Email summary explicitly states the customer was only informed of the timing of the estimate (\"顧客には見積時期だけ伝達済み\"), so the customer's current expectation about estimate timing is documented."
+        },
+        {
+          "slot_name": "timeline_confidence",
+          "filled": false,
+          "reason": "No specific date/window or confidence level is provided—only that timing was communicated. That lacks the required date/window plus confidence/conditions."
+        },
+        {
+          "slot_name": "negotiation_status",
+          "filled": false,
+          "reason": "Evidence notes legal confirmation is incomplete and exception conditions pending, but does not provide a confirmed agreement state, resolved/open issues, or approvals. This pending status does not meet the 'explicit current negotiation state' requirement."
+        }
+      ],
+      "usage": {
+        "input_tokens": 690,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 1751,
+        "output_tokens_details": {
+          "reasoning_tokens": 1472
+        },
+        "total_tokens": 2441
+      }
+    },
+    {
+      "scenario_id": "U004",
+      "successor_role": "CS",
+      "unsafe_transfer_label": false,
+      "llm_filled_slots": [
+        "authority",
+        "communication_status",
+        "customer_facing_wording",
+        "escalation_path",
+        "fallback_plan",
+        "scope"
+      ],
+      "gold_gap_slots": [],
+      "predicted_gap_slots": [],
+      "missed_gold_gap_slots": [],
+      "transferability_status": "transferable",
+      "slot_rationales": [
+        {
+          "slot_name": "communication_status",
+          "filled": true,
+          "reason": "Memory: 'FAQ差し替えは全顧客向けに告知済み' explicitly states who was informed and that announcement is complete; doc summary also records 告知状況."
+        },
+        {
+          "slot_name": "scope",
+          "filled": true,
+          "reason": "Evidence doc summary explicitly states '対象範囲...を記載' (scope is documented)."
+        },
+        {
+          "slot_name": "authority",
+          "filled": true,
+          "reason": "Evidence doc summary explicitly states '回答権限...を記載' (response/answer authority is documented)."
+        },
+        {
+          "slot_name": "fallback_plan",
+          "filled": true,
+          "reason": "Evidence doc summary explicitly states '代替手段...を記載' (fallback/alternative measures are documented)."
+        },
+        {
+          "slot_name": "escalation_path",
+          "filled": true,
+          "reason": "Memory: '例外問い合わせはCSリードへ送る' names a concrete escalation owner; evidence doc also records エスカレーション."
+        },
+        {
+          "slot_name": "customer_facing_wording",
+          "filled": true,
+          "reason": "Evidence doc summary explicitly states '外部向け文面を記載' (reusable customer-facing wording is documented)."
+        }
+      ],
+      "usage": {
+        "input_tokens": 751,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 981,
+        "output_tokens_details": {
+          "reasoning_tokens": 640
+        },
+        "total_tokens": 1732
+      }
+    },
+    {
+      "scenario_id": "U005",
+      "successor_role": "Engineer",
+      "unsafe_transfer_label": true,
+      "llm_filled_slots": [
+        "failure_modes"
+      ],
+      "gold_gap_slots": [
+        "rationale",
+        "related_issue",
+        "technical_constraint",
+        "trigger_for_reconsideration"
+      ],
+      "predicted_gap_slots": [
+        "implementation_scope",
+        "rationale",
+        "related_issue",
+        "technical_constraint",
+        "trigger_for_reconsideration"
+      ],
+      "missed_gold_gap_slots": [],
+      "transferability_status": "needs_clarification",
+      "slot_rationales": [
+        {
+          "slot_name": "rationale",
+          "filled": false,
+          "reason": "記録は「Webhook検証を先行」とあるのみで、なぜWebhookを優先するのかという判断理由（目的・利点・根拠）は記載されていない。"
+        },
+        {
+          "slot_name": "technical_constraint",
+          "filled": false,
+          "reason": "技術的制約や前提（例：認証方式、レイテンシ上限、接続数限界など）は示されておらず、制約そのものの記載はない。"
+        },
+        {
+          "slot_name": "implementation_scope",
+          "filled": false,
+          "reason": "実装の範囲（対象システム／環境／除外項目や境界）は明示されておらず、対象と非対象が特定できない。"
+        },
+        {
+          "slot_name": "trigger_for_reconsideration",
+          "filled": false,
+          "reason": "失敗時のフォールバック（手動CSV）は記載されているが、いつ／どの条件で計画を見直すか（API化を再検討する判断トリガー）は明示されていない。"
+        },
+        {
+          "slot_name": "related_issue",
+          "filled": false,
+          "reason": "関連チケット、ドキュメントID、ランブック等の参照可能な記録は示されていない。"
+        },
+        {
+          "slot_name": "failure_modes",
+          "filled": true,
+          "reason": "明示的に「Webhook検証を先行。手動CSVの逃げ道あり」と記載されており、Webhook検証の失敗が想定される故障モード（失敗時は手動CSVで継続する）として記録されている。"
+        }
+      ],
+      "usage": {
+        "input_tokens": 732,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 1033,
+        "output_tokens_details": {
+          "reasoning_tokens": 640
+        },
+        "total_tokens": 1765
+      }
+    },
+    {
+      "scenario_id": "U006",
+      "successor_role": "Sales",
+      "unsafe_transfer_label": false,
+      "llm_filled_slots": [
+        "contract_impact",
+        "customer_expectation",
+        "negotiation_status",
+        "promise_boundary"
+      ],
+      "gold_gap_slots": [],
+      "predicted_gap_slots": [
+        "timeline_confidence"
+      ],
+      "missed_gold_gap_slots": [],
+      "transferability_status": "needs_clarification",
+      "slot_rationales": [
+        {
+          "slot_name": "contract_impact",
+          "filled": true,
+          "reason": "Evidenceに『契約影響なし』と明記されており、契約・商業影響の有無が直接記録されているため。"
+        },
+        {
+          "slot_name": "promise_boundary",
+          "filled": true,
+          "reason": "Evidenceが『約束範囲…を記録』と明記しており、約束の範囲がCRMに記載されていると示されているため。"
+        },
+        {
+          "slot_name": "customer_expectation",
+          "filled": true,
+          "reason": "Evidenceに『顧客期待…を記録』とあり、顧客の期待事項がCRMに記録されていると明示されているため。"
+        },
+        {
+          "slot_name": "timeline_confidence",
+          "filled": false,
+          "reason": "Evidenceは『提示期限』が記録されているとするが、具体的な日付/期間や確度（自信／リスク条件）が示されておらず、タイムラインの確度要件を満たしていないため。"
+        },
+        {
+          "slot_name": "negotiation_status",
+          "filled": true,
+          "reason": "Evidenceが『交渉状況を記録』と明記しており、交渉状況がCRMに記載されていると示されているため。"
+        }
+      ],
+      "usage": {
+        "input_tokens": 684,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 1410,
+        "output_tokens_details": {
+          "reasoning_tokens": 1088
+        },
+        "total_tokens": 2094
+      }
+    }
+  ]
+}

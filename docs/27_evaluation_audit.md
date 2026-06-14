@@ -30,6 +30,7 @@ After removing direct label access from predictors:
 | holdout / optimistic | 0.64 | 0.67 | 0.64 | 1.00 | 1.00 |
 | holdout / OpenAI slot fill / gpt-4.1-mini | 0.91 | 0.33 | n/a | 0.67 | 0.50 |
 | holdout / OpenAI slot fill / gpt-5-mini | 0.45 | 0.33 | n/a | 0.67 | 0.50 |
+| holdout / OpenAI slot fill / gpt-5-mini / gpt5_strict | 1.00 | 0.67 | n/a | 1.00 | 1.00 |
 
 ## Interpretation
 
@@ -37,9 +38,14 @@ The mechanism is still useful as a role-conditioned missing-slot checker, but th
 
 The `gpt-5-mini` live run used 1,901 input tokens and 8,136 output tokens, including 5,184 reasoning tokens, for an estimated cost of `$0.0167` at the observed GPT-5 mini pricing.
 
+The tuned `gpt5_strict` prompt improved `gpt-5-mini` by adding slot-specific acceptance criteria and a policy for treating synthetic evidence summaries as direct support when they explicitly say a required item is documented. This is useful evidence that prompt calibration matters, but it is also closer to the holdout annotation protocol. It should not be treated as independent production accuracy.
+
+The strict prompt still produced an unnecessary clarification in safe scenario `U006` (`timeline_confidence`). Current headline metrics do not fully penalize this because `safe_transfer_allowance` only checks whether the scenario was blocked, not whether it was marked exactly transferable.
+
 The next useful improvement is not more scenarios with the same `provided_slots` structure. It is a stricter input pipeline:
 
 - derive `provided_slots` from evidence with a calibrated slot-filling model;
 - keep `gold_gaps` and `unsafe_transfer_label` evaluation-only;
 - tune the block policy without reading labels;
 - add adversarial safe cases where some slots are ambiguous but transfer should not be blocked.
+- add a false-clarification or exact-transferability metric for safe cases.

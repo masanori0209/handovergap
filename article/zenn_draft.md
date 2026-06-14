@@ -199,10 +199,13 @@ python harness/validation/openai_slot_filling_check.py --dataset holdout --persi
 |---|---:|---:|---:|---:|---:|
 | handovergap/openai-slot-fill/gpt-4.1-mini | 6 | 0.91 | 0.33 | 0.67 | 0.50 |
 | handovergap/openai-slot-fill/gpt-5-mini | 6 | 0.45 | 0.33 | 0.67 | 0.50 |
+| handovergap/openai-slot-fill/gpt-5-mini/gpt5_strict | 6 | 1.00 | 0.67 | 1.00 | 1.00 |
 
 実LLMでは、`gpt-4.1-mini` は単純な`optimistic` profileよりTacit Gap Recallが改善しました。一方でUnsafe Transfer Preventionは0.33、Blocked Precisionは0.50まで落ちました。さらに `gpt-5-mini` では、同じpromptでもTacit Gap Recallが0.45まで下がりました。詳細ログを見ると、LLMが契約影響や判断理由を楽観的に埋めすぎるケースと、安全なhandoverでも`needs_clarification`に寄るケースがありました。
 
-`gpt-5-mini` の6件検証では、入力1,901 tokens、出力8,136 tokens、うちreasoning 5,184 tokensを使用し、推定費用は約 $0.0167 でした。費用は小さい一方、結果の揺れは大きい。これは「slot fillingは効く可能性があるが、モデル選択、prompt、ブロック判定ポリシー、slot定義にはまだ改善余地が大きい」という示唆です。
+そこで `gpt-5-mini` 向けに、slotごとの受理条件、未確定情報をfilledにしない条件、合成holdoutの証拠要約をどう扱うかをpromptへ追加しました。その結果、Tacit Gap Recallは1.00まで改善しました。ただし、このpromptはholdoutのannotation protocolに近づいているため、本番精度ではなく「モデル別prompt調整が効く」という証拠として扱うべきです。また安全ケース `U006` では不要な `timeline_confidence` gapを出しており、現在のheadline metricsは過剰な確認質問を十分に罰していません。
+
+`gpt-5-mini` の初回6件検証では、入力1,901 tokens、出力8,136 tokens、うちreasoning 5,184 tokensを使用し、推定費用は約 $0.0167 でした。調整後promptでは、入力4,351 tokens、出力8,803 tokens、うちreasoning 6,400 tokensで、推定費用は約 $0.0187 でした。費用は小さい一方、結果の揺れは大きい。これは「slot fillingは効く可能性があるが、モデル選択、prompt、ブロック判定ポリシー、slot定義、評価指標にはまだ改善余地が大きい」という示唆です。
 
 ## PyPIから試す
 
