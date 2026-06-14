@@ -1,5 +1,5 @@
 from handovergap import TiDBStore
-from handovergap.stores.tidb import _split_sql_statements
+from handovergap.stores.tidb import _make_create_table_idempotent, _split_sql_statements
 
 
 def test_tidb_store_is_importable_without_live_connection() -> None:
@@ -35,3 +35,9 @@ def test_tidb_schema_can_be_split_for_transactional_install() -> None:
 
     assert len(statements) == 11
     assert all(statement.startswith("CREATE TABLE") for statement in statements)
+
+
+def test_create_table_statements_can_be_made_idempotent() -> None:
+    statement = "CREATE TABLE source_events (id BIGINT PRIMARY KEY)"
+
+    assert _make_create_table_idempotent(statement).startswith("CREATE TABLE IF NOT EXISTS source_events")

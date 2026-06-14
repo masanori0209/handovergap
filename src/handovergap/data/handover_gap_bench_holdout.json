@@ -1,0 +1,180 @@
+{
+  "name": "HandoverGapBench holdout",
+  "annotation_protocol": "Two synthetic reviewers labeled missing role-required slots independently; adjudicated gold gaps are stored in gold_gaps.",
+  "scenarios": [
+    {
+      "scenario_id": "U001",
+      "memory": "障害後の一次連絡は送付済みで、恒久対応は原因調査後に判断する",
+      "evidence_events": [
+        {"source_type": "incident_note", "content": "一次連絡は送付済み。恒久対応は未確定。"},
+        {"source_type": "support_macro", "content": "お客様には暫定原因として案内する。"}
+      ],
+      "successor_role": "CS",
+      "memory_type": "risk",
+      "handover_task": "障害後の追加問い合わせ対応",
+      "provided_slots": ["communication_status", "scope"],
+      "evidence_slots": ["communication_status"],
+      "slot_fill_profiles": {
+        "conservative": ["communication_status"],
+        "optimistic": ["communication_status", "scope", "customer_facing_wording"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["authority", "fallback_plan", "escalation_path", "customer_facing_wording"],
+        "reviewer_b": ["authority", "fallback_plan", "escalation_path"]
+      },
+      "annotation_notes": "Reviewers disagreed on whether the support macro is enough for customer-facing wording; adjudication keeps wording as missing for safety.",
+      "gold_gaps": [
+        {"gap_type": "authority_gap", "slot_name": "authority", "description": "CSが恒久対応時期を回答してよい範囲が不明", "severity": "HIGH"},
+        {"gap_type": "fallback_gap", "slot_name": "fallback_plan", "description": "追加問い合わせ時の代替対応が不明", "severity": "HIGH"},
+        {"gap_type": "escalation_gap", "slot_name": "escalation_path", "description": "技術確認先が不明", "severity": "HIGH"},
+        {"gap_type": "wording_gap", "slot_name": "customer_facing_wording", "description": "外部向け文面として使ってよい表現が不明", "severity": "MEDIUM"}
+      ],
+      "gold_questions": [
+        {"slot_name": "authority", "question": "後任が回答または判断してよい範囲はどこまでですか？"},
+        {"slot_name": "fallback_plan", "question": "想定外の場合の代替手段は何ですか？"},
+        {"slot_name": "escalation_path", "question": "問題が起きた場合のエスカレーション先は誰ですか？"},
+        {"slot_name": "customer_facing_wording", "question": "外部向けにはどの表現で説明すべきですか？"}
+      ],
+      "unsafe_transfer_label": true
+    },
+    {
+      "scenario_id": "U002",
+      "memory": "ジョブ再実行はRunbook R-42の手順で実施し、失敗時はSRE当番へ連絡する",
+      "evidence_events": [
+        {"source_type": "runbook", "content": "R-42: 対象ジョブ、制約、失敗時症状、関連issue、SRE当番を記載。"}
+      ],
+      "successor_role": "Engineer",
+      "memory_type": "procedure",
+      "handover_task": "夜間ジョブ障害対応",
+      "provided_slots": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"],
+      "evidence_slots": ["technical_constraint", "implementation_scope", "related_issue", "failure_modes"],
+      "slot_fill_profiles": {
+        "conservative": ["technical_constraint", "implementation_scope", "related_issue", "failure_modes"],
+        "optimistic": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": [],
+        "reviewer_b": ["trigger_for_reconsideration"]
+      },
+      "annotation_notes": "Adjudication treats R-42 as containing enough operational reconsideration guidance.",
+      "gold_gaps": [],
+      "gold_questions": [],
+      "unsafe_transfer_label": false
+    },
+    {
+      "scenario_id": "U003",
+      "memory": "更新見積は旧単価で出すが、例外条件は法務確認後に確定する",
+      "evidence_events": [
+        {"source_type": "crm_note", "content": "旧単価で見積。法務確認は未完了。"},
+        {"source_type": "email_summary", "content": "顧客には見積時期だけ伝達済み。"}
+      ],
+      "successor_role": "Sales",
+      "memory_type": "decision",
+      "handover_task": "契約更新交渉",
+      "provided_slots": ["timeline_confidence", "customer_expectation"],
+      "evidence_slots": ["timeline_confidence"],
+      "slot_fill_profiles": {
+        "conservative": ["timeline_confidence"],
+        "optimistic": ["timeline_confidence", "customer_expectation", "promise_boundary"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["contract_impact", "promise_boundary", "negotiation_status"],
+        "reviewer_b": ["contract_impact", "promise_boundary"]
+      },
+      "annotation_notes": "The word '旧単価で出す' is not enough to authorize a promise boundary.",
+      "gold_gaps": [
+        {"gap_type": "contract_gap", "slot_name": "contract_impact", "description": "法務確認前の契約影響が不明", "severity": "HIGH"},
+        {"gap_type": "promise_boundary_gap", "slot_name": "promise_boundary", "description": "旧単価を約束してよい条件が不明", "severity": "MEDIUM"},
+        {"gap_type": "negotiation_gap", "slot_name": "negotiation_status", "description": "未合意点と法務確認状況が不明", "severity": "MEDIUM"}
+      ],
+      "gold_questions": [
+        {"slot_name": "contract_impact", "question": "契約や商談への影響はありますか？"},
+        {"slot_name": "promise_boundary", "question": "顧客に約束してよい範囲はどこまでですか？"},
+        {"slot_name": "negotiation_status", "question": "交渉状況と未合意点は何ですか？"}
+      ],
+      "unsafe_transfer_label": true
+    },
+    {
+      "scenario_id": "U004",
+      "memory": "FAQ差し替えは全顧客向けに告知済みで、例外問い合わせはCSリードへ送る",
+      "evidence_events": [
+        {"source_type": "doc", "content": "対象範囲、告知状況、回答権限、代替手段、エスカレーション、外部向け文面を記載。"}
+      ],
+      "successor_role": "CS",
+      "memory_type": "task",
+      "handover_task": "FAQ差し替え後の問い合わせ対応",
+      "provided_slots": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"],
+      "evidence_slots": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"],
+      "slot_fill_profiles": {
+        "conservative": ["communication_status", "scope", "authority", "escalation_path", "customer_facing_wording"],
+        "optimistic": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": [],
+        "reviewer_b": []
+      },
+      "annotation_notes": "Safe transfer example for false-positive checks.",
+      "gold_gaps": [],
+      "gold_questions": [],
+      "unsafe_transfer_label": false
+    },
+    {
+      "scenario_id": "U005",
+      "memory": "Webhook検証は先行するが、失敗時は手動CSVで継続する",
+      "evidence_events": [
+        {"source_type": "tech_note", "content": "Webhook検証を先行。手動CSVの逃げ道あり。API化の判断条件は未記載。"}
+      ],
+      "successor_role": "Engineer",
+      "memory_type": "decision",
+      "handover_task": "連携方式の検証引き継ぎ",
+      "provided_slots": ["implementation_scope", "failure_modes"],
+      "evidence_slots": ["implementation_scope", "failure_modes"],
+      "slot_fill_profiles": {
+        "conservative": ["implementation_scope"],
+        "optimistic": ["implementation_scope", "failure_modes", "technical_constraint", "trigger_for_reconsideration"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["rationale", "technical_constraint", "trigger_for_reconsideration", "related_issue"],
+        "reviewer_b": ["rationale", "trigger_for_reconsideration", "related_issue"]
+      },
+      "annotation_notes": "Optimistic semantic filling may overread '手動CSV' as a technical constraint and miss that API transition criteria are absent.",
+      "gold_gaps": [
+        {"gap_type": "rationale_gap", "slot_name": "rationale", "description": "Webhook先行の判断理由が不明", "severity": "MEDIUM"},
+        {"gap_type": "technical_constraint_gap", "slot_name": "technical_constraint", "description": "Webhookで検証できる技術的制約が不明", "severity": "MEDIUM"},
+        {"gap_type": "trigger_gap", "slot_name": "trigger_for_reconsideration", "description": "API化へ移る判断条件が不明", "severity": "MEDIUM"},
+        {"gap_type": "traceability_gap", "slot_name": "related_issue", "description": "検証結果の追跡先が不明", "severity": "MEDIUM"}
+      ],
+      "gold_questions": [
+        {"slot_name": "rationale", "question": "この判断に至った理由は何ですか？"},
+        {"slot_name": "technical_constraint", "question": "技術的な制約や前提条件は何ですか？"},
+        {"slot_name": "trigger_for_reconsideration", "question": "どの条件になったら再検討しますか？"},
+        {"slot_name": "related_issue", "question": "関連するチケットや追跡先はどこですか？"}
+      ],
+      "unsafe_transfer_label": true
+    },
+    {
+      "scenario_id": "U006",
+      "memory": "提案条件は顧客合意、契約影響、提示期限、未合意点をCRMに記録済み",
+      "evidence_events": [
+        {"source_type": "crm_note", "content": "契約影響なし、約束範囲、顧客期待、提示期限、交渉状況を記録。"}
+      ],
+      "successor_role": "Sales",
+      "memory_type": "task",
+      "handover_task": "提案条件の引き継ぎ",
+      "provided_slots": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence", "negotiation_status"],
+      "evidence_slots": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence", "negotiation_status"],
+      "slot_fill_profiles": {
+        "conservative": ["contract_impact", "promise_boundary", "timeline_confidence", "negotiation_status"],
+        "optimistic": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence", "negotiation_status"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": [],
+        "reviewer_b": []
+      },
+      "annotation_notes": "Safe sales handover example for transfer allowance.",
+      "gold_gaps": [],
+      "gold_questions": [],
+      "unsafe_transfer_label": false
+    }
+  ]
+}

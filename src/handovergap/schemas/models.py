@@ -38,6 +38,9 @@ class HandoverScenario(BaseModel):
     handover_task: str
     provided_slots: list[str] = Field(default_factory=list)
     evidence_slots: list[str] = Field(default_factory=list)
+    slot_fill_profiles: dict[str, list[str]] = Field(default_factory=dict)
+    annotator_gap_slots: dict[str, list[str]] = Field(default_factory=dict)
+    annotation_notes: str | None = None
     gold_gaps: list[HandoverGap] = Field(default_factory=list)
     gold_questions: list[GoldQuestion] = Field(default_factory=list)
     unsafe_transfer_label: bool
@@ -63,3 +66,5 @@ class EvalMetrics(BaseModel):
     tacit_gap_recall: float = Field(ge=0.0, le=1.0)
     unsafe_transfer_prevention: float = Field(ge=0.0, le=1.0)
     question_coverage: float = Field(ge=0.0, le=1.0)
+    safe_transfer_allowance: float = Field(ge=0.0, le=1.0)
+    blocked_precision: float = Field(ge=0.0, le=1.0)

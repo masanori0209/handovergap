@@ -14,7 +14,7 @@ from handovergap.store import InMemoryStore
 from handovergap.stores import TiDBStore
 
 app = typer.Typer(help="Detect tacit context gaps in handover-oriented RAG memories.")
-console = Console(width=120)
+console = Console(width=160)
 
 
 def _build_detector() -> HandoverGapDetector:
@@ -62,17 +62,39 @@ def detect(
 @app.command()
 def evaluate(
     compare: bool = typer.Option(False, "--compare", help="Compare HandoverGap with naive and hybrid baselines."),
+    dataset: str = typer.Option("mini", "--dataset", help="Built-in dataset: mini, holdout, or all."),
+    slot_profile: str = typer.Option(
+        "provided",
+        "--slot-profile",
+        help="Slot filling profile: provided, conservative, or optimistic.",
+    ),
+    stress_filling: bool = typer.Option(
+        False,
+        "--stress-filling",
+        help="Evaluate HandoverGap across provided, conservative, and optimistic slot filling profiles.",
+    ),
 ) -> None:
     """Evaluate on HandoverGapBench mini."""
-    evaluator = HandoverGapEvaluator(store=InMemoryStore.from_builtin_dataset())
-    rows = evaluator.compare() if compare else [evaluator.evaluate_method("handovergap")]
+    if stress_filling:
+        rows = []
+        for profile in ["provided", "conservative", "optimistic"]:
+            evaluator = HandoverGapEvaluator(store=InMemoryStore.from_builtin_dataset(dataset), slot_profile=profile)
+            metrics = evaluator.evaluate_method("handovergap")
+            rows.append(metrics.model_copy(update={"method": f"handovergap/{profile}"}))
+        title = f"HandoverGapBench {dataset} / slot filling stress"
+    else:
+        evaluator = HandoverGapEvaluator(store=InMemoryStore.from_builtin_dataset(dataset), slot_profile=slot_profile)
+        rows = evaluator.compare() if compare else [evaluator.evaluate_method("handovergap")]
+        title = f"HandoverGapBench {dataset} / slot-profile={slot_profile}"
 
-    table = Table(title="HandoverGapBench mini")
-    table.add_column("Method")
-    table.add_column("Scenarios", justify="right")
+    table = Table(title=title)
+    table.add_column("Method", no_wrap=True)
+    table.add_column("Scenarios", justify="right", no_wrap=True)
     table.add_column("Tacit Gap Recall", justify="right", no_wrap=True)
     table.add_column("Unsafe Transfer Prevention", justify="right", no_wrap=True)
     table.add_column("Question Coverage", justify="right", no_wrap=True)
+    table.add_column("Safe Transfer Allowance", justify="right", no_wrap=True)
+    table.add_column("Blocked Precision", justify="right", no_wrap=True)
     for metrics in rows:
         table.add_row(
             metrics.method,
@@ -80,6 +102,8 @@ def evaluate(
             f"{metrics.tacit_gap_recall:.2f}",
             f"{metrics.unsafe_transfer_prevention:.2f}",
             f"{metrics.question_coverage:.2f}",
+            f"{metrics.safe_transfer_allowance:.2f}",
+            f"{metrics.blocked_precision:.2f}",
         )
     console.print(table)
 

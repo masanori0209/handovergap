@@ -34,7 +34,7 @@ class TiDBStore:
         statements = _split_sql_statements(self.schema_sql())
         with active_engine.begin() as connection:
             for statement in statements:
-                connection.execute(sqlalchemy.text(statement))
+                connection.execute(sqlalchemy.text(_make_create_table_idempotent(statement)))
 
     def persist_slot_fill_attempts(self, rows: Iterable[dict[str, Any]], engine: Any | None = None) -> int:
         return self._insert_rows(
@@ -81,6 +81,19 @@ class TiDBStore:
             engine,
         )
 
+    def persist_evaluation_runs(self, rows: Iterable[dict[str, Any]], engine: Any | None = None) -> int:
+        return self._insert_rows(
+            """
+            INSERT INTO evaluation_runs (
+              method_name, dataset_name, metrics_json
+            ) VALUES (
+              :method_name, :dataset_name, :metrics_json
+            )
+            """,
+            rows,
+            engine,
+        )
+
     def _insert_rows(self, statement: str, rows: Iterable[dict[str, Any]], engine: Any | None) -> int:
         payload = list(rows)
         if not payload:
@@ -118,3 +131,9 @@ def _split_sql_statements(schema_sql: str) -> list[str]:
     if trailing:
         statements.append(trailing)
     return statements
+
+
+def _make_create_table_idempotent(statement: str) -> str:
+    if statement.lstrip().upper().startswith("CREATE TABLE "):
+        return statement.replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS ", 1)
+    return statement

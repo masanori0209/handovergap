@@ -23,3 +23,28 @@ def test_evaluate_cli_outputs_required_metrics() -> None:
     assert "Tacit Gap Recall" in result.output
     assert "Unsafe Transfer Prevention" in result.output
     assert "Question Coverage" in result.output
+    assert "Safe Transfer Allowance" in result.output
+
+
+def test_holdout_optimistic_slot_filling_exposes_recall_drop() -> None:
+    provided = HandoverGapEvaluator(
+        store=InMemoryStore.from_builtin_dataset("holdout"),
+        slot_profile="provided",
+    ).evaluate_method("handovergap")
+    optimistic = HandoverGapEvaluator(
+        store=InMemoryStore.from_builtin_dataset("holdout"),
+        slot_profile="optimistic",
+    ).evaluate_method("handovergap")
+
+    assert provided.tacit_gap_recall == 1.0
+    assert optimistic.tacit_gap_recall < provided.tacit_gap_recall
+    assert optimistic.unsafe_transfer_prevention == 1.0
+    assert optimistic.safe_transfer_allowance == 1.0
+
+
+def test_evaluate_cli_outputs_slot_filling_stress() -> None:
+    result = CliRunner().invoke(app, ["evaluate", "--dataset", "holdout", "--stress-filling"])
+
+    assert result.exit_code == 0
+    assert "slot filling stress" in result.output
+    assert "handovergap/optimistic" in result.output

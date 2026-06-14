@@ -15,3 +15,13 @@ def test_builtin_dataset_uses_synthetic_sources() -> None:
 
     assert all(scenario.scenario_id.startswith("S") for scenario in scenarios)
     assert all(not scenario.memory.startswith("株式会社") for scenario in scenarios)
+
+
+def test_holdout_dataset_has_unknown_ids_and_annotation_metadata() -> None:
+    scenarios = InMemoryStore.from_builtin_dataset("holdout").list_scenarios()
+
+    assert len(scenarios) >= 6
+    assert all(scenario.scenario_id.startswith("U") for scenario in scenarios)
+    assert any(scenario.unsafe_transfer_label is False for scenario in scenarios)
+    assert all(scenario.annotator_gap_slots for scenario in scenarios)
+    assert all("optimistic" in scenario.slot_fill_profiles for scenario in scenarios)

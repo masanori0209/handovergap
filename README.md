@@ -55,13 +55,27 @@ The demo defaults to Japanese and includes an English language switch. It compar
 
 `handovergap evaluate --compare` runs the bundled synthetic HandoverGapBench mini dataset.
 
-| Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage |
-|---|---:|---:|---:|
-| naive_rag | 0.00 | 0.00 | 0.00 |
-| hybrid_rag | 0.26 | 0.59 | 0.26 |
-| handovergap | 1.00 | 1.00 | 1.00 |
+| Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision |
+|---|---:|---:|---:|---:|---:|
+| naive_rag | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 |
+| hybrid_rag | 0.26 | 0.59 | 0.26 | 1.00 | 1.00 |
+| handovergap | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
 
 These are deterministic results from the bundled 20-scenario dataset. The benchmark is synthetic and intentionally small; it demonstrates reproducible behavior rather than production accuracy.
+
+For a small unknown holdout set with adjudicated synthetic reviewer labels and slot-filling stress profiles:
+
+```bash
+handovergap evaluate --dataset holdout --stress-filling
+```
+
+| Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision |
+|---|---:|---:|---:|---:|---:|
+| handovergap/provided | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| handovergap/conservative | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| handovergap/optimistic | 0.64 | 1.00 | 0.64 | 1.00 | 1.00 |
+
+The optimistic profile simulates an LLM over-filling ambiguous slots. It shows a real failure mode: recall drops even though unsafe transfers are still blocked in this holdout.
 
 ![Japanese Streamlit demo](https://raw.githubusercontent.com/masanori0209/handovergap/main/docs/assets/demo-ja.png)
 
@@ -79,7 +93,7 @@ store = TiDBStore("mysql+pymysql://user:password@host:4000/handovergap")
 store.create_schema()
 ```
 
-The packaged schema models source evidence, memories, role requirements, slot-fill attempts, context gaps, clarification questions, transfer assessments, and evaluation runs. Live persistence methods are available for slot-fill attempts, context gaps, and transfer assessments.
+The packaged schema models source evidence, memories, role requirements, slot-fill attempts, context gaps, clarification questions, transfer assessments, and evaluation runs. Live persistence methods are available for slot-fill attempts, context gaps, transfer assessments, and evaluation runs.
 
 ### Live TiDB Validation
 
@@ -100,7 +114,7 @@ Then run:
 python harness/validation/tidb_live_check.py --create-schema
 ```
 
-The check creates the packaged schema if needed, writes one synthetic memory, persists a slot-fill attempt, a context gap, and a transfer assessment, then prints row counts as JSON. Do not commit `.env` files or TiDB credentials.
+The check creates the packaged schema if needed, writes one synthetic memory, persists a slot-fill attempt, a context gap, a transfer assessment, and the holdout stress evaluation runs, then prints row counts as JSON. Do not commit `.env` files or TiDB credentials.
 
 ## Python API
 
@@ -127,7 +141,8 @@ python3 -m venv .venv
 ## Limitations
 
 - The bundled detector and baselines are deterministic rules, not learned models.
-- HandoverGapBench mini contains synthetic scenarios.
+- HandoverGapBench mini and holdout contain synthetic scenarios.
+- Slot-filling stress profiles simulate LLM variance; they are not a replacement for a live LLM evaluation.
 - Semantic equivalence scoring for generated questions is not implemented in the MVP.
 - Live TiDB integration requires the optional `tidb` extra and a configured database.
 

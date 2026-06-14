@@ -6,6 +6,8 @@ import os
 from datetime import UTC, datetime
 
 from handovergap import TiDBStore
+from handovergap.core.evaluator import HandoverGapEvaluator
+from handovergap.store import InMemoryStore
 
 
 def main() -> int:
@@ -114,7 +116,10 @@ def main() -> int:
         "context_gaps": store.persist_context_gaps(gap_rows, engine),
         "transfer_assessments": store.persist_transfer_assessments(assessment_rows, engine),
     }
+    evaluation_rows = _evaluation_rows()
+    inserted["evaluation_runs"] = store.persist_evaluation_runs(evaluation_rows, engine)
     counts = _counts(engine, memory_item_id)
+    evaluation_count = _evaluation_count(engine)
 
     print(
         json.dumps(
@@ -124,6 +129,7 @@ def main() -> int:
                 "memory_item_id": memory_item_id,
                 "inserted": inserted,
                 "counts": counts,
+                "latest_evaluation_runs": evaluation_count,
             },
             ensure_ascii=False,
             indent=2,
@@ -155,6 +161,33 @@ def _counts(engine: object, memory_item_id: int) -> dict[str, int]:
             ).scalar_one()
             for table in tables
         }
+
+
+def _evaluation_rows() -> list[dict[str, str]]:
+    rows = []
+    for profile in ["provided", "conservative", "optimistic"]:
+        metrics = HandoverGapEvaluator(
+            store=InMemoryStore.from_builtin_dataset("holdout"),
+            slot_profile=profile,
+        ).evaluate_method("handovergap")
+        rows.append(
+            {
+                "method_name": f"handovergap/{profile}",
+                "dataset_name": "HandoverGapBench holdout",
+                "metrics_json": metrics.model_dump_json(),
+            }
+        )
+    return rows
+
+
+def _evaluation_count(engine: object) -> int:
+    from sqlalchemy import text
+
+    with engine.connect() as connection:
+        return connection.execute(
+            text("SELECT COUNT(*) FROM evaluation_runs WHERE dataset_name = :dataset_name"),
+            {"dataset_name": "HandoverGapBench holdout"},
+        ).scalar_one()
 
 
 def _required_env(name: str) -> str:

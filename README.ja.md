@@ -44,13 +44,25 @@ handovergap serve
 
 同梱の合成データセット20件に対する決定的評価です。
 
-| 手法 | 暗黙ギャップ検出率 | 不適切転送の防止率 | 質問カバレッジ |
-|---|---:|---:|---:|
-| naive_rag | 0.00 | 0.00 | 0.00 |
-| hybrid_rag | 0.26 | 0.59 | 0.26 |
-| handovergap | 1.00 | 1.00 | 1.00 |
+| 手法 | 暗黙ギャップ検出率 | 不適切転送の防止率 | 質問カバレッジ | 安全転送の許可率 | ブロック精度 |
+|---|---:|---:|---:|---:|---:|
+| naive_rag | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 |
+| hybrid_rag | 0.26 | 0.59 | 0.26 | 1.00 | 1.00 |
+| handovergap | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
 
-この結果はMVPの整合性検査であり、未知データや実環境での一般性能を意味しません。
+未知holdoutデータと、LLMがslotを控えめ/楽観的に埋めた場合の揺れは次で確認できます。
+
+```bash
+handovergap evaluate --dataset holdout --stress-filling
+```
+
+| 手法 | 暗黙ギャップ検出率 | 不適切転送の防止率 | 質問カバレッジ | 安全転送の許可率 | ブロック精度 |
+|---|---:|---:|---:|---:|---:|
+| handovergap/provided | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| handovergap/conservative | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| handovergap/optimistic | 0.64 | 1.00 | 0.64 | 1.00 | 1.00 |
+
+楽観的profileでは、曖昧な証拠をLLMが埋まったslotとして扱いすぎる状況を模擬しています。この場合、検出率は落ちますが、このholdoutでは不適切転送は止められています。
 
 ## TiDBモード
 
@@ -80,12 +92,13 @@ export TIDB_CA_PATH="/path/to/ca-certificates.crt"
 python harness/validation/tidb_live_check.py --create-schema
 ```
 
-この検証はschemaを作成し、合成memoryを1件、slot fill試行、context gap、transfer assessmentを1件ずつ保存して、件数をJSONで出力します。`.env`やTiDB認証情報はコミットしないでください。
+この検証はschemaを作成し、合成memoryを1件、slot fill試行、context gap、transfer assessment、holdout stress評価結果を保存して、件数をJSONで出力します。`.env`やTiDB認証情報はコミットしないでください。
 
 ## 制約
 
 - MVPの検出器とbaselineは決定的ルールです。
-- HandoverGapBench miniは合成データです。
+- HandoverGapBench miniとholdoutは合成データです。
+- slot filling stress profileはLLMの揺れを模擬するもので、実LLM評価の代替ではありません。
 - 質問の意味的同値判定は未実装です。
 - ライブTiDB接続はoptional dependencyです。
 

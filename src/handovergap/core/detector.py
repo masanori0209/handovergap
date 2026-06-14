@@ -13,6 +13,9 @@ class HandoverGapDetector:
 
     def detect(self, scenario_id: str, successor_role: str) -> DetectionResult:
         scenario = self.store.get_scenario(scenario_id=scenario_id, successor_role=successor_role)
+        return self.detect_scenario(scenario)
+
+    def detect_scenario(self, scenario) -> DetectionResult:
         required_slots = ROLE_REQUIRED_SLOTS[scenario.successor_role]
         missing_slots = [slot for slot in required_slots if slot not in scenario.provided_slots]
 

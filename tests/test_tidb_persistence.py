@@ -58,3 +58,23 @@ def test_empty_persistence_batch_does_not_connect() -> None:
 
     assert store.persist_slot_fill_attempts([]) == 0
     assert store.persist_transfer_assessments([]) == 0
+
+
+def test_persist_evaluation_runs(monkeypatch) -> None:
+    monkeypatch.setattr(tidb_module, "_load_sqlalchemy", lambda: FakeSQLAlchemy())
+    store = TiDBStore("mysql+pymysql://unused")
+    engine = FakeEngine()
+
+    inserted = store.persist_evaluation_runs(
+        [
+            {
+                "method_name": "handovergap/optimistic",
+                "dataset_name": "HandoverGapBench holdout",
+                "metrics_json": '{"tacit_gap_recall":0.64}',
+            }
+        ],
+        engine=engine,
+    )
+
+    assert inserted == 1
+    assert "INSERT INTO evaluation_runs" in engine.connection.calls[0][0]

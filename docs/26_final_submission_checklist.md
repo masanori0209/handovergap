@@ -13,6 +13,8 @@
 - [x] schema.sql included
 - [x] examples included
 - [x] live TiDB Developer Tier validation completed
+- [x] holdout dataset with adjudicated synthetic reviewer labels included
+- [x] slot filling stress evaluation included
 
 ## GitHub Description
 
@@ -36,6 +38,7 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 - [x] `handovergap detect --scenario S001 --role CS`
 - [x] `handovergap evaluate`
 - [x] `handovergap evaluate --compare`
+- [x] `handovergap evaluate --dataset holdout --stress-filling`
 - [x] `handovergap schema --dialect tidb`
 - [x] `python harness/validation/tidb_live_check.py --create-schema`
 
@@ -46,6 +49,8 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 - [x] at least 5 gap types
 - [x] baselines included
 - [x] metrics documented
+- [x] safe-transfer and blocked-precision metrics documented
+- [x] live TiDB evaluation_runs persistence validated
 
 ## Article
 
