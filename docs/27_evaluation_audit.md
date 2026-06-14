@@ -29,10 +29,13 @@ After removing direct label access from predictors:
 | holdout / conservative | 1.00 | 0.67 | 1.00 | 0.67 | 0.67 |
 | holdout / optimistic | 0.64 | 0.67 | 0.64 | 1.00 | 1.00 |
 | holdout / OpenAI slot fill / gpt-4.1-mini | 0.91 | 0.33 | n/a | 0.67 | 0.50 |
+| holdout / OpenAI slot fill / gpt-5-mini | 0.45 | 0.33 | n/a | 0.67 | 0.50 |
 
 ## Interpretation
 
 The mechanism is still useful as a role-conditioned missing-slot checker, but the previous `1.00` unsafe-transfer claim depended on evaluation leakage.
+
+The `gpt-5-mini` live run used 1,901 input tokens and 8,136 output tokens, including 5,184 reasoning tokens, for an estimated cost of `$0.0167` at the observed GPT-5 mini pricing.
 
 The next useful improvement is not more scenarios with the same `provided_slots` structure. It is a stricter input pipeline:
 

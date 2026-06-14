@@ -16,6 +16,7 @@
 - [x] holdout dataset with adjudicated synthetic reviewer labels included
 - [x] slot filling stress evaluation included
 - [x] optional live OpenAI slot filling validation completed
+- [x] gpt-5-mini live slot filling validation and cost documented
 
 ## GitHub Description
 
@@ -25,8 +26,8 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 
 ## Package
 
-- [ ] PyPI package published or TestPyPI if time-constrained
-- [ ] `pip install handovergap` works
+- [x] PyPI package published
+- [x] `pip install handovergap` works
 - [x] local wheel installation works
 - [x] `handovergap demo` works
 - [x] `handovergap evaluate` works
@@ -67,7 +68,7 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 - [x] competitor positioning
 - [x] limitations
 - [x] link to GitHub
-- [ ] link to PyPI
+- [x] link to PyPI
 - [ ] link to demo/video if available
 
 ## Final Article Title

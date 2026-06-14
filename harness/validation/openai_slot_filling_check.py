@@ -16,6 +16,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Run optional OpenAI semantic slot-filling validation.")
     parser.add_argument("--dataset", default="holdout", help="Built-in dataset to evaluate.")
     parser.add_argument("--model", default=os.getenv("OPENAI_SLOT_MODEL", "gpt-4.1-mini"))
+    parser.add_argument("--max-output-tokens", type=int, default=4000)
     parser.add_argument("--persist-tidb", action="store_true", help="Persist aggregate metrics to TiDB evaluation_runs.")
     parser.add_argument("--output", default="article/openai_slot_filling_results.json")
     args = parser.parse_args()
@@ -33,7 +34,7 @@ def main() -> int:
     scenario_rows = []
 
     for scenario in store.list_scenarios():
-        fill = _fill_slots(client, args.model, scenario)
+        fill = _fill_slots(client, args.model, scenario, args.max_output_tokens)
         profiled = scenario.model_copy(update={"provided_slots": fill["filled_slots"]})
         result = detector.detect_scenario(profiled)
         gold_slots = {gap.slot_name for gap in scenario.gold_gaps}
@@ -49,6 +50,7 @@ def main() -> int:
                 "missed_gold_gap_slots": sorted(gold_slots - predicted_gap_slots),
                 "transferability_status": result.transferability_status,
                 "slot_rationales": fill["slot_rationales"],
+                "usage": fill["usage"],
             }
         )
 
@@ -58,6 +60,7 @@ def main() -> int:
         "dataset": args.dataset,
         "model": args.model,
         "metrics": metrics,
+        "usage": _usage_from_rows(scenario_rows),
         "scenarios": scenario_rows,
     }
     output_path = Path(args.output)
@@ -71,7 +74,7 @@ def main() -> int:
     return 0
 
 
-def _fill_slots(client: Any, model: str, scenario: Any) -> dict[str, Any]:
+def _fill_slots(client: Any, model: str, scenario: Any, max_output_tokens: int) -> dict[str, Any]:
     required_slots = ROLE_REQUIRED_SLOTS[scenario.successor_role]
     prompt = f"""
 You are a strict handover safety reviewer.
@@ -125,11 +128,21 @@ Evidence events:
                 },
             }
         },
-        max_output_tokens=1200,
+        max_output_tokens=max_output_tokens,
     )
+    if not response.output_text:
+        raise RuntimeError(
+            f"OpenAI response did not contain output_text for scenario {scenario.scenario_id}; "
+            f"status={getattr(response, 'status', None)} incomplete={getattr(response, 'incomplete_details', None)}"
+        )
     payload = json.loads(response.output_text)
     filled = sorted(set(payload["filled_slots"]) & set(required_slots))
-    return {"filled_slots": filled, "slot_rationales": payload["slot_rationales"]}
+    usage = getattr(response, "usage", None)
+    return {
+        "filled_slots": filled,
+        "slot_rationales": payload["slot_rationales"],
+        "usage": usage.model_dump() if usage else {},
+    }
 
 
 def _metrics_from_rows(rows: list[dict[str, Any]]) -> dict[str, float]:
@@ -157,6 +170,18 @@ def _metrics_from_rows(rows: list[dict[str, Any]]) -> dict[str, float]:
             len(blocked_rows),
         ),
     }
+
+
+def _usage_from_rows(rows: list[dict[str, Any]]) -> dict[str, int]:
+    totals = {"input_tokens": 0, "output_tokens": 0, "reasoning_tokens": 0, "total_tokens": 0}
+    for row in rows:
+        usage = row.get("usage", {})
+        totals["input_tokens"] += usage.get("input_tokens", 0)
+        totals["output_tokens"] += usage.get("output_tokens", 0)
+        totals["total_tokens"] += usage.get("total_tokens", 0)
+        output_details = usage.get("output_tokens_details") or {}
+        totals["reasoning_tokens"] += output_details.get("reasoning_tokens", 0)
+    return totals
 
 
 def _persist_metrics_to_tidb(dataset: str, model: str, metrics: dict[str, float]) -> None:

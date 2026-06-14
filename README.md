@@ -87,6 +87,8 @@ python harness/validation/openai_slot_filling_check.py --dataset holdout --persi
 
 Observed with `gpt-4.1-mini`: tacit gap recall `0.91`, unsafe transfer prevention `0.33`, safe transfer allowance `0.67`, blocked precision `0.50`. The detailed per-scenario output is saved to `article/openai_slot_filling_results.json`.
 
+Observed with `gpt-5-mini`: tacit gap recall `0.45`, unsafe transfer prevention `0.33`, safe transfer allowance `0.67`, blocked precision `0.50`. The run used 1,901 input tokens and 8,136 output tokens, including 5,184 reasoning tokens, for an estimated cost of about `$0.0167`. This lower recall is intentional evidence in the repository: semantic slot filling is model- and prompt-sensitive, so HandoverGap should report the sensitivity instead of hiding it.
+
 ![Japanese Streamlit demo](https://raw.githubusercontent.com/masanori0209/handovergap/main/docs/assets/demo-ja.png)
 
 ## Optional TiDB Store
@@ -154,6 +156,7 @@ python3 -m venv .venv
 - HandoverGapBench mini and holdout contain synthetic scenarios.
 - Slot-filling stress profiles simulate LLM variance; they are not a replacement for a live LLM evaluation.
 - Live OpenAI slot filling is optional and not required for first-run usage.
+- Live OpenAI slot filling is model-sensitive; current holdout results differ materially between `gpt-4.1-mini` and `gpt-5-mini`.
 - Semantic equivalence scoring for generated questions is not implemented in the MVP.
 - Live TiDB integration requires the optional `tidb` extra and a configured database.
 

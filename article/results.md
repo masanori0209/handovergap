@@ -43,8 +43,11 @@ Observed on June 14, 2026:
 | Method | Scenarios | Tacit Gap Recall | Unsafe Transfer Prevention | Safe Transfer Allowance | Blocked Precision |
 |---|---:|---:|---:|---:|---:|
 | handovergap/openai-slot-fill/gpt-4.1-mini | 6 | 0.91 | 0.33 | 0.67 | 0.50 |
+| handovergap/openai-slot-fill/gpt-5-mini | 6 | 0.45 | 0.33 | 0.67 | 0.50 |
 
-The detailed per-scenario output is stored in `article/openai_slot_filling_results.json`.
+The detailed per-scenario outputs are stored in `article/openai_slot_filling_results.json` and `article/openai_slot_filling_results_gpt5mini.json`.
+
+The `gpt-5-mini` run used 1,901 input tokens and 8,136 output tokens, including 5,184 reasoning tokens. At the observed GPT-5 mini text pricing of $0.25 per 1M input tokens and $2.00 per 1M output tokens, this six-scenario validation cost about `$0.0167`.
 
 ## Interpretation
 
@@ -52,7 +55,7 @@ The detailed per-scenario output is stored in `article/openai_slot_filling_resul
 - `hybrid_rag` can identify one explicit risk and blocks only when that risk is high severity.
 - `handovergap` checks every slot required by the successor role.
 - `handovergap/optimistic` simulates an LLM over-filling ambiguous slots; recall drops because some truly missing slots are treated as filled.
-- Live OpenAI slot filling improves recall versus the optimistic simulation, but lowers unsafe-transfer prevention because some unsafe slots are filled too optimistically.
+- Live OpenAI slot filling is model-sensitive. `gpt-4.1-mini` improves recall versus the optimistic simulation, while `gpt-5-mini` under this prompt drops recall to 0.45. Both live runs lower unsafe-transfer prevention because some unsafe slots are filled too optimistically.
 
 ## Important Limitation
 

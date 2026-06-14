@@ -193,13 +193,16 @@ handovergap evaluate --dataset holdout --stress-filling
 python harness/validation/openai_slot_filling_check.py --dataset holdout --persist-tidb
 ```
 
-`gpt-4.1-mini` での結果:
+実行したモデルごとの結果:
 
 | Method | Scenarios | Tacit Gap Recall | Unsafe Transfer Prevention | Safe Transfer Allowance | Blocked Precision |
 |---|---:|---:|---:|---:|---:|
 | handovergap/openai-slot-fill/gpt-4.1-mini | 6 | 0.91 | 0.33 | 0.67 | 0.50 |
+| handovergap/openai-slot-fill/gpt-5-mini | 6 | 0.45 | 0.33 | 0.67 | 0.50 |
 
-実LLMでは、単純な`optimistic` profileよりTacit Gap Recallが改善しました。一方でUnsafe Transfer Preventionは0.33、Blocked Precisionは0.50まで落ちました。詳細ログを見ると、LLMが契約影響や判断理由を楽観的に埋めすぎるケースと、安全なhandoverでも`needs_clarification`に寄るケースがありました。これは「slot fillingは効くが、ブロック判定ポリシーとslot定義にはまだ改善余地が大きい」という示唆です。
+実LLMでは、`gpt-4.1-mini` は単純な`optimistic` profileよりTacit Gap Recallが改善しました。一方でUnsafe Transfer Preventionは0.33、Blocked Precisionは0.50まで落ちました。さらに `gpt-5-mini` では、同じpromptでもTacit Gap Recallが0.45まで下がりました。詳細ログを見ると、LLMが契約影響や判断理由を楽観的に埋めすぎるケースと、安全なhandoverでも`needs_clarification`に寄るケースがありました。
+
+`gpt-5-mini` の6件検証では、入力1,901 tokens、出力8,136 tokens、うちreasoning 5,184 tokensを使用し、推定費用は約 $0.0167 でした。費用は小さい一方、結果の揺れは大きい。これは「slot fillingは効く可能性があるが、モデル選択、prompt、ブロック判定ポリシー、slot定義にはまだ改善余地が大きい」という示唆です。
 
 ## PyPIから試す
 

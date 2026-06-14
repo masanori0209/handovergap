@@ -72,6 +72,8 @@ python harness/validation/openai_slot_filling_check.py --dataset holdout --persi
 
 `gpt-4.1-mini` での観測結果は、暗黙ギャップ検出率 `0.91`、不適切転送の防止率 `0.33`、安全転送の許可率 `0.67`、ブロック精度 `0.50` でした。詳細は `article/openai_slot_filling_results.json` に保存されます。
 
+`gpt-5-mini` での観測結果は、暗黙ギャップ検出率 `0.45`、不適切転送の防止率 `0.33`、安全転送の許可率 `0.67`、ブロック精度 `0.50` でした。使用量は入力1,901 tokens、出力8,136 tokens、うちreasoning 5,184 tokensで、推定費用は約 `$0.0167` です。この低いRecallも意図的に残しています。意味的slot fillingはモデルとプロンプトに敏感なので、良い数値だけを見せないためです。
+
 ## TiDBモード
 
 ```bash
@@ -108,6 +110,7 @@ python harness/validation/tidb_live_check.py --create-schema
 - HandoverGapBench miniとholdoutは合成データです。
 - slot filling stress profileはLLMの揺れを模擬するもので、実LLM評価の代替ではありません。
 - OpenAI実接続slot fillingは任意で、初回利用には不要です。
+- OpenAI実接続slot fillingはモデル依存で、現在のholdoutでは `gpt-4.1-mini` と `gpt-5-mini` の結果が大きく異なります。
 - 質問の意味的同値判定は未実装です。
 - ライブTiDB接続はoptional dependencyです。
 
