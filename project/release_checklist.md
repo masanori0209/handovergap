@@ -19,6 +19,8 @@
 
 - [x] Push repository to `masanori0209/handovergap`
 - [x] Confirm default branch name used by README image links
+- [ ] Add `PYPI_API_TOKEN` repository or environment secret, or configure PyPI Trusted Publisher
+- [ ] Add `TEST_PYPI_API_TOKEN` repository or environment secret, or configure TestPyPI Trusted Publisher
 - [ ] Enable the `testpypi` GitHub environment
 - [ ] Configure TestPyPI Trusted Publisher for `.github/workflows/test-publish.yml`
 - [ ] Enable the `pypi` GitHub environment with required human approval

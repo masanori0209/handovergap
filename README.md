@@ -77,6 +77,14 @@ handovergap evaluate --dataset holdout --stress-filling
 
 The optimistic profile simulates an LLM over-filling ambiguous slots. It shows a real failure mode: recall drops even though unsafe transfers are still blocked in this holdout.
 
+With optional live OpenAI semantic slot filling:
+
+```bash
+python harness/validation/openai_slot_filling_check.py --dataset holdout --persist-tidb
+```
+
+Observed with `gpt-4.1-mini`: tacit gap recall `0.82`, unsafe transfer prevention `1.00`, safe transfer allowance `1.00`, blocked precision `1.00`. The detailed per-scenario output is saved to `article/openai_slot_filling_results.json`.
+
 ![Japanese Streamlit demo](https://raw.githubusercontent.com/masanori0209/handovergap/main/docs/assets/demo-ja.png)
 
 ## Optional TiDB Store
@@ -143,6 +151,7 @@ python3 -m venv .venv
 - The bundled detector and baselines are deterministic rules, not learned models.
 - HandoverGapBench mini and holdout contain synthetic scenarios.
 - Slot-filling stress profiles simulate LLM variance; they are not a replacement for a live LLM evaluation.
+- Live OpenAI slot filling is optional and not required for first-run usage.
 - Semantic equivalence scoring for generated questions is not implemented in the MVP.
 - Live TiDB integration requires the optional `tidb` extra and a configured database.
 

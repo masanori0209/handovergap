@@ -64,6 +64,14 @@ handovergap evaluate --dataset holdout --stress-filling
 
 楽観的profileでは、曖昧な証拠をLLMが埋まったslotとして扱いすぎる状況を模擬しています。この場合、検出率は落ちますが、このholdoutでは不適切転送は止められています。
 
+任意のOpenAI実接続slot fillingは次で検証できます。
+
+```bash
+python harness/validation/openai_slot_filling_check.py --dataset holdout --persist-tidb
+```
+
+`gpt-4.1-mini` での観測結果は、暗黙ギャップ検出率 `0.82`、不適切転送の防止率 `1.00`、安全転送の許可率 `1.00`、ブロック精度 `1.00` でした。詳細は `article/openai_slot_filling_results.json` に保存されます。
+
 ## TiDBモード
 
 ```bash
@@ -99,6 +107,7 @@ python harness/validation/tidb_live_check.py --create-schema
 - MVPの検出器とbaselineは決定的ルールです。
 - HandoverGapBench miniとholdoutは合成データです。
 - slot filling stress profileはLLMの揺れを模擬するもので、実LLM評価の代替ではありません。
+- OpenAI実接続slot fillingは任意で、初回利用には不要です。
 - 質問の意味的同値判定は未実装です。
 - ライブTiDB接続はoptional dependencyです。
 

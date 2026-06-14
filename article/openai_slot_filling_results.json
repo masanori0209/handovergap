@@ -1,0 +1,319 @@
+{
+  "generated_at": "2026-06-14T14:42:53.177143+00:00",
+  "dataset": "holdout",
+  "model": "gpt-4.1-mini",
+  "metrics": {
+    "scenarios": 6,
+    "tacit_gap_recall": 0.8181818181818182,
+    "unsafe_transfer_prevention": 1.0,
+    "safe_transfer_allowance": 1.0,
+    "blocked_precision": 1.0
+  },
+  "scenarios": [
+    {
+      "scenario_id": "U001",
+      "successor_role": "CS",
+      "unsafe_transfer_label": true,
+      "llm_filled_slots": [
+        "communication_status",
+        "scope"
+      ],
+      "gold_gap_slots": [
+        "authority",
+        "customer_facing_wording",
+        "escalation_path",
+        "fallback_plan"
+      ],
+      "predicted_gap_slots": [
+        "authority",
+        "customer_facing_wording",
+        "escalation_path",
+        "fallback_plan"
+      ],
+      "missed_gold_gap_slots": [],
+      "transferability_status": "blocked",
+      "slot_rationales": [
+        {
+          "slot_name": "communication_status",
+          "filled": true,
+          "reason": "一次連絡は送付済みであることが明示されている。"
+        },
+        {
+          "slot_name": "scope",
+          "filled": true,
+          "reason": "恒久対応は原因調査後に判断するため、現時点での対応範囲は障害後の追加問い合わせ対応に限定されていることが示されている。"
+        },
+        {
+          "slot_name": "authority",
+          "filled": false,
+          "reason": "恒久対応の決定は未確定であり、明示的な権限範囲が示されていない。"
+        },
+        {
+          "slot_name": "fallback_plan",
+          "filled": false,
+          "reason": "代替対応策やフォールバックプランに関する明確な記述がない。"
+        },
+        {
+          "slot_name": "escalation_path",
+          "filled": false,
+          "reason": "エスカレーション経路についての情報がない。"
+        },
+        {
+          "slot_name": "customer_facing_wording",
+          "filled": false,
+          "reason": "お客様への案内が暫定原因として案内するという記述はあるが、具体的な文言が示されていないため不十分。"
+        }
+      ]
+    },
+    {
+      "scenario_id": "U002",
+      "successor_role": "Engineer",
+      "unsafe_transfer_label": false,
+      "llm_filled_slots": [
+        "implementation_scope",
+        "related_issue",
+        "trigger_for_reconsideration"
+      ],
+      "gold_gap_slots": [],
+      "predicted_gap_slots": [
+        "failure_modes",
+        "rationale",
+        "technical_constraint"
+      ],
+      "missed_gold_gap_slots": [],
+      "transferability_status": "needs_clarification",
+      "slot_rationales": [
+        {
+          "slot_name": "implementation_scope",
+          "filled": true,
+          "reason": "The memory specifies that job re-execution should be performed according to Runbook R-42, indicating the scope of implementation."
+        },
+        {
+          "slot_name": "related_issue",
+          "filled": true,
+          "reason": "Runbook R-42 contains details about the relevant job, constraints, failure symptoms, and related issues, thus providing related issue information."
+        },
+        {
+          "slot_name": "trigger_for_reconsideration",
+          "filled": true,
+          "reason": "The memory instructs to contact the SRE on duty if the job re-execution fails, representing a clear trigger for reconsideration or escalation."
+        },
+        {
+          "slot_name": "rationale",
+          "filled": false,
+          "reason": "No explicit reasons or objectives for the job or re-execution are provided."
+        },
+        {
+          "slot_name": "technical_constraint",
+          "filled": false,
+          "reason": "No specific technical constraints are mentioned explicitly."
+        },
+        {
+          "slot_name": "failure_modes",
+          "filled": false,
+          "reason": "Failure symptoms may be noted in R-42, but the memory does not explicitly provide failure modes details to the successor."
+        }
+      ]
+    },
+    {
+      "scenario_id": "U003",
+      "successor_role": "Sales",
+      "unsafe_transfer_label": true,
+      "llm_filled_slots": [
+        "contract_impact",
+        "customer_expectation"
+      ],
+      "gold_gap_slots": [
+        "contract_impact",
+        "negotiation_status",
+        "promise_boundary"
+      ],
+      "predicted_gap_slots": [
+        "negotiation_status",
+        "promise_boundary",
+        "timeline_confidence"
+      ],
+      "missed_gold_gap_slots": [
+        "contract_impact"
+      ],
+      "transferability_status": "blocked",
+      "slot_rationales": [
+        {
+          "slot_name": "contract_impact",
+          "filled": true,
+          "reason": "The update estimate will be issued at the old unit price, explicitly stated in both memory and evidence."
+        },
+        {
+          "slot_name": "customer_expectation",
+          "filled": true,
+          "reason": "The customer has been informed about the timing of the estimate, as per the email summary."
+        },
+        {
+          "slot_name": "promise_boundary",
+          "filled": false,
+          "reason": "The exception conditions are to be confirmed after legal review, so the boundary is not finalized."
+        },
+        {
+          "slot_name": "timeline_confidence",
+          "filled": false,
+          "reason": "No clear timeline or confidence in scheduling is provided beyond estimate timing notification."
+        },
+        {
+          "slot_name": "negotiation_status",
+          "filled": false,
+          "reason": "Legal confirmation is pending and negotiation status is incomplete."
+        }
+      ]
+    },
+    {
+      "scenario_id": "U004",
+      "successor_role": "CS",
+      "unsafe_transfer_label": false,
+      "llm_filled_slots": [
+        "communication_status",
+        "escalation_path",
+        "scope"
+      ],
+      "gold_gap_slots": [],
+      "predicted_gap_slots": [
+        "authority",
+        "customer_facing_wording",
+        "fallback_plan"
+      ],
+      "missed_gold_gap_slots": [],
+      "transferability_status": "needs_clarification",
+      "slot_rationales": [
+        {
+          "slot_name": "communication_status",
+          "filled": true,
+          "reason": "FAQ replacement was announced to all customers, indicating communication status is clearly stated."
+        },
+        {
+          "slot_name": "scope",
+          "filled": true,
+          "reason": "The FAQ replacement applies to all customers, defining scope explicitly."
+        },
+        {
+          "slot_name": "escalation_path",
+          "filled": true,
+          "reason": "Exceptions are directed to escalate to the CS lead, which specifies the escalation path."
+        },
+        {
+          "slot_name": "authority",
+          "filled": false,
+          "reason": "No explicit statement about who holds the answering authority."
+        },
+        {
+          "slot_name": "fallback_plan",
+          "filled": false,
+          "reason": "No explicit fallback plan mentioned beyond escalation."
+        },
+        {
+          "slot_name": "customer_facing_wording",
+          "filled": false,
+          "reason": "No explicit external-facing wording provided in the information."
+        }
+      ]
+    },
+    {
+      "scenario_id": "U005",
+      "successor_role": "Engineer",
+      "unsafe_transfer_label": true,
+      "llm_filled_slots": [
+        "failure_modes",
+        "rationale"
+      ],
+      "gold_gap_slots": [
+        "rationale",
+        "related_issue",
+        "technical_constraint",
+        "trigger_for_reconsideration"
+      ],
+      "predicted_gap_slots": [
+        "implementation_scope",
+        "related_issue",
+        "technical_constraint",
+        "trigger_for_reconsideration"
+      ],
+      "missed_gold_gap_slots": [
+        "rationale"
+      ],
+      "transferability_status": "blocked",
+      "slot_rationales": [
+        {
+          "slot_name": "rationale",
+          "filled": true,
+          "reason": "Webhook検証を先行と記載されており、その理由として手動CSVでの継続手段があるため検証を優先していることが明示されている。"
+        },
+        {
+          "slot_name": "technical_constraint",
+          "filled": false,
+          "reason": "API化の判断条件や技術的制約についての記載がなく、不明確であるため未記入。"
+        },
+        {
+          "slot_name": "implementation_scope",
+          "filled": false,
+          "reason": "具体的な実装範囲や対象範囲の記載がないため未記入。"
+        },
+        {
+          "slot_name": "trigger_for_reconsideration",
+          "filled": false,
+          "reason": "再検討のきっかけとなる条件が明記されていないため未記入。"
+        },
+        {
+          "slot_name": "related_issue",
+          "filled": false,
+          "reason": "関連する問題点や連携している課題の記載がないため未記入。"
+        },
+        {
+          "slot_name": "failure_modes",
+          "filled": true,
+          "reason": "Webhook検証失敗時には手動CSVで継続すると明示されており、失敗時の代替手段が示されている。"
+        }
+      ]
+    },
+    {
+      "scenario_id": "U006",
+      "successor_role": "Sales",
+      "unsafe_transfer_label": false,
+      "llm_filled_slots": [
+        "contract_impact",
+        "customer_expectation",
+        "negotiation_status",
+        "promise_boundary",
+        "timeline_confidence"
+      ],
+      "gold_gap_slots": [],
+      "predicted_gap_slots": [],
+      "missed_gold_gap_slots": [],
+      "transferability_status": "transferable",
+      "slot_rationales": [
+        {
+          "slot_name": "contract_impact",
+          "filled": true,
+          "reason": "CRM note explicitly states '契約影響なし' (no contract impact)."
+        },
+        {
+          "slot_name": "promise_boundary",
+          "filled": true,
+          "reason": "CRM note mentions recording '約束範囲' (promise boundary)."
+        },
+        {
+          "slot_name": "customer_expectation",
+          "filled": true,
+          "reason": "CRM note confirms '顧客期待' (customer expectation) is recorded."
+        },
+        {
+          "slot_name": "timeline_confidence",
+          "filled": true,
+          "reason": "CRM note includes '提示期限' (presentation deadline) recorded."
+        },
+        {
+          "slot_name": "negotiation_status",
+          "filled": true,
+          "reason": "CRM note states '交渉状況' (negotiation status) recorded."
+        }
+      ]
+    }
+  ]
+}

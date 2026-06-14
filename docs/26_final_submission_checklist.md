@@ -15,6 +15,7 @@
 - [x] live TiDB Developer Tier validation completed
 - [x] holdout dataset with adjudicated synthetic reviewer labels included
 - [x] slot filling stress evaluation included
+- [x] optional live OpenAI slot filling validation completed
 
 ## GitHub Description
 
@@ -41,6 +42,7 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 - [x] `handovergap evaluate --dataset holdout --stress-filling`
 - [x] `handovergap schema --dialect tidb`
 - [x] `python harness/validation/tidb_live_check.py --create-schema`
+- [x] `python harness/validation/openai_slot_filling_check.py --dataset holdout --persist-tidb`
 
 ## Evaluation
 
@@ -51,6 +53,7 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 - [x] metrics documented
 - [x] safe-transfer and blocked-precision metrics documented
 - [x] live TiDB evaluation_runs persistence validated
+- [x] live OpenAI slot filling metrics documented
 
 ## Article
 

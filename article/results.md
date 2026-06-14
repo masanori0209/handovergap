@@ -30,13 +30,30 @@ Observed on June 14, 2026:
 | handovergap/conservative | 6 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
 | handovergap/optimistic | 6 | 0.64 | 1.00 | 0.64 | 1.00 | 1.00 |
 
+## Live OpenAI Slot Filling
+
+Command:
+
+```bash
+python harness/validation/openai_slot_filling_check.py --dataset holdout --persist-tidb
+```
+
+Observed on June 14, 2026:
+
+| Method | Scenarios | Tacit Gap Recall | Unsafe Transfer Prevention | Safe Transfer Allowance | Blocked Precision |
+|---|---:|---:|---:|---:|---:|
+| handovergap/openai-slot-fill/gpt-4.1-mini | 6 | 0.82 | 1.00 | 1.00 | 1.00 |
+
+The detailed per-scenario output is stored in `article/openai_slot_filling_results.json`.
+
 ## Interpretation
 
 - `naive_rag` returns retrieved memories without checking transferability.
 - `hybrid_rag` can identify one explicit risk and blocks only when that risk is high severity.
 - `handovergap` checks every slot required by the successor role.
 - `handovergap/optimistic` simulates an LLM over-filling ambiguous slots; recall drops because some truly missing slots are treated as filled.
+- Live OpenAI slot filling improves recall versus the optimistic simulation, but still exposes conservative clarification behavior on some safe handovers.
 
 ## Important Limitation
 
-These are deterministic results on small synthetic benchmarks. The holdout split and slot-filling stress profiles expose one real limitation, but they are still not a substitute for independent real-world annotation or online production validation.
+These are results on small synthetic benchmarks. The holdout split, slot-filling stress profiles, and live OpenAI check expose real limitations, but they are still not a substitute for independent real-world annotation or online production validation.
