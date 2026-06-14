@@ -54,6 +54,7 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 - [x] safe-transfer and blocked-precision metrics documented
 - [x] live TiDB evaluation_runs persistence validated
 - [x] live OpenAI slot filling metrics documented
+- [x] evaluation leakage audit completed
 
 ## Article
 

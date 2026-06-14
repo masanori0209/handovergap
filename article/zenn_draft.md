@@ -168,8 +168,8 @@ handovergap evaluate --compare
 | Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision |
 |---|---:|---:|---:|---:|---:|
 | naive_rag | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 |
-| hybrid_rag | 0.26 | 0.59 | 0.26 | 1.00 | 1.00 |
-| handovergap | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| hybrid_rag | 0.21 | 0.59 | 0.21 | 0.67 | 0.91 |
+| handovergap | 1.00 | 0.65 | 1.00 | 1.00 | 1.00 |
 
 この結果は、HandoverGapが本番環境でも100%正しいことを意味しません。データセットと決定的ルールを一緒に設計したMVPの整合性検査です。
 
@@ -181,11 +181,11 @@ handovergap evaluate --dataset holdout --stress-filling
 
 | Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision |
 |---|---:|---:|---:|---:|---:|
-| handovergap/provided | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| handovergap/conservative | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| handovergap/optimistic | 0.64 | 1.00 | 0.64 | 1.00 | 1.00 |
+| handovergap/provided | 1.00 | 0.67 | 1.00 | 1.00 | 1.00 |
+| handovergap/conservative | 1.00 | 0.67 | 1.00 | 0.67 | 0.67 |
+| handovergap/optimistic | 0.64 | 0.67 | 0.64 | 1.00 | 1.00 |
 
-`optimistic` profileは、曖昧な証拠をLLMが「slotが埋まっている」と楽観的に解釈する状況を模擬しています。このときTacit Gap RecallとQuestion Coverageは0.64まで落ちました。これは良い意味で、機構の弱点を隠していません。一方で、このholdoutではUnsafe Transfer PreventionとBlocked Precisionは1.00を維持しました。
+`optimistic` profileは、曖昧な証拠をLLMが「slotが埋まっている」と楽観的に解釈する状況を模擬しています。このときTacit Gap RecallとQuestion Coverageは0.64まで落ち、Unsafe Transfer Preventionも0.67に留まりました。これは良い意味で、機構の弱点を隠していません。
 
 さらにOpenAI APIを使った実LLM slot fillingも任意検証として実行しました。
 
@@ -197,9 +197,9 @@ python harness/validation/openai_slot_filling_check.py --dataset holdout --persi
 
 | Method | Scenarios | Tacit Gap Recall | Unsafe Transfer Prevention | Safe Transfer Allowance | Blocked Precision |
 |---|---:|---:|---:|---:|---:|
-| handovergap/openai-slot-fill/gpt-4.1-mini | 6 | 0.82 | 1.00 | 1.00 | 1.00 |
+| handovergap/openai-slot-fill/gpt-4.1-mini | 6 | 0.91 | 0.33 | 0.67 | 0.50 |
 
-実LLMでは、単純な`optimistic` profileよりTacit Gap Recallが改善しました。一方で詳細ログを見ると、安全なhandoverでも`needs_clarification`に寄るケースがありました。これは「危険な引き継ぎを止める」方向には効いているが、「止めすぎない」ためのslot定義や証拠粒度にはまだ改善余地がある、という示唆です。
+実LLMでは、単純な`optimistic` profileよりTacit Gap Recallが改善しました。一方でUnsafe Transfer Preventionは0.33、Blocked Precisionは0.50まで落ちました。詳細ログを見ると、LLMが契約影響や判断理由を楽観的に埋めすぎるケースと、安全なhandoverでも`needs_clarification`に寄るケースがありました。これは「slot fillingは効くが、ブロック判定ポリシーとslot定義にはまだ改善余地が大きい」という示唆です。
 
 ## PyPIから試す
 

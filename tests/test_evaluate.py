@@ -12,7 +12,8 @@ def test_evaluator_scores_handovergap_above_baselines() -> None:
     assert rows["handovergap"].scenarios >= 20
     assert rows["handovergap"].tacit_gap_recall > rows["hybrid_rag"].tacit_gap_recall
     assert rows["hybrid_rag"].tacit_gap_recall > rows["naive_rag"].tacit_gap_recall
-    assert rows["handovergap"].unsafe_transfer_prevention == 1.0
+    assert rows["handovergap"].unsafe_transfer_prevention > rows["hybrid_rag"].unsafe_transfer_prevention
+    assert rows["handovergap"].blocked_precision == 1.0
 
 
 def test_evaluate_cli_outputs_required_metrics() -> None:
@@ -38,7 +39,7 @@ def test_holdout_optimistic_slot_filling_exposes_recall_drop() -> None:
 
     assert provided.tacit_gap_recall == 1.0
     assert optimistic.tacit_gap_recall < provided.tacit_gap_recall
-    assert optimistic.unsafe_transfer_prevention == 1.0
+    assert optimistic.unsafe_transfer_prevention == provided.unsafe_transfer_prevention
     assert optimistic.safe_transfer_allowance == 1.0
 
 

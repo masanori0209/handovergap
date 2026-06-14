@@ -47,8 +47,8 @@ handovergap serve
 | 手法 | 暗黙ギャップ検出率 | 不適切転送の防止率 | 質問カバレッジ | 安全転送の許可率 | ブロック精度 |
 |---|---:|---:|---:|---:|---:|
 | naive_rag | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 |
-| hybrid_rag | 0.26 | 0.59 | 0.26 | 1.00 | 1.00 |
-| handovergap | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| hybrid_rag | 0.21 | 0.59 | 0.21 | 0.67 | 0.91 |
+| handovergap | 1.00 | 0.65 | 1.00 | 1.00 | 1.00 |
 
 未知holdoutデータと、LLMがslotを控えめ/楽観的に埋めた場合の揺れは次で確認できます。
 
@@ -58,11 +58,11 @@ handovergap evaluate --dataset holdout --stress-filling
 
 | 手法 | 暗黙ギャップ検出率 | 不適切転送の防止率 | 質問カバレッジ | 安全転送の許可率 | ブロック精度 |
 |---|---:|---:|---:|---:|---:|
-| handovergap/provided | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| handovergap/conservative | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| handovergap/optimistic | 0.64 | 1.00 | 0.64 | 1.00 | 1.00 |
+| handovergap/provided | 1.00 | 0.67 | 1.00 | 1.00 | 1.00 |
+| handovergap/conservative | 1.00 | 0.67 | 1.00 | 0.67 | 0.67 |
+| handovergap/optimistic | 0.64 | 0.67 | 0.64 | 1.00 | 1.00 |
 
-楽観的profileでは、曖昧な証拠をLLMが埋まったslotとして扱いすぎる状況を模擬しています。この場合、検出率は落ちますが、このholdoutでは不適切転送は止められています。
+楽観的profileでは、曖昧な証拠をLLMが埋まったslotとして扱いすぎる状況を模擬しています。この場合、検出率は落ち、不適切転送の防止率も `0.67` に留まります。
 
 任意のOpenAI実接続slot fillingは次で検証できます。
 
@@ -70,7 +70,7 @@ handovergap evaluate --dataset holdout --stress-filling
 python harness/validation/openai_slot_filling_check.py --dataset holdout --persist-tidb
 ```
 
-`gpt-4.1-mini` での観測結果は、暗黙ギャップ検出率 `0.82`、不適切転送の防止率 `1.00`、安全転送の許可率 `1.00`、ブロック精度 `1.00` でした。詳細は `article/openai_slot_filling_results.json` に保存されます。
+`gpt-4.1-mini` での観測結果は、暗黙ギャップ検出率 `0.91`、不適切転送の防止率 `0.33`、安全転送の許可率 `0.67`、ブロック精度 `0.50` でした。詳細は `article/openai_slot_filling_results.json` に保存されます。
 
 ## TiDBモード
 

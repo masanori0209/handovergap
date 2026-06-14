@@ -60,8 +60,8 @@ The demo defaults to Japanese and includes an English language switch. It compar
 | Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision |
 |---|---:|---:|---:|---:|---:|
 | naive_rag | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 |
-| hybrid_rag | 0.26 | 0.59 | 0.26 | 1.00 | 1.00 |
-| handovergap | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| hybrid_rag | 0.21 | 0.59 | 0.21 | 0.67 | 0.91 |
+| handovergap | 1.00 | 0.65 | 1.00 | 1.00 | 1.00 |
 
 These are deterministic results from the bundled 20-scenario dataset. The benchmark is synthetic and intentionally small; it demonstrates reproducible behavior rather than production accuracy.
 
@@ -73,11 +73,11 @@ handovergap evaluate --dataset holdout --stress-filling
 
 | Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision |
 |---|---:|---:|---:|---:|---:|
-| handovergap/provided | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| handovergap/conservative | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| handovergap/optimistic | 0.64 | 1.00 | 0.64 | 1.00 | 1.00 |
+| handovergap/provided | 1.00 | 0.67 | 1.00 | 1.00 | 1.00 |
+| handovergap/conservative | 1.00 | 0.67 | 1.00 | 0.67 | 0.67 |
+| handovergap/optimistic | 0.64 | 0.67 | 0.64 | 1.00 | 1.00 |
 
-The optimistic profile simulates an LLM over-filling ambiguous slots. It shows a real failure mode: recall drops even though unsafe transfers are still blocked in this holdout.
+The optimistic profile simulates an LLM over-filling ambiguous slots. It shows a real failure mode: recall drops, while unsafe-transfer prevention stays incomplete at `0.67`.
 
 With optional live OpenAI semantic slot filling:
 
@@ -85,7 +85,7 @@ With optional live OpenAI semantic slot filling:
 python harness/validation/openai_slot_filling_check.py --dataset holdout --persist-tidb
 ```
 
-Observed with `gpt-4.1-mini`: tacit gap recall `0.82`, unsafe transfer prevention `1.00`, safe transfer allowance `1.00`, blocked precision `1.00`. The detailed per-scenario output is saved to `article/openai_slot_filling_results.json`.
+Observed with `gpt-4.1-mini`: tacit gap recall `0.91`, unsafe transfer prevention `0.33`, safe transfer allowance `0.67`, blocked precision `0.50`. The detailed per-scenario output is saved to `article/openai_slot_filling_results.json`.
 
 ![Japanese Streamlit demo](https://raw.githubusercontent.com/masanori0209/handovergap/main/docs/assets/demo-ja.png)
 

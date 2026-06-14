@@ -31,7 +31,7 @@
 
 - [ ] Run the TestPyPI workflow
 - [ ] Install from TestPyPI in a clean environment
-- [ ] Create and publish a `v0.1.0` GitHub release
+- [ ] Create and publish a `v0.1.1` GitHub release
 - [x] Approve the protected `pypi` environment deployment
 - [x] Verify `pip install handovergap`
 

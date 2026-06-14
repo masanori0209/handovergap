@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from handovergap.schemas import ClarificationQuestion, DetectionResult, HandoverGap
-from handovergap.slot_rules import GAP_TYPE_BY_SLOT, QUESTION_BY_SLOT, ROLE_REQUIRED_SLOTS
+from handovergap.slot_rules import GAP_TYPE_BY_SLOT, HIGH_RISK_SLOTS, QUESTION_BY_SLOT, ROLE_REQUIRED_SLOTS
 from handovergap.store import InMemoryStore
 
 
@@ -34,8 +34,11 @@ class HandoverGapDetector:
             if slot in QUESTION_BY_SLOT
         ]
         transferability_score = max(0.0, 1.0 - (len(missing_slots) / max(len(required_slots), 1)))
-        status = "blocked" if scenario.unsafe_transfer_label and missing_slots else "transferable"
-        if 0 < transferability_score < 0.75 and status != "blocked":
+        if not missing_slots:
+            status = "transferable"
+        elif any(slot in HIGH_RISK_SLOTS for slot in missing_slots):
+            status = "blocked"
+        else:
             status = "needs_clarification"
 
         return DetectionResult(
@@ -51,7 +54,7 @@ class HandoverGapDetector:
 
 
 def _severity_for_slot(slot: str) -> str:
-    if slot in {"authority", "communication_status", "fallback_plan", "escalation_path", "contract_impact"}:
+    if slot in HIGH_RISK_SLOTS:
         return "HIGH"
     return "MEDIUM"
 

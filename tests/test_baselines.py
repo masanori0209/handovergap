@@ -1,4 +1,8 @@
+import inspect
+
+from handovergap.core import baselines
 from handovergap.core.baselines import HybridRAGBaseline, NaiveRAGBaseline
+from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.store import InMemoryStore
 
@@ -30,3 +34,12 @@ def test_compare_keeps_article_ready_method_order() -> None:
 
     assert [row.method for row in rows] == ["naive_rag", "hybrid_rag", "handovergap"]
     assert rows[0].tacit_gap_recall < rows[1].tacit_gap_recall < rows[2].tacit_gap_recall
+
+
+def test_predictors_do_not_read_gold_or_unsafe_labels() -> None:
+    detector_source = inspect.getsource(HandoverGapDetector.detect_scenario)
+    baseline_source = inspect.getsource(baselines)
+
+    assert "gold_gaps" not in baseline_source
+    assert "gold_questions" not in baseline_source
+    assert "unsafe_transfer_label" not in detector_source

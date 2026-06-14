@@ -24,6 +24,14 @@ ROLE_REQUIRED_SLOTS = {
     ],
 }
 
+HIGH_RISK_SLOTS = {
+    "authority",
+    "communication_status",
+    "fallback_plan",
+    "escalation_path",
+    "contract_impact",
+}
+
 GAP_TYPE_BY_SLOT = {
     "scope": "scope_gap",
     "communication_status": "communication_gap",

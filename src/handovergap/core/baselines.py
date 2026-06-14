@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from handovergap.schemas import HandoverScenario
+from handovergap.slot_rules import HIGH_RISK_SLOTS, ROLE_REQUIRED_SLOTS
 
 
 @dataclass(frozen=True)
@@ -39,13 +40,12 @@ class HybridRAGBaseline:
     method = "hybrid_rag"
 
     def predict(self, scenario: HandoverScenario) -> BaselinePrediction:
-        slots = _first_explicit_risk_slots(scenario)
-        first_gap = scenario.gold_gaps[0] if scenario.gold_gaps else None
+        slots = _first_evidence_missing_required_slot(scenario)
         return BaselinePrediction(
             method=self.method,
             gap_slots=slots,
             question_slots=slots,
-            blocked=bool(first_gap and first_gap.severity == "HIGH"),
+            blocked=bool(slots & HIGH_RISK_SLOTS),
             rationale="Adds evidence context and can flag one explicit risk, but does not fill role-required slots.",
         )
 
@@ -56,7 +56,9 @@ BASELINES: dict[str, BaselineMethod] = {
 }
 
 
-def _first_explicit_risk_slots(scenario: HandoverScenario) -> set[str]:
-    if not scenario.gold_gaps:
-        return set()
-    return {scenario.gold_gaps[0].slot_name}
+def _first_evidence_missing_required_slot(scenario: HandoverScenario) -> set[str]:
+    required_slots = ROLE_REQUIRED_SLOTS[scenario.successor_role]
+    for slot in required_slots:
+        if slot not in scenario.evidence_slots:
+            return {slot}
+    return set()
