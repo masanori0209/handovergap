@@ -61,6 +61,27 @@ handovergap schema --dialect tidb
 
 TiDB schemaは証拠、記憶、役割要件、slot fill試行、context gap、確認質問、transfer assessment、評価結果を保存します。
 
+### TiDB実接続の検証
+
+TiDB Cloudでクラスタを作成したあと、**Connect**を開き、Public接続とPython/SQLAlchemy互換の接続情報を取得します。パスワードを生成またはリセットし、ローカルでは次のように環境変数へ入れてください。
+
+```bash
+export TIDB_HOST="..."
+export TIDB_PORT="4000"
+export TIDB_USER="..."
+export TIDB_PASSWORD="..."
+export TIDB_DB_NAME="test"
+export TIDB_CA_PATH="/path/to/ca-certificates.crt"
+```
+
+その後、次を実行します。
+
+```bash
+python harness/validation/tidb_live_check.py --create-schema
+```
+
+この検証はschemaを作成し、合成memoryを1件、slot fill試行、context gap、transfer assessmentを1件ずつ保存して、件数をJSONで出力します。`.env`やTiDB認証情報はコミットしないでください。
+
 ## 制約
 
 - MVPの検出器とbaselineは決定的ルールです。

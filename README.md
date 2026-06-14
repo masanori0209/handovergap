@@ -81,6 +81,27 @@ store.create_schema()
 
 The packaged schema models source evidence, memories, role requirements, slot-fill attempts, context gaps, clarification questions, transfer assessments, and evaluation runs. Live persistence methods are available for slot-fill attempts, context gaps, and transfer assessments.
 
+### Live TiDB Validation
+
+After creating a TiDB Cloud cluster, open **Connect**, choose a public Python/SQLAlchemy-compatible connection, generate or reset the password, and export the connection values locally:
+
+```bash
+export TIDB_HOST="..."
+export TIDB_PORT="4000"
+export TIDB_USER="..."
+export TIDB_PASSWORD="..."
+export TIDB_DB_NAME="test"
+export TIDB_CA_PATH="/path/to/ca-certificates.crt"
+```
+
+Then run:
+
+```bash
+python harness/validation/tidb_live_check.py --create-schema
+```
+
+The check creates the packaged schema if needed, writes one synthetic memory, persists a slot-fill attempt, a context gap, and a transfer assessment, then prints row counts as JSON. Do not commit `.env` files or TiDB credentials.
+
 ## Python API
 
 ```python
