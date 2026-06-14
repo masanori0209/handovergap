@@ -227,8 +227,11 @@ def _inject_css() -> None:
     st.markdown(
         """
         <style>
+          [data-testid="stHeader"],
+          [data-testid="stToolbar"],
+          [data-testid="stDecoration"] { display: none; }
           .stApp { background: #fbfbfa; color: #1e2428; }
-          .block-container { max-width: 1440px; padding: 4rem 1.5rem 2.5rem; }
+          .block-container { max-width: 1440px; padding: 1.2rem 1.5rem 2.5rem; }
           .app-title { font-size: 1.7rem; font-weight: 750; padding: .35rem 0 1rem; border-bottom: 1px solid #d8dcde; }
           .app-title span { font-size: .92rem; font-weight: 450; color: #5b6368; margin-left: 1rem; }
           .memory-band { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #d8dcde; margin: .35rem 0 .75rem; }
@@ -259,7 +262,7 @@ def _inject_css() -> None:
           div[data-testid="stAlert"] { border-radius: 2px; }
           button, [data-baseweb="select"] > div { border-radius: 3px !important; }
           @media (max-width: 760px) {
-            .block-container { padding: 4rem .75rem 1.5rem; }
+            .block-container { padding: 1rem .75rem 1.5rem; }
             .app-title span { display: block; margin: .25rem 0 0; }
             .memory-band { grid-template-columns: 1fr; }
             .memory-band div + div { border-left: 0; border-top: 1px solid #d8dcde; }
