@@ -390,7 +390,7 @@ def _persist_live_result(scenario: HandoverScenario, result: Any, fill: dict[str
         return {"tidb_rows": 0, "tidb_message": str(exc)}
 
 
-def _database_url() -> str | None:
+def _database_url() -> Any | None:
     if os.getenv("HANDOVERGAP_TIDB_URL"):
         return os.getenv("HANDOVERGAP_TIDB_URL")
     required = ["TIDB_USER", "TIDB_PASSWORD", "TIDB_HOST"]
@@ -400,15 +400,13 @@ def _database_url() -> str | None:
         from sqlalchemy import URL
     except ImportError:
         return None
-    return str(
-        URL.create(
-            drivername="mysql+pymysql",
-            username=os.getenv("TIDB_USER"),
-            password=os.getenv("TIDB_PASSWORD"),
-            host=os.getenv("TIDB_HOST"),
-            port=int(os.getenv("TIDB_PORT", "4000")),
-            database=os.getenv("TIDB_DB_NAME", "test"),
-        )
+    return URL.create(
+        drivername="mysql+pymysql",
+        username=os.getenv("TIDB_USER"),
+        password=os.getenv("TIDB_PASSWORD"),
+        host=os.getenv("TIDB_HOST"),
+        port=int(os.getenv("TIDB_PORT", "4000")),
+        database=os.getenv("TIDB_DB_NAME", "test"),
     )
 
 
