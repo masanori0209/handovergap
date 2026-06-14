@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HandoverGap RAG Usage Guide</title>
+    <meta
+      name="description"
+      content="Install, run, evaluate, and demo HandoverGap RAG, a Python library for detecting tacit context gaps in handover-oriented RAG memories."
+    />
+    <style>
+      :root {
+        --ink: #182129;
+        --muted: #51606c;
+        --line: #d7e0e6;
+        --panel: #ffffff;
+        --paper: #f6f8f9;
+        --teal: #167c75;
+        --red: #c5333a;
+        --gold: #9b6a16;
+        --code: #101820;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.55;
+      }
+
+      a {
+        color: var(--teal);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      header {
+        border-bottom: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .wrap {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        min-height: 64px;
+      }
+
+      .brand {
+        font-weight: 800;
+        font-size: 18px;
+      }
+
+      .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 14px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.35fr);
+        gap: 36px;
+        align-items: center;
+        padding: 56px 0 44px;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: var(--teal);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(34px, 5vw, 58px);
+        line-height: 1.02;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        margin: 20px 0 0;
+        color: var(--muted);
+        font-size: 18px;
+        max-width: 680px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--ink);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .button.primary {
+        border-color: var(--teal);
+        background: var(--teal);
+        color: #fff;
+      }
+
+      .screenshot {
+        width: 100%;
+        height: auto;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        box-shadow: 0 16px 36px rgba(24, 33, 41, 0.08);
+      }
+
+      main {
+        padding: 24px 0 64px;
+      }
+
+      section {
+        padding: 34px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: 28px;
+        line-height: 1.18;
+      }
+
+      h3 {
+        margin: 0 0 10px;
+        font-size: 18px;
+      }
+
+      p {
+        margin: 0 0 16px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .card {
+        min-width: 0;
+        min-height: 100%;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel);
+      }
+
+      .card p:last-child,
+      .callout p:last-child {
+        margin-bottom: 0;
+      }
+
+      .kicker {
+        display: inline-block;
+        margin-bottom: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .callout {
+        padding: 18px;
+        border: 1px solid #e1d0a8;
+        border-left: 4px solid var(--gold);
+        border-radius: 6px;
+        background: #fffaf0;
+      }
+
+      pre {
+        max-width: 100%;
+        overflow-x: auto;
+        margin: 14px 0 0;
+        padding: 16px;
+        border-radius: 6px;
+        background: var(--code);
+        color: #f5f7f8;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      code {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      :not(pre) > code {
+        padding: 2px 5px;
+        border-radius: 4px;
+        background: #e9eef1;
+        color: #1a2a33;
+        font-size: 0.92em;
+      }
+
+      table {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #eef3f4;
+        font-size: 13px;
+      }
+
+      td:last-child,
+      th:last-child {
+        text-align: right;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .status {
+        color: var(--red);
+        font-weight: 800;
+      }
+
+      .small {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      footer {
+        padding: 28px 0;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        background: #fff;
+        font-size: 14px;
+      }
+
+      @media (max-width: 860px) {
+        .hero,
+        .grid,
+        .grid.two {
+          grid-template-columns: 1fr;
+        }
+
+        .nav {
+          align-items: flex-start;
+          flex-direction: column;
+          padding: 16px 0;
+        }
+
+        h1 {
+          font-size: 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap nav">
+        <div class="brand">HandoverGap RAG</div>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#install">Install</a>
+          <a href="#cli">CLI</a>
+          <a href="#demo">Demo</a>
+          <a href="#evaluation">Evaluation</a>
+          <a href="#api">Python API</a>
+          <a href="https://github.com/masanori0209/handovergap">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap hero">
+        <div>
+          <p class="eyebrow">Python library for handover-oriented RAG</p>
+          <h1>Correct memories are not always transferable.</h1>
+          <p class="lead">
+            HandoverGap detects missing tacit context in otherwise correct RAG memories,
+            checks the successor role, and blocks unsafe transfer with clarification questions.
+          </p>
+          <div class="actions">
+            <a class="button primary" href="#install">Start using it</a>
+            <a class="button" href="https://pypi.org/project/handovergap/">PyPI package</a>
+            <a class="button" href="https://github.com/masanori0209/handovergap/blob/main/README.ja.md">日本語README</a>
+          </div>
+        </div>
+        <img
+          class="screenshot"
+          src="assets/demo-ja.png"
+          alt="HandoverGap Streamlit demo showing Japanese default UI, local sample mode, and Live OpenAI plus TiDB option"
+        />
+      </div>
+
+      <div class="wrap">
+        <section id="install">
+          <h2>Install And First Run</h2>
+          <div class="grid">
+            <article class="card">
+              <span class="kicker">1. Install</span>
+              <h3>Use the latest tested release</h3>
+              <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
+              <pre><code>pip install handovergap==0.1.3</code></pre>
+            </article>
+            <article class="card">
+              <span class="kicker">2. Inspect one case</span>
+              <h3>Run the built-in demo</h3>
+              <p>See a valid memory that is unsafe to transfer to a CS successor.</p>
+              <pre><code>handovergap demo</code></pre>
+            </article>
+            <article class="card">
+              <span class="kicker">3. Measure behavior</span>
+              <h3>Compare baselines</h3>
+              <p>Run the bundled synthetic benchmark against Naive, Hybrid, and HandoverGap RAG.</p>
+              <pre><code>handovergap evaluate --compare</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section id="cli">
+          <h2>CLI Usage</h2>
+          <div class="grid two">
+            <article class="card">
+              <h3>Detect gaps for a role</h3>
+              <p>
+                `detect` checks a built-in fictional scenario against a successor role such as
+                CS, Engineer, or Sales.
+              </p>
+              <pre><code>handovergap detect --scenario S001 --role CS</code></pre>
+            </article>
+            <article class="card">
+              <h3>Evaluate slot-filling sensitivity</h3>
+              <p>
+                The holdout stress profiles simulate how semantic slot filling can under-fill or
+                over-fill required context.
+              </p>
+              <pre><code>handovergap evaluate --dataset holdout --stress-filling</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section id="demo">
+          <h2>Local And Live Demo</h2>
+          <div class="grid two">
+            <article class="card">
+              <span class="kicker">Default</span>
+              <h3>Local bilingual Streamlit demo</h3>
+              <p>
+                The UI opens in Japanese by default and can switch to English. Local sample mode
+                runs the real deterministic detector on fictional handover cases.
+              </p>
+              <pre><code>pip install "handovergap[demo]"
+handovergap serve</code></pre>
+            </article>
+            <article class="card">
+              <span class="kicker">Optional</span>
+              <h3>Live OpenAI + TiDB audit demo</h3>
+              <p>
+                Live mode asks the selected OpenAI model to fill role-required slots, runs
+                HandoverGap on those slots, and persists audit rows to TiDB.
+              </p>
+              <pre><code>pip install "handovergap[live]"
+export OPENAI_API_KEY="..."
+export TIDB_HOST="..."
+export TIDB_USER="..."
+export TIDB_PASSWORD="..."
+handovergap serve</code></pre>
+            </article>
+          </div>
+          <div class="callout" style="margin-top: 16px">
+            <p>
+              Live dependencies are optional by design. First-run usage, CI, and package import do
+              not require an OpenAI key or TiDB account.
+            </p>
+          </div>
+        </section>
+
+        <section id="evaluation">
+          <h2>Evaluation Snapshot</h2>
+          <p>
+            These are deterministic results from the bundled synthetic 20-scenario mini dataset.
+            They demonstrate reproducible behavior, not production accuracy.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Tacit Gap Recall</th>
+                <th>Unsafe Transfer Prevention</th>
+                <th>Question Coverage</th>
+                <th>Safe Transfer Allowance</th>
+                <th>Blocked Precision</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>naive_rag</td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>1.00</td>
+                <td>0.00</td>
+              </tr>
+              <tr>
+                <td>hybrid_rag</td>
+                <td>0.21</td>
+                <td>0.59</td>
+                <td>0.21</td>
+                <td>0.67</td>
+                <td>0.91</td>
+              </tr>
+              <tr>
+                <td><strong>handovergap</strong></td>
+                <td><strong>1.00</strong></td>
+                <td><strong>0.65</strong></td>
+                <td><strong>1.00</strong></td>
+                <td><strong>1.00</strong></td>
+                <td><strong>1.00</strong></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="small" style="margin-top: 14px">
+            Live gpt-5-mini with the tuned <code>gpt5_strict</code> prompt reached tacit gap recall
+            1.00, unsafe transfer prevention 0.67, safe transfer allowance 1.00, and blocked
+            precision 1.00 on the holdout protocol. See
+            <a href="https://github.com/masanori0209/handovergap/blob/main/article/results.md">results notes</a>.
+          </p>
+        </section>
+
+        <section id="api">
+          <h2>Python API</h2>
+          <div class="grid two">
+            <article class="card">
+              <h3>Run the detector in code</h3>
+              <pre><code>from handovergap import HandoverGapDetector, InMemoryStore
+
+store = InMemoryStore.from_builtin_dataset()
+detector = HandoverGapDetector(store)
+result = detector.detect(scenario_id="S001", successor_role="CS")
+
+print(result.transferability_status)
+print(result.gaps)
+print(result.questions)</code></pre>
+            </article>
+            <article class="card">
+              <h3>Prepare TiDB schema</h3>
+              <p>Print the bundled schema locally or create it through the optional TiDB store.</p>
+              <pre><code>pip install "handovergap[tidb]"
+handovergap schema --dialect tidb</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section>
+          <h2>What This Page Helps Validate</h2>
+          <div class="grid">
+            <article class="card">
+              <h3>PyPI first-run experience</h3>
+              <p>Users can install the core package and run the MVP commands without secrets.</p>
+            </article>
+            <article class="card">
+              <h3>Demo clarity</h3>
+              <p>The page shows the actual Japanese-default demo and its optional live path.</p>
+            </article>
+            <article class="card">
+              <h3>TiDB-specific learning</h3>
+              <p>TiDB is positioned as an audit store for slot attempts, gaps, and transfer decisions.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        MIT License. Repository:
+        <a href="https://github.com/masanori0209/handovergap">github.com/masanori0209/handovergap</a>
+      </div>
+    </footer>
+  </body>
+</html>

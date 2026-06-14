@@ -13,6 +13,8 @@ PyPI: https://pypi.org/project/handovergap/
 
 Latest tested release: `handovergap==0.1.3`
 
+Usage guide: https://masanori0209.github.io/handovergap/
+
 A normal RAG system may retrieve:
 
 ```text
