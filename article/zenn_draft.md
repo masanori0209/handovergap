@@ -206,6 +206,7 @@ python harness/validation/openai_slot_filling_check.py --dataset holdout --persi
 英語を主READMEとし、日本語READMEも同梱します。
 
 GitHub: https://github.com/masanori0209/handovergap
+PyPI: https://pypi.org/project/handovergap/
 
 ```bash
 pip install handovergap

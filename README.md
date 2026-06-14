@@ -9,6 +9,8 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 > Correct memories are not always transferable.
 
+PyPI: https://pypi.org/project/handovergap/
+
 A normal RAG system may retrieve:
 
 ```text
