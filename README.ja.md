@@ -200,7 +200,41 @@ handovergap audit-benchmark --dataset all --iterations 100
 | p50監査クエリlatency | `38.818 ms` |
 | p95監査クエリlatency | `574.713 ms` |
 
-生成ワークロードの詳細は [`article/tidb_workload_audit_results.md`](article/tidb_workload_audit_results.md) に保存しています。ローカル生成では100、1,000、10,000シナリオ相当の監査行数も記録しています。
+生成ワークロードの実TiDB検証では、10,000シナリオをmemory chunk込みで保存し、25,007件のblocked-transfer監査行をJOINできることを確認しました。
+
+| 項目 | 観測値 |
+|---|---:|
+| 生成シナリオ | 10,000 |
+| source events | 10,000 |
+| memory chunks | 20,000 |
+| slot-fill attempts | 56,667 |
+| context gaps | 25,007 |
+| clarification questions | 25,007 |
+| transfer assessments | 10,000 |
+| 監査クエリ結果行 | 25,007 |
+| クエリ実行回数 | 10 |
+| p50監査クエリlatency | `1374.01 ms` |
+| p95監査クエリlatency | `1478.298 ms` |
+
+無料枠のストレージを守るため、100,000シナリオではVECTOR/full-text chunkを省いた監査テーブル中心の検証を行いました。
+
+| 項目 | 観測値 |
+|---|---:|
+| 生成シナリオ | 100,000 |
+| source events | 100,000 |
+| memory chunks | 0 |
+| slot-fill attempts | 566,667 |
+| context gaps | 250,004 |
+| clarification questions | 250,004 |
+| transfer assessments | 100,000 |
+| 監査クエリ結果行 | 250,004 |
+| クエリ実行回数 | 10 |
+| p50監査クエリlatency | `14236.62 ms` |
+| p95監査クエリlatency | `15074.449 ms` |
+
+10k/100kの詳細は [`article/tidb_workload_audit_10k_results.md`](article/tidb_workload_audit_10k_results.md) と [`article/tidb_workload_audit_100k_results.md`](article/tidb_workload_audit_100k_results.md) に保存しています。これは監査経路が実DBで動くことの確認であり、負荷性能の主張ではありません。
+
+Slackで観測した引き継ぎに近い公開チャンネル上のやり取りから、原文・氏名・顧客名・URL・IDを保存せず、パターン要約だけを使った独立ラベルレビューも追加しました。結果は [`article/independent_gap_label_review.md`](article/independent_gap_label_review.md) に保存しています。
 
 ### TiDB実接続の検証
 

@@ -1,5 +1,7 @@
 """HandoverGap RAG public API."""
 
+__version__ = "0.1.6"
+
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.core.gate import ContextReadinessGate, TransferabilityGate
@@ -17,4 +19,5 @@ __all__ = [
     "SlotPolicy",
     "TiDBStore",
     "TransferabilityGate",
+    "__version__",
 ]

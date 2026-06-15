@@ -11,6 +11,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from handovergap import __version__
 from handovergap.audit import TRANSFER_AUDIT_EXPLANATION, transfer_audit_example_rows, transfer_audit_sql
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
@@ -28,6 +29,25 @@ from handovergap.workload import benchmark_generated_workload
 
 app = typer.Typer(help="Detect profile-conditioned context gaps in RAG memories.")
 console = Console(width=160)
+
+
+def _version_callback(value: bool) -> None:
+    if value:
+        console.print(__version__)
+        raise typer.Exit()
+
+
+@app.callback()
+def main(
+    version: bool = typer.Option(
+        False,
+        "--version",
+        help="Show the installed handovergap version and exit.",
+        callback=_version_callback,
+        is_eager=True,
+    ),
+) -> None:
+    """Detect profile-conditioned context gaps in RAG memories."""
 
 
 def _build_detector() -> HandoverGapDetector:

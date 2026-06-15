@@ -1,0 +1,286 @@
+{
+  "status": "ok",
+  "run_id": "WORKLOAD-20260615150408",
+  "dataset": "generated_workload",
+  "scale_label": "10k-chunked",
+  "scenario_count": 10000,
+  "include_memory_chunks": true,
+  "insert_duration_ms": 57861.309,
+  "inserted": {
+    "source_events": 10000,
+    "memory_items": 10000,
+    "memory_chunks": 20000,
+    "slot_fill_attempts": 56667,
+    "context_gaps": 25007,
+    "clarification_questions": 25007,
+    "transfer_assessments": 10000
+  },
+  "audit_query": {
+    "iterations": 10,
+    "result_rows": 25007,
+    "p50_ms": 1374.01,
+    "p95_ms": 1478.298,
+    "min_ms": 1261.745,
+    "max_ms": 1478.298
+  },
+  "local_scale": [
+    {
+      "scenarios": 100,
+      "iterations": 2,
+      "transfer_assessments_per_run": 100,
+      "context_gaps_per_run": 254,
+      "clarification_questions_per_run": 254,
+      "blocked_assessments_per_run": 24,
+      "p50_ms": 0.8302920032292604,
+      "p95_ms": 0.9383328724652529
+    },
+    {
+      "scenarios": 1000,
+      "iterations": 2,
+      "transfer_assessments_per_run": 1000,
+      "context_gaps_per_run": 2505,
+      "clarification_questions_per_run": 2505,
+      "blocked_assessments_per_run": 238,
+      "p50_ms": 7.205667207017541,
+      "p95_ms": 8.670666953548789
+    },
+    {
+      "scenarios": 10000,
+      "iterations": 2,
+      "transfer_assessments_per_run": 10000,
+      "context_gaps_per_run": 25007,
+      "clarification_questions_per_run": 25007,
+      "blocked_assessments_per_run": 2382,
+      "p50_ms": 110.3232919704169,
+      "p95_ms": 122.15754203498363
+    }
+  ],
+  "sample_rows": [
+    {
+      "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "WORKLOAD-20260615150408-W9549",
+      "subject": "Anonymized workload handover W9549",
+      "profile": "Sales",
+      "gap_type": "expectation_gap",
+      "slot_name": "customer_expectation",
+      "severity": "MEDIUM",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "WORKLOAD-20260615150408-W9549 evidence 1: generated_note",
+      "question": "顧客の期待値はどの状態に調整されていますか？"
+    },
+    {
+      "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "WORKLOAD-20260615150408-W9501",
+      "subject": "Anonymized workload handover W9501",
+      "profile": "Sales",
+      "gap_type": "expectation_gap",
+      "slot_name": "customer_expectation",
+      "severity": "MEDIUM",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "WORKLOAD-20260615150408-W9501 evidence 1: generated_note",
+      "question": "顧客の期待値はどの状態に調整されていますか？"
+    },
+    {
+      "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "WORKLOAD-20260615150408-W9531",
+      "subject": "Anonymized workload handover W9531",
+      "profile": "Sales",
+      "gap_type": "expectation_gap",
+      "slot_name": "customer_expectation",
+      "severity": "MEDIUM",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "WORKLOAD-20260615150408-W9531 evidence 1: generated_note",
+      "question": "顧客の期待値はどの状態に調整されていますか？"
+    },
+    {
+      "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "WORKLOAD-20260615150408-W9525",
+      "subject": "Anonymized workload handover W9525",
+      "profile": "Sales",
+      "gap_type": "expectation_gap",
+      "slot_name": "customer_expectation",
+      "severity": "MEDIUM",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "WORKLOAD-20260615150408-W9525 evidence 1: generated_note",
+      "question": "顧客の期待値はどの状態に調整されていますか？"
+    },
+    {
+      "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "WORKLOAD-20260615150408-W9591",
+      "subject": "Anonymized workload handover W9591",
+      "profile": "Sales",
+      "gap_type": "expectation_gap",
+      "slot_name": "customer_expectation",
+      "severity": "MEDIUM",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "WORKLOAD-20260615150408-W9591 evidence 1: generated_note",
+      "question": "顧客の期待値はどの状態に調整されていますか？"
+    },
+    {
+      "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "WORKLOAD-20260615150408-W9567",
+      "subject": "Anonymized workload handover W9567",
+      "profile": "Sales",
+      "gap_type": "expectation_gap",
+      "slot_name": "customer_expectation",
+      "severity": "MEDIUM",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "WORKLOAD-20260615150408-W9567 evidence 1: generated_note",
+      "question": "顧客の期待値はどの状態に調整されていますか？"
+    },
+    {
+      "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "WORKLOAD-20260615150408-W9585",
+      "subject": "Anonymized workload handover W9585",
+      "profile": "Sales",
+      "gap_type": "expectation_gap",
+      "slot_name": "customer_expectation",
+      "severity": "MEDIUM",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "WORKLOAD-20260615150408-W9585 evidence 1: generated_note",
+      "question": "顧客の期待値はどの状態に調整されていますか？"
+    },
+    {
+      "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "WORKLOAD-20260615150408-W9519",
+      "subject": "Anonymized workload handover W9519",
+      "profile": "Sales",
+      "gap_type": "expectation_gap",
+      "slot_name": "customer_expectation",
+      "severity": "MEDIUM",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "WORKLOAD-20260615150408-W9519 evidence 1: generated_note",
+      "question": "顧客の期待値はどの状態に調整されていますか？"
+    },
+    {
+      "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "WORKLOAD-20260615150408-W9537",
+      "subject": "Anonymized workload handover W9537",
+      "profile": "Sales",
+      "gap_type": "expectation_gap",
+      "slot_name": "customer_expectation",
+      "severity": "MEDIUM",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "WORKLOAD-20260615150408-W9537 evidence 1: generated_note",
+      "question": "顧客の期待値はどの状態に調整されていますか？"
+    },
+    {
+      "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "WORKLOAD-20260615150408-W9561",
+      "subject": "Anonymized workload handover W9561",
+      "profile": "Sales",
+      "gap_type": "expectation_gap",
+      "slot_name": "customer_expectation",
+      "severity": "MEDIUM",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "WORKLOAD-20260615150408-W9561 evidence 1: generated_note",
+      "question": "顧客の期待値はどの状態に調整されていますか？"
+    }
+  ],
+  "explain_rows": [
+    {
+      "id": "Projection_27",
+      "estRows": "22.89",
+      "task": "root",
+      "access object": "",
+      "operator info": "test.transfer_assessments.status, test.transfer_assessments.transferability_score, test.memory_items.scenario_id, test.memory_items.subject, test.transfer_assessments.profile, test.context_gaps.gap_type, test.context_gaps.slot_name, test.context_gaps.severity, test.slot_fill_attempts.status, test.slot_fill_attempts.confidence, test.source_events.title, test.clarification_questions.question"
+    },
+    {
+      "id": "└─Sort_28",
+      "estRows": "22.89",
+      "task": "root",
+      "access object": "",
+      "operator info": "test.transfer_assessments.created_at:desc, test.context_gaps.severity:desc, test.context_gaps.slot_name"
+    },
+    {
+      "id": "  └─Projection_30",
+      "estRows": "22.89",
+      "task": "root",
+      "access object": "",
+      "operator info": "test.transfer_assessments.profile, test.transfer_assessments.transferability_score, test.transfer_assessments.status, test.transfer_assessments.created_at, test.memory_items.scenario_id, test.memory_items.subject, test.context_gaps.gap_type, test.context_gaps.slot_name, test.context_gaps.severity, test.slot_fill_attempts.confidence, test.slot_fill_attempts.status, test.source_events.title, test.clarification_questions.question"
+    },
+    {
+      "id": "    └─IndexJoin_35",
+      "estRows": "22.89",
+      "task": "root",
+      "access object": "",
+      "operator info": "left outer join, inner:TableReader_32, outer key:test.slot_fill_attempts.selected_event_id, inner key:test.source_events.id, equal cond:eq(test.slot_fill_attempts.selected_event_id, test.source_events.id)"
+    },
+    {
+      "id": "      ├─IndexJoin_45(Build)",
+      "estRows": "18.31",
+      "task": "root",
+      "access object": "",
+      "operator info": "left outer join, inner:IndexLookUp_44, outer key:test.context_gaps.memory_item_id, test.context_gaps.profile, inner key:test.slot_fill_attempts.memory_item_id, test.slot_fill_attempts.profile, equal cond:eq(test.context_gaps.memory_item_id, test.slot_fill_attempts.memory_item_id), eq(test.context_gaps.profile, test.slot_fill_attempts.profile), eq(test.context_gaps.slot_name, test.slot_fill_attempts.slot_name)"
+    },
+    {
+      "id": "      │ ├─IndexHashJoin_60(Build)",
+      "estRows": "14.65",
+      "task": "root",
+      "access object": "",
+      "operator info": "left outer join, inner:IndexLookUp_57, outer key:test.context_gaps.id, inner key:test.clarification_questions.context_gap_id, equal cond:eq(test.context_gaps.id, test.clarification_questions.context_gap_id)"
+    },
+    {
+      "id": "      │ │ ├─IndexJoin_76(Build)",
+      "estRows": "11.72",
+      "task": "root",
+      "access object": "",
+      "operator info": "inner join, inner:TableReader_72, outer key:test.transfer_assessments.memory_item_id, inner key:test.memory_items.id, equal cond:eq(test.transfer_assessments.memory_item_id, test.memory_items.id)"
+    },
+    {
+      "id": "      │ │ │ ├─IndexHashJoin_118(Build)",
+      "estRows": "9.38",
+      "task": "root",
+      "access object": "",
+      "operator info": "left outer join, inner:IndexLookUp_115, outer key:test.transfer_assessments.memory_item_id, test.transfer_assessments.profile, inner key:test.context_gaps.memory_item_id, test.context_gaps.profile, equal cond:eq(test.transfer_assessments.memory_item_id, test.context_gaps.memory_item_id), eq(test.transfer_assessments.profile, test.context_gaps.profile)"
+    },
+    {
+      "id": "      │ │ │ │ ├─TableReader_128(Build)",
+      "estRows": "7.50",
+      "task": "root",
+      "access object": "",
+      "operator info": "data:Selection_127"
+    },
+    {
+      "id": "      │ │ │ │ │ └─Selection_127",
+      "estRows": "7.50",
+      "task": "cop[tikv]",
+      "access object": "",
+      "operator info": "eq(test.transfer_assessments.status, ?)"
+    },
+    {
+      "id": "      │ │ │ │ │   └─TableFullScan_126",
+      "estRows": "7500.00",
+      "task": "cop[tikv]",
+      "access object": "table:ta",
+      "operator info": "keep order:false, stats:pseudo"
+    },
+    {
+      "id": "      │ │ │ │ └─IndexLookUp_115(Probe)",
+      "estRows": "9.38",
+      "task": "root",
+      "access object": "",
+      "operator info": ""
+    }
+  ]
+}
