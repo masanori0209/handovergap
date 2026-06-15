@@ -42,6 +42,23 @@ The adversarial split is the stricter signal: recall stays low at `0.38`, while 
 
 The sanitized split adds field-realistic, anonymized CRM, incident, runbook, release-checklist, and deal-review style notes. It is still synthetic and contains no real company or customer data, but it exercises more realistic handover phrasing than the original mini dataset.
 
+A small independent reviewer-style label pass now uses public Slack keyword search only to observe handover-like patterns. Raw Slack messages, channel names, user names, customer names, URLs, IDs, and quoted text are not stored. The anonymized pattern labels are compared with the existing `sanitized` gold gaps:
+
+| Observation count | Exact matches | Mean Jaccard agreement |
+|---:|---:|---:|
+| 5 | 2 | 0.533 |
+
+The disagreement examples are useful evidence that gold gaps are partly subjective. This weakens the "synthetic labels only" concern without pretending the current labels are production ground truth.
+
+Live TiDB Cloud generated workload validation was expanded beyond the earlier 100-scenario run:
+
+| Scale | Scenarios | Memory chunks | Slot-fill attempts | Context gaps | Questions | Assessments | Audit rows | p50 query | p95 query |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 10k chunked | 10,000 | 20,000 | 56,667 | 25,007 | 25,007 | 10,000 | 25,007 | 1374.01 ms | 1478.298 ms |
+| 100k audit tables | 100,000 | 0 | 566,667 | 250,004 | 250,004 | 100,000 | 250,004 | 14236.62 ms | 15074.449 ms |
+
+The 100k run skips `memory_chunks` to avoid free-tier storage growth from VECTOR rows. It is evidence that the audit JOIN path scales to larger persisted audit tables, not a general TiDB performance benchmark.
+
 The `gpt-5-mini` live run used 1,901 input tokens and 8,136 output tokens, including 5,184 reasoning tokens, for an estimated cost of `$0.0167` at the observed GPT-5 mini pricing.
 
 The tuned `gpt5_strict` prompt improved `gpt-5-mini` by adding slot-specific acceptance criteria and a policy for treating synthetic evidence summaries as direct support when they explicitly say a required item is documented. This is useful evidence that prompt calibration matters, but it is also closer to the holdout annotation protocol. It should not be treated as independent production accuracy.
@@ -53,7 +70,7 @@ The next useful improvement is not more scenarios with the same `provided_slots`
 - derive `provided_slots` from evidence with a calibrated slot-filling model;
 - keep `gold_gaps` and `unsafe_transfer_label` evaluation-only;
 - tune the block policy without reading labels;
-- run the audit query against live TiDB with a larger anonymized workload and record p50/p95 query latency.
+- keep adding independent reviewer labels and disagreement analysis.
 
 ## Evaluation Integrity Policy
 

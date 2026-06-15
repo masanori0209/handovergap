@@ -234,19 +234,37 @@ Generated workload validation on live TiDB Cloud:
 
 | Item | Observed value |
 |---|---:|
-| Generated scenarios persisted | 100 |
-| Source events | 100 |
-| Memory chunks | 200 |
-| Slot-fill attempts | 567 |
-| Context gaps | 254 |
-| Clarification questions | 254 |
-| Transfer assessments | 100 |
-| Audit query result rows | 254 |
+| Generated scenarios persisted | 10,000 |
+| Source events | 10,000 |
+| Memory chunks | 20,000 |
+| Slot-fill attempts | 56,667 |
+| Context gaps | 25,007 |
+| Clarification questions | 25,007 |
+| Transfer assessments | 10,000 |
+| Audit query result rows | 25,007 |
 | Query iterations | 10 |
-| p50 audit query latency | `38.818 ms` |
-| p95 audit query latency | `574.713 ms` |
+| p50 audit query latency | `1374.01 ms` |
+| p95 audit query latency | `1478.298 ms` |
 
-The generated workload result is saved in [`article/tidb_workload_audit_results.md`](article/tidb_workload_audit_results.md). It also records local workload scaling for 100, 1,000, and 10,000 scenarios.
+Free-tier 100k audit-table validation also succeeded with VECTOR/full-text chunk rows disabled to avoid unnecessary storage growth:
+
+| Item | Observed value |
+|---|---:|
+| Generated scenarios persisted | 100,000 |
+| Source events | 100,000 |
+| Memory chunks | 0 |
+| Slot-fill attempts | 566,667 |
+| Context gaps | 250,004 |
+| Clarification questions | 250,004 |
+| Transfer assessments | 100,000 |
+| Audit query result rows | 250,004 |
+| Query iterations | 10 |
+| p50 audit query latency | `14236.62 ms` |
+| p95 audit query latency | `15074.449 ms` |
+
+The 10k and 100k generated workload results are saved in [`article/tidb_workload_audit_10k_results.md`](article/tidb_workload_audit_10k_results.md) and [`article/tidb_workload_audit_100k_results.md`](article/tidb_workload_audit_100k_results.md). These are live TiDB audit-path validations, not load-test claims.
+
+Independent reviewer-style labels derived from anonymized Slack-observed handover patterns are saved in [`article/independent_gap_label_review.md`](article/independent_gap_label_review.md). Raw Slack messages, names, customer names, URLs, and IDs are not stored.
 
 ### Live TiDB Validation
 

@@ -31,6 +31,7 @@ HandoverGap is an alpha readiness gate for RAG memories. The safe production pos
 - [ ] Run `handovergap report --dataset all`.
 - [ ] Run adversarial and sanitized splits.
 - [ ] Track question actionability and redundancy.
+- [ ] Compare reviewer labels against gold gaps and inspect disagreement examples.
 - [ ] Compare optional LLM slot filling across model/prompt versions.
 - [ ] Do not claim production accuracy from synthetic mini/holdout scores alone.
 

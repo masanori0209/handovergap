@@ -118,6 +118,29 @@ Observed live on TiDB Cloud with the `sanitized` split:
 
 See `article/tidb_audit_query_results.md` and `article/tidb_audit_query_results.json` for the sample rows and EXPLAIN output.
 
+## Larger Live TiDB Audit Runs
+
+The generated workload harness now supports bulk persistence for larger validation runs. These runs are evidence that the audit path can be persisted and queried on TiDB Cloud; they are not load-test claims.
+
+| Scale | Scenarios | Memory chunks | Slot-fill attempts | Context gaps | Questions | Assessments | Audit rows | p50 query | p95 query |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 10k chunked | 10,000 | 20,000 | 56,667 | 25,007 | 25,007 | 10,000 | 25,007 | 1374.01 ms | 1478.298 ms |
+| 100k audit tables | 100,000 | 0 | 566,667 | 250,004 | 250,004 | 100,000 | 250,004 | 14236.62 ms | 15074.449 ms |
+
+The 100k run intentionally skipped `memory_chunks` to avoid free-tier storage growth from VECTOR rows. It still validates the core audit JOIN across `transfer_assessments`, `memory_items`, `context_gaps`, `slot_fill_attempts`, `source_events`, and `clarification_questions`.
+
+See `article/tidb_workload_audit_10k_results.md`, `article/tidb_workload_audit_100k_results.md`, and their JSON files for sample rows and EXPLAIN output.
+
+## Independent Gap Label Review
+
+Public Slack keyword search was used only to observe handover-like communication patterns. Raw Slack messages, channel names, user names, customer names, URLs, IDs, and quoted text are not stored. The derived reviewer-style labels are compared with the existing `sanitized` gold gaps:
+
+| Observation count | Exact matches | Mean Jaccard agreement |
+|---:|---:|---:|
+| 5 | 2 | 0.533 |
+
+The disagreements are useful rather than embarrassing: they show that gold gaps are partly subjective, and that transferability evaluation needs reviewer labels in addition to generated benchmark labels. See `article/independent_gap_label_review.md`.
+
 Generated workload persisted to live TiDB Cloud:
 
 | Item | Value |

@@ -220,29 +220,55 @@ python harness/validation/tidb_audit_query_check.py --reset-schema --dataset san
 
 これは負荷試験の主張ではありません。ただし、TiDB上に保存したスロット抽出、gap、質問、transfer判断を、実際にJOINして説明できることは確認できました。
 
-さらに生成ワークロード100件もTiDBへ投入し、同じ監査クエリで追跡しました。
+さらに生成ワークロードをTiDBへ投入し、同じ監査クエリで追跡しました。まず10,000シナリオはmemory chunk込みで保存しています。
 
 ```bash
 python harness/validation/tidb_workload_audit_check.py \
   --reset-schema \
-  --scenarios 100 \
+  --scenarios 10000 \
   --iterations 10 \
-  --persist-batch-size 10 \
+  --persist-batch-size 500 \
+  --scale-label 10k-chunked \
   --local-scale 100,1000,10000
 ```
 
 | Item | Observed |
 |---|---:|
-| generated scenarios | 100 |
-| source_events | 100 |
-| memory_chunks | 200 |
-| slot_fill_attempts | 567 |
-| context_gaps | 254 |
-| clarification_questions | 254 |
-| transfer_assessments | 100 |
-| audit query result rows | 254 |
-| p50 audit query latency | 38.818 ms |
-| p95 audit query latency | 574.713 ms |
+| generated scenarios | 10,000 |
+| source_events | 10,000 |
+| memory_chunks | 20,000 |
+| slot_fill_attempts | 56,667 |
+| context_gaps | 25,007 |
+| clarification_questions | 25,007 |
+| transfer_assessments | 10,000 |
+| audit query result rows | 25,007 |
+| p50 audit query latency | 1374.01 ms |
+| p95 audit query latency | 1478.298 ms |
+
+無料枠のストレージを守るため、100,000シナリオではVECTOR/full-text chunkを省き、監査JOINに必要なテーブルを中心に検証しました。
+
+```bash
+python harness/validation/tidb_workload_audit_check.py \
+  --reset-schema \
+  --scenarios 100000 \
+  --iterations 10 \
+  --persist-batch-size 1000 \
+  --scale-label 100k-audit-tables \
+  --skip-memory-chunks
+```
+
+| Item | Observed |
+|---|---:|
+| generated scenarios | 100,000 |
+| source_events | 100,000 |
+| memory_chunks | 0 |
+| slot_fill_attempts | 566,667 |
+| context_gaps | 250,004 |
+| clarification_questions | 250,004 |
+| transfer_assessments | 100,000 |
+| audit query result rows | 250,004 |
+| p50 audit query latency | 14236.62 ms |
+| p95 audit query latency | 15074.449 ms |
 
 ローカル生成では、100件、1,000件、10,000件相当の監査行数も確認しました。
 
@@ -253,6 +279,14 @@ python harness/validation/tidb_workload_audit_check.py \
 | 10,000 | 10,000 | 25,007 | 25,007 | 2,382 |
 
 ここで強調したいのは、レイテンシの速さではなく、blocked transferを「どの記憶、どのプロファイル、どの不足slot、どの証拠、どの確認質問」までSQLで追えることです。TiDBを単なるVector Storeではなく、AI判断過程の監査DBとして使う、というこの記事の実装上のポイントです。
+
+もう一つ、合成データ中心という弱点を少しでも弱めるため、Slackで見つかる引き継ぎに近いやり取りの構造だけを使い、原文・氏名・顧客名・URL・IDを保存しない独立ラベルレビューも追加しました。5件の匿名化パターンを既存gold gapと比べると、完全一致は2件、平均Jaccardは0.533でした。
+
+| Observation count | Exact matches | Mean Jaccard agreement |
+|---:|---:|---:|
+| 5 | 2 | 0.533 |
+
+これは「gold gapが絶対に正しい」と主張するための材料ではありません。むしろ、業務引き継ぎのtransferability評価には、検索精度とは別に、reviewer labelや不一致分析が必要だと示すための材料です。
 
 監査クエリの結果例:
 

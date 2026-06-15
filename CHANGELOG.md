@@ -2,9 +2,15 @@
 
 ## Unreleased
 
-### Notes
+### Added
 
-- No unreleased changes yet.
+- `handovergap --version`.
+- An anonymized Slack-observed independent gap label review.
+- 10k and 100k live TiDB generated workload audit validation outputs.
+
+### Changed
+
+- Bulked the live TiDB workload validation harness for larger audit-table runs.
 
 ## 0.1.6 - 2026-06-15
 

@@ -20,3 +20,10 @@ def test_cli_help() -> None:
     assert "retrieve-evidence" in result.output
     assert "workload-benchmark" in result.output
     assert "serve" in result.output
+
+
+def test_cli_version() -> None:
+    result = CliRunner().invoke(app, ["--version"])
+
+    assert result.exit_code == 0
+    assert result.output.strip() == "0.1.6"

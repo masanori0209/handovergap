@@ -1,0 +1,127 @@
+{
+  "status": "ok",
+  "observed_at": "2026-06-15T15:03:13.446303+00:00",
+  "dataset": "sanitized",
+  "source_method": "Public Slack keyword search was used only to observe handover-like communication patterns. Raw Slack messages, channel names, user names, customer names, URLs, IDs, and quoted text are not stored.",
+  "privacy_filters": [
+    "replace people with role placeholders",
+    "replace customer and company names with tenant placeholders",
+    "remove URLs, account IDs, ticket IDs, campaign IDs, and dates that can identify a specific conversation",
+    "store pattern summaries and reviewer labels only"
+  ],
+  "label_protocol": "Reviewer-style labels are independent from detector runtime. They are used only for evaluation discussion and are never read by prediction code.",
+  "observation_count": 5,
+  "mean_jaccard": 0.533,
+  "exact_match_count": 2,
+  "rows": [
+    {
+      "observation_id": "SLACK-PATTERN-001",
+      "scenario_id": "R001",
+      "profile": "CS",
+      "reviewer_gap_slots": [
+        "authority",
+        "communication_status"
+      ],
+      "gold_gap_slots": [
+        "customer_facing_wording"
+      ],
+      "intersection": [],
+      "reviewer_only": [
+        "authority",
+        "communication_status"
+      ],
+      "gold_only": [
+        "customer_facing_wording"
+      ],
+      "jaccard": 0.0,
+      "pattern_summary": "A successor sees that a handover explanation may not have been given, while ownership and assignment rules are inferred from a business system rather than explicitly transferred.",
+      "reviewer_note": "Even if a workaround is known, the successor still needs to know whether stakeholders were told and who may answer."
+    },
+    {
+      "observation_id": "SLACK-PATTERN-002",
+      "scenario_id": "R002",
+      "profile": "Engineer",
+      "reviewer_gap_slots": [
+        "escalation_path",
+        "technical_constraint",
+        "trigger_for_reconsideration"
+      ],
+      "gold_gap_slots": [
+        "trigger_for_reconsideration"
+      ],
+      "intersection": [
+        "trigger_for_reconsideration"
+      ],
+      "reviewer_only": [
+        "escalation_path",
+        "technical_constraint"
+      ],
+      "gold_only": [],
+      "jaccard": 0.333,
+      "pattern_summary": "A customer-facing question is urgent, but the technical fact, customer-facing wording, and escalation boundary are mixed in a single thread.",
+      "reviewer_note": "The missing handover risk is not only retrieval; it is separating what is known, what can be said, and when to stop."
+    },
+    {
+      "observation_id": "SLACK-PATTERN-003",
+      "scenario_id": "R003",
+      "profile": "Sales",
+      "reviewer_gap_slots": [
+        "contract_impact",
+        "negotiation_status",
+        "promise_boundary"
+      ],
+      "gold_gap_slots": [
+        "contract_impact",
+        "negotiation_status",
+        "promise_boundary"
+      ],
+      "intersection": [
+        "contract_impact",
+        "negotiation_status",
+        "promise_boundary"
+      ],
+      "reviewer_only": [],
+      "gold_only": [],
+      "jaccard": 1.0,
+      "pattern_summary": "A commercial conversation refers to a requested amount or condition before the successor has the approved promise boundary.",
+      "reviewer_note": "The successor should not infer approved terms from a partial sales handoff."
+    },
+    {
+      "observation_id": "SLACK-PATTERN-004",
+      "scenario_id": "R004",
+      "profile": "CS",
+      "reviewer_gap_slots": [],
+      "gold_gap_slots": [],
+      "intersection": [],
+      "reviewer_only": [],
+      "gold_only": [],
+      "jaccard": 1.0,
+      "pattern_summary": "A prepared response includes cause, next action, apology, fallback, and escalation owner, making the memory transferable for standard support handling.",
+      "reviewer_note": "This is a negative example: if wording, scope, fallback, and escalation are explicit, HandoverGap should not force extra clarification."
+    },
+    {
+      "observation_id": "SLACK-PATTERN-005",
+      "scenario_id": "R005",
+      "profile": "Engineer",
+      "reviewer_gap_slots": [
+        "failure_modes",
+        "rationale",
+        "trigger_for_reconsideration"
+      ],
+      "gold_gap_slots": [
+        "rationale"
+      ],
+      "intersection": [
+        "rationale"
+      ],
+      "reviewer_only": [
+        "failure_modes",
+        "trigger_for_reconsideration"
+      ],
+      "gold_only": [],
+      "jaccard": 0.333,
+      "pattern_summary": "A checklist or operating rule exists, but the handover reveals that parts of the checklist were not consistently applied.",
+      "reviewer_note": "The gap is operational transferability: the next actor needs the reason, the failure mode, and the condition for reconsideration."
+    }
+  ]
+}
