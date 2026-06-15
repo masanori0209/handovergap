@@ -22,6 +22,10 @@ The key claim:
 
 > TiDB is used as a slot/evidence/gap evaluation store, not merely as a vector store.
 
+The practical TiDB-specific learning is that the retrieval result, semantic slot-fill attempt,
+missing gap, clarification question, and final transfer assessment can be queried together.
+This is what makes the system explainable after it withholds an answer.
+
 ## TiDB Usage
 
 | Feature | Usage |
@@ -68,4 +72,23 @@ Core tables:
 - clarification_questions
 - transfer_assessments
 - evaluation_runs
-- evaluation_results
+
+## Blocked Transfer Audit Query
+
+The package exposes the audit query with:
+
+```bash
+handovergap audit-sql
+```
+
+The query joins:
+
+- `transfer_assessments`
+- `memory_items`
+- `context_gaps`
+- `slot_fill_attempts`
+- `source_events`
+- `clarification_questions`
+
+It answers: if the memory was retrieved, which profile-required slot was still missing,
+what evidence was checked, and what clarification question should be asked before handover.

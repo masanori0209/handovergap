@@ -57,7 +57,7 @@ HandoverGap RAG focuses on:
 
 - transferability
 - tacit context gaps
-- successor role
+- successor responsibility profile
 - handover task
 - unsafe transfer prevention
 
@@ -69,11 +69,11 @@ This is a mini research/tooling article:
 
 - Defines valid-but-non-transferable memory
 - Defines Tacit Context Gap types
-- Implements role-conditioned slot filling
+- Implements successor-profile-conditioned slot filling
 - Provides HandoverGapBench mini
 - Compares against naive and hybrid RAG
 - Publishes PyPI package
-- Uses TiDB as a slot/evidence/gap store
+- Uses TiDB as a slot/evidence/gap audit store
 
 ## Success Criteria
 

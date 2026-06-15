@@ -8,6 +8,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from handovergap.audit import TRANSFER_AUDIT_EXPLANATION, transfer_audit_sql
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.store import InMemoryStore
@@ -116,6 +117,14 @@ def schema(
     if dialect.lower() != "tidb":
         raise typer.BadParameter("Only --dialect tidb is currently supported.")
     console.print(TiDBStore.schema_sql())
+
+
+@app.command("audit-sql")
+def audit_sql() -> None:
+    """Print the TiDB query that explains why transfers were blocked."""
+    console.print(f"[bold]Purpose:[/bold] {TRANSFER_AUDIT_EXPLANATION}")
+    console.print()
+    console.print(transfer_audit_sql())
 
 
 @app.command()

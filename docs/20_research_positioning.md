@@ -67,8 +67,8 @@ Transferable(m, r, t) =
 ## Contribution Claim
 
 1. Define valid-but-non-transferable memory.
-2. Propose role-conditioned tacit context gap detection.
-3. Implement a TiDB-backed slot/evidence/gap store.
+2. Propose successor-profile-conditioned tacit context gap detection.
+3. Implement a TiDB-backed slot/evidence/gap audit store with blocked-transfer SQL.
 4. Provide HandoverGapBench mini and baseline comparison.
 
 Avoid claiming a fully general or production-ready solution.

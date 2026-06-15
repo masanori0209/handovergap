@@ -5,4 +5,5 @@
 - 問題は「情報が正しいか」だけではなく、「他者が運用できるか」。
 - HandoverGap RAGは、引き継ぎ先の責任範囲ごとに不足する暗黙前提を検出する。
 - TiDBをVector Storeではなく、スロット、証拠、gapの監査ストアとして使う。
+- TiDB上の監査SQLで、blocked判断から不足スロット、証拠、確認質問まで追跡できる。
 - Naive RAGは答える。HandoverGap RAGは、足りない前提を聞き返す。

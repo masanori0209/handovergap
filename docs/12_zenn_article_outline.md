@@ -11,7 +11,7 @@
 ## 例: 「今回だけCSV」
 
 - Naive RAGはそのまま答える
-- でもCSが引き継ぐには情報が足りない
+- でも顧客対応を引き継ぐには情報が足りない
 
 ## valid-but-non-transferable memory
 
@@ -33,17 +33,18 @@
 ## HandoverGap RAG
 
 - memory type classification
-- successor role requirements
-- slot filling
+- successor responsibility profile requirements
+- semantic slot filling
 - evidence retrieval
 - gap detection
 - clarification questions
 
 ## TiDBを使う理由
 
-- Vector Storeではなくslot/evidence/gap store
+- Vector Storeではなくスロット、証拠、gapの監査ストア
 - SQL + Vector + Full-text + JSON + Transaction
-- slot filling processを保存できる
+- スロット抽出の過程を保存できる
+- blocked transferから不足スロット、証拠、確認質問までJOINして追える
 
 ## 実装
 
@@ -76,19 +77,20 @@
 
 ```bash
 pip install handovergap
-handovergap detect --sample S001 --role CS
-handovergap evaluate
+handovergap detect --scenario S001 --role CS
+handovergap evaluate --compare
+handovergap audit-sql
 ```
 
 ## 限界
 
 - gold gap annotation is subjective
-- role requirements need domain tuning
-- LLM-based slot filling can be unstable
+- handover profile requirements need organization-specific tuning
+- LLM-based semantic slot filling can be unstable
 - privacy and access control are necessary
 
 ## まとめ
 
 - RAGは正しい情報を返しても、引き継ぎ可能とは限らない
-- HandoverGap RAGは受け手ごとに不足文脈を検出する
-- TiDBはslot/evidence/gapを管理する基盤として使える
+- HandoverGap RAGは引き継ぎ先の責任範囲ごとに不足文脈を検出する
+- TiDBはスロット、証拠、gapを監査する基盤として使える

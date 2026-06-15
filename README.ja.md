@@ -5,7 +5,7 @@
 
 [English README](README.md)
 
-最新確認済みリリース: `handovergap==0.1.3`
+最新確認済みリリース: `handovergap==0.1.4`
 
 使い方ページ: https://masanori0209.github.io/handovergap/
 
@@ -20,6 +20,22 @@ A社は今回だけCSVで対応し、APIは次フェーズにする
 この記憶は正しくても、顧客対応を引き継ぐ後任が安全に回答するには、顧客への説明状況、適用範囲、回答権限、代替手段、エスカレーション先が不足している可能性があります。
 
 HandoverGapは引き継ぎプロファイル条件付きスロット検査を行い、不安全な転送を止め、確認質問を生成します。現在のMVPでは `CS` / `Engineer` / `Sales` を同梱データセット用のプリセットとして使っていますが、これは特定部門専用という意味ではなく、後任の責任範囲ごとに必要な前提が変わることを示す例です。
+
+## HandoverGapの良さ
+
+| 方式 | 見ているもの | 取りこぼしやすいもの |
+|---|---|---|
+| Naive RAG | 関連する記憶を返す | 後任が安全に使えるか |
+| Hybrid RAG | 関連証拠やリスク警告を足す | 引き継ぎプロファイルごとの不足前提 |
+| 一般的なContext Engineering | promptや文脈の渡し方を改善する | なぜ回答を止めたかの監査証跡 |
+| HandoverGap RAG | 回答前に必須スロットを検査する | 本番利用には組織ごとのannotation調整が必要 |
+
+持ち帰りポイントは4つです。
+
+1. 正しさと引き継ぎ可能性は別に測る。
+2. 後任の責任範囲ごとに必須スロットを定義する。
+3. 不足情報を補完せず、確認質問へ変換する。
+4. スロット抽出、gap、質問、transfer判断をTiDBに残す。
 
 ## クイックスタート
 
@@ -99,6 +115,14 @@ handovergap schema --dialect tidb
 ```
 
 TiDB schemaは証拠、記憶、役割要件、スロット抽出試行、context gap、確認質問、transfer assessment、評価結果を保存します。
+
+TiDBの価値はVector検索だけではありません。HandoverGapでは、回答を止めた理由をSQLで追えるように、判断過程を1つの監査ストアへ残します。
+
+```bash
+handovergap audit-sql
+```
+
+このクエリは `transfer_assessments`、`memory_items`、`context_gaps`、`slot_fill_attempts`、`source_events`、`clarification_questions` をJOINし、「記憶は取得できたが、どの必須スロットが不足し、どの証拠を確認し、何を質問すべきか」を追跡します。
 
 ### TiDB実接続の検証
 

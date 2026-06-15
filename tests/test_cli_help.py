@@ -12,4 +12,5 @@ def test_cli_help() -> None:
     assert "detect" in result.output
     assert "evaluate" in result.output
     assert "schema" in result.output
+    assert "audit-sql" in result.output
     assert "serve" in result.output

@@ -7,8 +7,8 @@ If the implementation only asks an LLM "what is missing?", it is weak.
 Mitigation:
 
 - Use memory type schemas
-- Use successor role requirements
-- Use slot filling
+- Use successor responsibility profile requirements
+- Use semantic slot filling
 - Persist slot fill attempts
 - Compare baselines
 
@@ -30,7 +30,7 @@ Then show why it is insufficient for CS.
 
 Mitigation:
 
-Show TiDB as slot/evidence/gap store.
+Show TiDB as a slot/evidence/gap audit store.
 
 Include:
 

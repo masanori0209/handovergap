@@ -59,10 +59,10 @@ Do not compete on "I built a RAG app."
 Compete on:
 
 - valid-but-non-transferable memory
-- role-conditioned tacit context gaps
+- successor-profile-conditioned tacit context gaps
 - HandoverGapBench mini
 - CLI + evaluate command
-- TiDB-backed slot/evidence/gap store
+- TiDB-backed slot/evidence/gap audit store
 
 ## Required to Beat PyPI Competitors
 

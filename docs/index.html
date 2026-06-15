@@ -306,6 +306,7 @@
           <a href="#install">Install</a>
           <a href="#cli">CLI</a>
           <a href="#demo">Demo</a>
+          <a href="#audit">TiDB Audit</a>
           <a href="#evaluation">Evaluation</a>
           <a href="#api">Python API</a>
           <a href="https://github.com/masanori0209/handovergap">GitHub</a>
@@ -343,7 +344,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.3</code></pre>
+              <pre><code>pip install handovergap==0.1.4</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -382,6 +383,41 @@
           </div>
         </section>
 
+        <section id="positioning">
+          <h2>What It Adds To RAG</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Approach</th>
+                <th>Optimizes</th>
+                <th>Misses</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Naive RAG</td>
+                <td>Relevant memory retrieval</td>
+                <td>Whether a successor can safely act</td>
+              </tr>
+              <tr>
+                <td>Hybrid RAG</td>
+                <td>Evidence and risk warnings</td>
+                <td>Profile-specific missing context</td>
+              </tr>
+              <tr>
+                <td>Context engineering</td>
+                <td>Better prompt and context packaging</td>
+                <td>A durable audit trail for withheld answers</td>
+              </tr>
+              <tr>
+                <td><strong>HandoverGap</strong></td>
+                <td>Profile-required slot checks before answering</td>
+                <td>Production use still needs organization-specific annotation</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
         <section id="demo">
           <h2>Local And Live Demo</h2>
           <div class="grid two">
@@ -399,7 +435,7 @@ handovergap serve</code></pre>
               <span class="kicker">Optional</span>
               <h3>Live OpenAI + TiDB audit demo</h3>
               <p>
-                Live mode asks the selected OpenAI model to fill role-required slots, runs
+                Live OpenAI + TiDB mode asks the selected OpenAI model to fill profile-required slots, runs
                 HandoverGap on those slots, and persists audit rows to TiDB.
               </p>
               <pre><code>pip install "handovergap[live]"
@@ -416,6 +452,22 @@ handovergap serve</code></pre>
               not require an OpenAI key or TiDB account.
             </p>
           </div>
+        </section>
+
+        <section id="audit">
+          <h2>TiDB Audit Query</h2>
+          <p>
+            TiDB is used as more than a vector store. HandoverGap stores the decision path so a
+            blocked answer can be explained across SQL rows, vector-backed evidence, JSON retrieval
+            metadata, gaps, and questions.
+          </p>
+          <pre><code>handovergap audit-sql</code></pre>
+          <p>
+            The generated SQL joins <code>transfer_assessments</code>, <code>memory_items</code>,
+            <code>context_gaps</code>, <code>slot_fill_attempts</code>, <code>source_events</code>,
+            and <code>clarification_questions</code>. It answers: which required slot was missing,
+            what evidence was checked, and what should be asked before handover.
+          </p>
         </section>
 
         <section id="evaluation">
@@ -507,7 +559,7 @@ handovergap schema --dialect tidb</code></pre>
             </article>
             <article class="card">
               <h3>TiDB-specific learning</h3>
-              <p>TiDB is positioned as an audit store for slot attempts, gaps, and transfer decisions.</p>
+              <p>TiDB is used as a single audit store for slot attempts, evidence, gaps, questions, and transfer decisions.</p>
             </article>
           </div>
         </section>

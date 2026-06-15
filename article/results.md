@@ -85,3 +85,7 @@ Observed after the `0.1.3` patch:
 | Existing HandoverGap tables | 11/11 present |
 | Live demo OpenAI run | `gpt-5-mini` succeeded |
 | Live demo TiDB persistence | 8 rows inserted |
+
+## TiDB Audit Query
+
+`handovergap audit-sql` prints the packaged blocked-transfer audit query. It joins `transfer_assessments`, `memory_items`, `context_gaps`, `slot_fill_attempts`, `source_events`, and `clarification_questions` so a blocked result can be explained from the transfer decision back to missing profile-required slots, checked evidence, and generated questions.

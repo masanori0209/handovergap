@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.3`
+Latest tested release: `handovergap==0.1.4`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -29,6 +29,22 @@ The statement can be correct while still being unsafe for a successor who must a
 - what fallback or escalation path to use.
 
 HandoverGap performs successor-profile-conditioned slot checks, blocks unsafe transfer, and generates clarification questions. The packaged dataset uses Support, Engineering, and Sales handover profiles as examples; the thesis is not limited to those business functions.
+
+## What HandoverGap Adds
+
+| Approach | What it optimizes | What it misses |
+|---|---|---|
+| Naive RAG | Return a relevant memory | Whether a successor can safely act on it |
+| Hybrid RAG | Add related evidence or risk warnings | Profile-specific missing context |
+| General context engineering | Better prompts and context packaging | A durable audit trail for why an answer was withheld |
+| HandoverGap RAG | Check profile-required slots before answering | Production tuning still needs real organizational annotation |
+
+The practical pattern is:
+
+1. Treat correctness and transferability as separate checks.
+2. Define required slots per successor responsibility profile.
+3. Do not invent missing context; turn missing slots into questions.
+4. Store the slot attempts, gaps, questions, and transfer decision so the stop reason is explainable.
 
 ## Quickstart
 
@@ -64,7 +80,7 @@ pip install "handovergap[live]"
 handovergap serve
 ```
 
-Set `OPENAI_API_KEY` plus either `HANDOVERGAP_TIDB_URL` or the `TIDB_HOST` / `TIDB_USER` / `TIDB_PASSWORD` environment variables. In **Live OpenAI + TiDB** mode, the app asks the selected model to fill role-required slots, runs HandoverGap on those filled slots, and persists slot-fill attempts, context gaps, and transfer assessments to TiDB.
+Set `OPENAI_API_KEY` plus either `HANDOVERGAP_TIDB_URL` or the `TIDB_HOST` / `TIDB_USER` / `TIDB_PASSWORD` environment variables. In **Live OpenAI + TiDB** mode, the app asks the selected model to fill profile-required slots, runs HandoverGap on those filled slots, and persists slot-fill attempts, context gaps, and transfer assessments to TiDB.
 
 In the current MVP, `CS`, `Engineer`, and `Sales` are built-in role profiles used to demonstrate different successor responsibilities. They are not meant to imply that HandoverGap only works for those departments; custom role/slot taxonomies are the natural extension point beyond the packaged benchmark.
 
@@ -124,6 +140,14 @@ store.create_schema()
 
 The packaged schema models source evidence, memories, role requirements, slot-fill attempts, context gaps, clarification questions, transfer assessments, and evaluation runs. Live persistence methods are available for slot-fill attempts, context gaps, transfer assessments, and evaluation runs.
 
+The TiDB-specific value is not only vector search. HandoverGap stores the whole decision path so a blocked answer can be traced with SQL:
+
+```bash
+handovergap audit-sql
+```
+
+That query joins `transfer_assessments`, `memory_items`, `context_gaps`, `slot_fill_attempts`, `source_events`, and `clarification_questions`. It answers the operational question: “this memory was retrieved, so exactly which required slot was missing, what evidence was checked, and what should we ask before handing it over?”
+
 ### Live TiDB Validation
 
 After creating a TiDB Cloud cluster, open **Connect**, choose a public Python/SQLAlchemy-compatible connection, generate or reset the password, and export the connection values locally:
@@ -174,7 +198,7 @@ python3 -m venv .venv
 - Slot-filling stress profiles simulate LLM variance; they are not a replacement for a live LLM evaluation.
 - Live OpenAI slot filling is optional and not required for first-run usage.
 - Live OpenAI slot filling is model-sensitive; current holdout results differ materially between `gpt-4.1-mini` and `gpt-5-mini`.
-- The Streamlit demo uses fictional handover cases. Live mode exercises OpenAI slot filling and TiDB audit persistence, but it is still a local demo rather than a production retrieval service.
+- The Streamlit demo uses fictional handover cases. Live OpenAI + TiDB mode exercises OpenAI slot filling and TiDB audit persistence, but it is still a local demo rather than a production retrieval service.
 - Semantic equivalence scoring for generated questions is not implemented in the MVP.
 - Live TiDB integration requires the optional `tidb` extra and a configured database.
 

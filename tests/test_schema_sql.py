@@ -30,6 +30,17 @@ def test_tidb_schema_models_slot_evidence_gap_workflow() -> None:
     assert "retrieved_event_ids JSON" in schema
 
 
+def test_tidb_transfer_audit_sql_joins_decision_to_evidence() -> None:
+    query = TiDBStore.transfer_audit_sql()
+
+    assert "FROM transfer_assessments ta" in query
+    assert "JOIN memory_items mi" in query
+    assert "LEFT JOIN context_gaps cg" in query
+    assert "LEFT JOIN slot_fill_attempts sfa" in query
+    assert "LEFT JOIN clarification_questions cq" in query
+    assert "WHERE ta.status = 'blocked'" in query
+
+
 def test_tidb_schema_can_be_split_for_transactional_install() -> None:
     statements = _split_sql_statements(TiDBStore.schema_sql())
 

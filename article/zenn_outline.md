@@ -38,12 +38,14 @@
 - evidence retrieval
 - gap detection
 - clarification questions
+- answer-before gate
 
 ## TiDBを使う理由
 
 - Vector Storeではなくスロット、証拠、gapの監査ストア
 - SQL + Vector + Full-text + JSON + Transaction
 - スロット抽出の過程を保存できる
+- blocked transferから不足スロット、証拠、確認質問までJOINして追える
 
 ## 実装
 
@@ -71,6 +73,7 @@
 - Tacit Gap Recall
 - Unsafe Transfer Prevention
 - Clarification Question Coverage
+- 失敗も含めてtransferability-specific metricsの必要性として扱う
 
 ## PyPI公開
 

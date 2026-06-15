@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from importlib import resources
 from typing import Any
 
+from handovergap.audit import transfer_audit_sql
+
 
 class TiDBDependencyError(RuntimeError):
     """Raised when a live TiDB operation is requested without the optional extra."""
@@ -23,6 +25,10 @@ class TiDBStore:
     @staticmethod
     def schema_sql() -> str:
         return resources.files("handovergap.data").joinpath("schema.sql").read_text()
+
+    @staticmethod
+    def transfer_audit_sql() -> str:
+        return transfer_audit_sql()
 
     def create_engine(self, **kwargs: Any) -> Any:
         sqlalchemy = _load_sqlalchemy()

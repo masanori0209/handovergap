@@ -97,7 +97,7 @@ COPY = {
         "gap_check": "Role gap check",
         "persist": "TiDB audit store",
         "direct_answer": "Answering from retrieved memory alone misses tacit prerequisites.",
-        "evidence_answer": "Adding evidence still does not exhaust role-required slots.",
+        "evidence_answer": "Adding evidence still does not exhaust profile-required slots.",
         "handover_answer": "Checks successor-required slots and withholds unsafe handovers.",
         "answer": "Result",
         "evidence": "Retrieved evidence",

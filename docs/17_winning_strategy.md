@@ -56,10 +56,10 @@ Correctness != Transferability
    valid-but-non-transferable memory
 
 2. Method
-   role-conditioned slot filling
+   successor-profile-conditioned slot filling
 
 3. Infrastructure
-   TiDB-backed slot/evidence/gap store
+   TiDB-backed slot/evidence/gap audit store
 
 4. Benchmark
    HandoverGapBench mini

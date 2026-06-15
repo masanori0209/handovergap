@@ -46,7 +46,7 @@ class HybridRAGBaseline:
             gap_slots=slots,
             question_slots=slots,
             blocked=bool(slots & HIGH_RISK_SLOTS),
-            rationale="Adds evidence context and can flag one explicit risk, but does not fill role-required slots.",
+            rationale="Adds evidence context and can flag one explicit risk, but does not fill profile-required slots.",
         )
 
 

@@ -20,8 +20,8 @@ Enable users to run:
 
 ```bash
 pip install handovergap
-handovergap detect --sample S001 --role CS
-handovergap evaluate
+handovergap detect --scenario S001 --role CS
+handovergap evaluate --compare
 handovergap serve
 ```
 
@@ -56,14 +56,13 @@ dependencies = [
   "typer>=0.12",
   "pydantic>=2",
   "rich>=13",
-  "sqlalchemy>=2",
-  "pymysql>=1",
-  "python-dotenv>=1",
 ]
 
 [project.optional-dependencies]
 openai = ["openai>=1"]
 demo = ["streamlit>=1.30"]
+tidb = ["sqlalchemy>=2", "pymysql>=1", "python-dotenv>=1"]
+live = ["streamlit>=1.30", "openai>=1", "sqlalchemy>=2", "pymysql>=1", "python-dotenv>=1"]
 dev = ["pytest>=8", "ruff>=0.5", "mypy>=1", "build>=1", "twine>=5"]
 
 [project.scripts]
@@ -84,6 +83,7 @@ handovergap = "handovergap.cli:app"
 
 - TiDB store
 - schema command
+- audit-sql command
 - ingest command
 - Streamlit demo
 

@@ -1,6 +1,6 @@
 {
   "name": "HandoverGapBench holdout",
-  "annotation_protocol": "Two synthetic reviewers labeled missing role-required slots independently; adjudicated gold gaps are stored in gold_gaps.",
+  "annotation_protocol": "Two synthetic reviewers labeled missing profile-required slots independently; adjudicated gold gaps are stored in gold_gaps.",
   "scenarios": [
     {
       "scenario_id": "U001",
