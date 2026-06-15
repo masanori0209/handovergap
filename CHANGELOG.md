@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Notes
+
+- No unreleased changes yet.
+
+## 0.1.7 - 2026-06-16
+
 ### Added
 
 - `handovergap --version`.

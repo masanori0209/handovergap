@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.6`
+Latest tested release: `handovergap==0.1.7`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
