@@ -20,7 +20,7 @@ Add a small `TransferabilityGate` public API that existing RAG pipelines can cal
 - [x] `.venv/bin/pytest`
 - [x] `.venv/bin/handovergap detect --scenario S001 --profile CS`
 - [x] `.venv/bin/handovergap evaluate --compare`
-- [x] direct `TransferabilityGate().check(...)` import smoke
+- [x] direct `TransferabilityGate().check(...)` import check
 
 ## Evaluation Integrity
 

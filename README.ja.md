@@ -166,7 +166,7 @@ handovergap audit-benchmark --dataset all --iterations 100
 
 `audit-benchmark` は、同梱シナリオから監査行をローカル生成し、行数、blocked件数、頻出不足スロット、p50/p95実行時間を表示します。これはTiDBクエリレイテンシの主張ではなく、TiDBに保存・照会する監査ワークロードの規模を見るための実測です。
 
-実TiDB Cloudでのblocked-transfer監査クエリのスモーク結果:
+実TiDB Cloudでのblocked-transfer監査クエリの検証結果:
 
 | 項目 | 観測値 |
 |---|---:|
@@ -182,7 +182,7 @@ handovergap audit-benchmark --dataset all --iterations 100
 | p50監査クエリlatency | `48.408 ms` |
 | p95監査クエリlatency | `1510.413 ms` |
 
-これはTiDB Cloud上の10 iterationスモーク実測であり、負荷試験の主張ではありません。p95にはcold/クラウド側の揺れが含まれるため、性能ベンチではなく監査パスが実DBで動く証拠として扱います。詳細は [`article/tidb_audit_query_results.md`](article/tidb_audit_query_results.md) に保存しています。
+これはTiDB Cloud上の10 iteration実DB検証であり、負荷試験の主張ではありません。p95にはcold/クラウド側の揺れが含まれるため、性能ベンチではなく監査パスが実DBで動く証拠として扱います。詳細は [`article/tidb_audit_query_results.md`](article/tidb_audit_query_results.md) に保存しています。
 
 ### TiDB実接続の検証
 

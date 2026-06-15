@@ -4,7 +4,7 @@ Date: 2026-06-15
 
 ## Plan
 
-Close the remaining live TiDB evidence gap without increasing free-tier usage. Use the smallest live validation path: one persistence smoke check and one sanitized audit-query smoke check.
+Close the remaining live TiDB evidence gap without increasing free-tier usage. Use the smallest live validation path: one persistence check and one sanitized audit-query check.
 
 Winning filter:
 
@@ -18,7 +18,7 @@ Winning filter:
 - Added `--reset-schema` to `harness/validation/tidb_live_check.py`.
 - Added `--reset-schema` to `harness/validation/tidb_audit_query_check.py`.
 - Re-ran live TiDB validation with the current schema.
-- Updated docs and article results with the latest smoke metrics.
+- Updated docs and article results with the latest live validation metrics.
 
 ## Observe
 
@@ -39,7 +39,7 @@ The first live run failed because the existing TiDB database still had old table
 
 ## Reflect
 
-The high p95 should not be framed as TiDB latency performance. It is useful as honest smoke evidence that the SQL audit path works on live TiDB Cloud. The more important implementation insight is that alpha schema drift must be handled explicitly when validating against a reused cloud database.
+The high p95 should not be framed as TiDB latency performance. It is useful as honest live validation evidence that the SQL audit path works on TiDB Cloud. The more important implementation insight is that alpha schema drift must be handled explicitly when validating against a reused cloud database.
 
 ## Update Context
 

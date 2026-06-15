@@ -76,7 +76,7 @@ The tuned `gpt5_strict` prompt used 4,351 input tokens and 8,803 output tokens, 
 
 These are results on small synthetic benchmarks. The holdout split, slot-filling stress profiles, and live OpenAI check expose real limitations, but they are still not a substitute for independent real-world annotation or online production validation.
 
-## Live Demo Smoke Check
+## Live Demo Validation
 
 The Streamlit demo has two modes and defaults to Japanese copy:
 

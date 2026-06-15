@@ -212,7 +212,7 @@ handovergap workload-benchmark --scenarios 1000 --iterations 5
 
 This reports local materialization counts and p50/p95 runtime for generated synthetic scenarios. It is not a live TiDB load test.
 
-Live TiDB Cloud smoke result for the blocked-transfer audit query:
+Live TiDB Cloud validation result for the blocked-transfer audit query:
 
 | Item | Observed value |
 |---|---:|
@@ -228,7 +228,7 @@ Live TiDB Cloud smoke result for the blocked-transfer audit query:
 | p50 audit query latency | `48.408 ms` |
 | p95 audit query latency | `1510.413 ms` |
 
-This is a live TiDB Cloud smoke result over 10 iterations, not a load-test claim. The p95 includes cold/variable cloud latency and should be read as proof of the audit path, not as a performance benchmark. The detailed output is saved in [`article/tidb_audit_query_results.md`](article/tidb_audit_query_results.md).
+This is a live TiDB Cloud validation result over 10 iterations, not a load-test claim. The p95 includes cold/variable cloud latency and should be read as proof that the audit path runs on a real database, not as a performance benchmark. The detailed output is saved in [`article/tidb_audit_query_results.md`](article/tidb_audit_query_results.md).
 
 ### Live TiDB Validation
 

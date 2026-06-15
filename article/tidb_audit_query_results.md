@@ -8,7 +8,7 @@
 - p50 latency: `48.408 ms`
 - p95 latency: `1510.413 ms`
 
-This is a live TiDB Cloud smoke result for the blocked-transfer audit query, not a load-test claim.
+This is a live TiDB Cloud validation result for the blocked-transfer audit query, not a load-test claim.
 
 ## Inserted Rows
 

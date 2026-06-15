@@ -340,7 +340,7 @@ def _render_markdown(result: dict[str, Any]) -> str:
         f"- p50 latency: `{result['audit_query']['p50_ms']} ms`",
         f"- p95 latency: `{result['audit_query']['p95_ms']} ms`",
         "",
-        "This is a live TiDB Cloud smoke result for the blocked-transfer audit query, not a load-test claim.",
+        "This is a live TiDB Cloud validation result for the blocked-transfer audit query, not a load-test claim.",
         "",
         "## Inserted Rows",
         "",
