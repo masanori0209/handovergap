@@ -67,7 +67,7 @@ The tuned `gpt5_strict` prompt used 4,351 input tokens and 8,803 output tokens, 
 
 - `naive_rag` returns retrieved memories without checking transferability.
 - `hybrid_rag` can identify one explicit risk and blocks only when that risk is high severity.
-- `handovergap` checks every slot required by the successor responsibility profile.
+- `handovergap` checks every slot required by the selected profile and task context.
 - `handovergap/optimistic` simulates an LLM over-filling ambiguous slots; recall drops because some truly missing slots are treated as filled.
 - Live OpenAI semantic slot filling is model-sensitive. `gpt-4.1-mini` improves recall versus the optimistic simulation, while the first `gpt-5-mini` prompt drops recall to 0.45. A model-specific strict-evidence prompt raises `gpt-5-mini` recall to 1.00 on this holdout split by preventing optimistic filling of ambiguous slots.
 - The strict prompt still over-asks in at least one safe case (`U006`: `timeline_confidence`). Current headline metrics punish unsafe blocking, but do not fully penalize unnecessary clarification.
@@ -113,7 +113,7 @@ Observed live on TiDB Cloud with the `sanitized` split:
 | Transfer assessments | 6 |
 | Audit query result rows | 7 |
 | Query iterations | 30 |
-| p50 audit query latency | `22.166 ms` |
-| p95 audit query latency | `30.117 ms` |
+| p50 audit query latency | `48.408 ms` |
+| p95 audit query latency | `1510.413 ms` |
 
 See `article/tidb_audit_query_results.md` and `article/tidb_audit_query_results.json` for the sample rows and EXPLAIN output.

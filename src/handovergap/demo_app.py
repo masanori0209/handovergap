@@ -13,15 +13,15 @@ from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.schemas import EvidenceEvent, HandoverScenario
 from handovergap.semantic_slot_filling import fill_slots_with_openai, usage_summary
-from handovergap.slot_rules import ROLE_REQUIRED_SLOTS
+from handovergap.slot_rules import PROFILE_REQUIRED_SLOTS
 from handovergap.store import InMemoryStore
 
 COPY = {
     "日本語": {
-        "thesis": "正しい記憶を、後任が安全に使える形へ検査する。",
+        "thesis": "正しい記憶を、特定プロファイルが安全に使える形へ検査する。",
         "scenario": "ケース",
-        "role": "引き継ぎプロファイル",
-        "role_note": "CS/技術/商談はデモ用プリセットです。特定業界ではなく、後任の責任範囲ごとに必要な前提を変える例です。",
+        "role": "プロファイル",
+        "role_note": "CS/技術/商談はデモ用プリセットです。特定業界ではなく、プロファイルごとに必要な前提を変える例です。",
         "mode": "実行モード",
         "model": "OpenAIモデル",
         "prompt_profile": "プロンプト設定",
@@ -29,15 +29,15 @@ COPY = {
         "live": "実LLM + TiDB",
         "run_live": "実LLMでスロット抽出してTiDBへ保存",
         "memory": "取得された記憶",
-        "task": "後任のタスク",
-        "pipeline": "RAG引き継ぎパイプライン",
+        "task": "タスク文脈",
+        "pipeline": "RAG準備度チェック",
         "retrieved": "記憶の取得",
         "slot_fill": "意味的スロット抽出",
         "gap_check": "役割別ギャップ検査",
         "persist": "TiDB監査保存",
         "direct_answer": "取得記憶だけで回答すると、欠けた前提を見落とします。",
         "evidence_answer": "関連証拠を添えても、プロファイルごとの必須スロットは残ります。",
-        "handover_answer": "後任に必要なスロットを検査し、不足があれば回答を止めます。",
+        "handover_answer": "プロファイルに必要なスロットを検査し、不足があれば回答を止めます。",
         "answer": "処理結果",
         "evidence": "検索された証拠",
         "status": "転送可否",
@@ -79,10 +79,10 @@ COPY = {
         "local_missing": "ローカルサンプルでは不足",
     },
     "English": {
-        "thesis": "Checks whether correct memory is safe for a successor to use.",
+        "thesis": "Checks whether correct memory is safe for a specific profile to use.",
         "scenario": "Case",
-        "role": "Handover profile",
-        "role_note": "Support, engineering, and sales are demo presets. They are examples of successor responsibility profiles, not a fixed industry taxonomy.",
+        "role": "Profile",
+        "role_note": "Support, engineering, and sales are demo presets. They are examples of profile-specific readiness checks, not a fixed industry taxonomy.",
         "mode": "Run mode",
         "model": "OpenAI model",
         "prompt_profile": "Prompt profile",
@@ -90,15 +90,15 @@ COPY = {
         "live": "Live OpenAI + TiDB",
         "run_live": "Run live slot filling and persist to TiDB",
         "memory": "Retrieved memory",
-        "task": "Successor task",
-        "pipeline": "RAG handover pipeline",
+        "task": "Task context",
+        "pipeline": "RAG readiness pipeline",
         "retrieved": "Retrieved memory",
         "slot_fill": "Semantic slot filling",
-        "gap_check": "Role gap check",
+        "gap_check": "Profile gap check",
         "persist": "TiDB audit store",
         "direct_answer": "Answering from retrieved memory alone misses tacit prerequisites.",
         "evidence_answer": "Adding evidence still does not exhaust profile-required slots.",
-        "handover_answer": "Checks successor-required slots and withholds unsafe handovers.",
+        "handover_answer": "Checks profile-required slots and withholds unsafe answers.",
         "answer": "Result",
         "evidence": "Retrieved evidence",
         "status": "Transferability",
@@ -143,14 +143,14 @@ COPY = {
 
 ROLE_LABELS = {
     "日本語": {
-        "CS": "サポート引き継ぎ",
-        "Engineer": "技術運用引き継ぎ",
-        "Sales": "商談引き継ぎ",
+        "CS": "サポート対応",
+        "Engineer": "技術運用",
+        "Sales": "商談レビュー",
     },
     "English": {
-        "CS": "Support handover",
-        "Engineer": "Engineering handover",
-        "Sales": "Sales handover",
+        "CS": "Support response",
+        "Engineer": "Engineering operations",
+        "Sales": "Deal review",
     },
 }
 
@@ -172,7 +172,7 @@ LOCALIZED_SCENARIO_TEXT = {
     "日本語": {
         "D-CS-01": {
             "memory": "架空テナント Northstar Retail は6月請求だけCSV出力で回避する。API修正は四半期締め後の予定だが確定ではない。",
-            "handover_task": "回答権限を守りながら、請求CSV回避策への追加問い合わせに対応する",
+            "task_context": "回答権限を守りながら、請求CSV回避策への追加問い合わせに対応する",
             "evidence": [
                 "CS記録では、財務管理者は6月のみCSV出力になることを把握済み。ただしAPI時期について承認済みの外部向け文面は記録されていない。",
                 "技術側はAPI不具合が調査中であることを確認。CSV出力に失敗した場合、サポートは請求IDを集めて請求オンコールへエスカレーションする。",
@@ -181,7 +181,7 @@ LOCALIZED_SCENARIO_TEXT = {
         },
         "D-ENG-01": {
             "memory": "架空プロジェクト Partner Sync では、プレミアムテナント向けwebhook再試行を有効化した。ただしエラー分類が安定するまでAPI backfillは手動で行う。",
-            "handover_task": "夜間当番がwebhook失敗を復旧し、API backfillへ進める条件を判断する",
+            "task_context": "夜間当番がwebhook失敗を復旧し、API backfillへ進める条件を判断する",
             "evidence": [
                 "運用手順書PS-42には、再試行上限、タイムアウト挙動、重複イベントの既知症状、partner-sync-oncallへのエスカレーション先がある。",
                 "PR #1842 はプレミアムテナントのwebhookだけに再試行の冪等性を追加。ロールバックコマンドとダッシュボードリンクも含まれる。",
@@ -190,7 +190,7 @@ LOCALIZED_SCENARIO_TEXT = {
         },
         "D-SALES-01": {
             "memory": "架空アカウント ElmWorks には更新時に旧analytics価格を提示できる可能性がある。ただしデータ保持の覚書を法務が確認した場合に限る。",
-            "handover_task": "更新見積の商談を引き継ぎ、顧客へ約束できる範囲を判断する",
+            "task_context": "更新見積の商談を引き継ぎ、顧客へ約束できる範囲を判断する",
             "evidence": [
                 "顧客は今週中の更新見積を期待している。旧単価は社内希望だが、データ保持の覚書はまだ法務承認されていない。",
                 "顧客には見積を準備中とだけ伝えており、価格例外はまだ約束していない。",
@@ -200,13 +200,13 @@ LOCALIZED_SCENARIO_TEXT = {
     },
     "English": {
         "D-CS-01": {
-            "handover_task": "Respond to follow-up questions about the invoice CSV workaround without overstepping support authority",
+            "task_context": "Respond to follow-up questions about the invoice CSV workaround without overstepping support authority",
         },
         "D-ENG-01": {
-            "handover_task": "Recover webhook failures during on-call and decide when API backfill can move forward",
+            "task_context": "Recover webhook failures during on-call and decide when API backfill can move forward",
         },
         "D-SALES-01": {
-            "handover_task": "Take over a renewal quote and decide what can safely be promised to the customer",
+            "task_context": "Take over a renewal quote and decide what can safely be promised to the customer",
         },
     },
 }
@@ -239,9 +239,9 @@ DEMO_SCENARIOS = [
                 content="Draft macro says: 'We will provide the June export via CSV while Engineering investigates the API issue.'",
             ),
         ],
-        successor_role="CS",
+        profile="CS",
         memory_type="decision",
-        handover_task="回答権限を守りながら、請求CSV回避策への追加問い合わせに対応する",
+        task_context="回答権限を守りながら、請求CSV回避策への追加問い合わせに対応する",
         provided_slots=["communication_status", "scope", "fallback_plan", "escalation_path", "customer_facing_wording"],
         evidence_slots=["communication_status", "scope", "fallback_plan", "escalation_path", "customer_facing_wording"],
         gold_gaps=[],
@@ -274,9 +274,9 @@ DEMO_SCENARIOS = [
                 content="Backfill automation should be reconsidered after duplicate-event rate stays below 0.1% for two weeks.",
             ),
         ],
-        successor_role="Engineer",
+        profile="Engineer",
         memory_type="procedure",
-        handover_task="夜間当番がwebhook失敗を復旧し、API backfillへ進める条件を判断する",
+        task_context="夜間当番がwebhook失敗を復旧し、API backfillへ進める条件を判断する",
         provided_slots=[
             "rationale",
             "technical_constraint",
@@ -319,9 +319,9 @@ DEMO_SCENARIOS = [
                 content="Approval is pending. Sales must not promise the legacy price until the addendum is cleared.",
             ),
         ],
-        successor_role="Sales",
+        profile="Sales",
         memory_type="risk",
-        handover_task="更新見積の商談を引き継ぎ、顧客へ約束できる範囲を判断する",
+        task_context="更新見積の商談を引き継ぎ、顧客へ約束できる範囲を判断する",
         provided_slots=["customer_expectation", "timeline_confidence"],
         evidence_slots=["customer_expectation", "timeline_confidence"],
         gold_gaps=[],
@@ -346,21 +346,21 @@ def render_app() -> None:
     localized_scenarios = [_localized_scenario(s, language) for s in scenarios]
     selected_label = st.sidebar.selectbox(
         copy["scenario"],
-        [f"{s.scenario_id} · {s.handover_task}" for s in localized_scenarios],
+        [f"{s.scenario_id} · {s.task_context}" for s in localized_scenarios],
     )
     selected_id = selected_label.split(" · ", 1)[0]
     source_scenario = next(item for item in localized_scenarios if item.scenario_id == selected_id)
-    role_labels = ROLE_LABELS[language]
-    role_options = list(role_labels.values())
-    default_role_label = role_labels[source_scenario.successor_role]
-    selected_role_label = st.sidebar.segmented_control(copy["role"], role_options, default=default_role_label)
+    profile_labels = ROLE_LABELS[language]
+    profile_options = list(profile_labels.values())
+    default_profile_label = profile_labels[source_scenario.profile]
+    selected_profile_label = st.sidebar.segmented_control(copy["role"], profile_options, default=default_profile_label)
     st.sidebar.caption(copy["role_note"])
-    role = _role_from_label(selected_role_label or default_role_label, language)
+    profile = _profile_from_label(selected_profile_label or default_profile_label, language)
     run_mode = st.sidebar.radio(copy["mode"], [copy["local"], copy["live"]], index=0)
     model = st.sidebar.text_input(copy["model"], value=os.getenv("OPENAI_SLOT_MODEL", "gpt-5-mini"))
     prompt_profile = st.sidebar.selectbox(copy["prompt_profile"], ["auto", "baseline", "gpt5_strict"], index=0)
 
-    scenario = source_scenario.model_copy(update={"successor_role": role or source_scenario.successor_role})
+    scenario = source_scenario.model_copy(update={"profile": profile or source_scenario.profile})
     live_requested = run_mode == copy["live"]
 
     st.markdown(
@@ -371,7 +371,7 @@ def render_app() -> None:
         f"""
         <section class="memory-band">
           <div><small>{html.escape(copy["memory"])}</small><strong>{html.escape(scenario.memory)}</strong></div>
-          <div><small>{html.escape(copy["task"])}</small><strong>{html.escape(scenario.handover_task)}</strong></div>
+          <div><small>{html.escape(copy["task"])}</small><strong>{html.escape(scenario.task_context)}</strong></div>
         </section>
         """,
         unsafe_allow_html=True,
@@ -399,7 +399,7 @@ def render_app() -> None:
 
     demo_store = InMemoryStore([detector_input])
     detector = HandoverGapDetector(store=demo_store)
-    result = detector.detect(detector_input.scenario_id, detector_input.successor_role)
+    result = detector.detect(detector_input.scenario_id, detector_input.profile)
     naive = NaiveRAGBaseline().predict(detector_input)
     hybrid = HybridRAGBaseline().predict(detector_input)
 
@@ -463,9 +463,9 @@ def _persist_live_result(scenario: HandoverScenario, result: Any, fill: dict[str
         attempt_rows = [
             {
                 "memory_item_id": memory_item_id,
-                "successor_role": scenario.successor_role,
+                "profile": scenario.profile,
                 "slot_name": item["slot_name"],
-                "query_text": scenario.handover_task,
+                "query_text": scenario.task_context,
                 "retrieved_event_ids": json.dumps(list(range(len(scenario.evidence_events)))),
                 "selected_event_id": None,
                 "fill_result": json.dumps(item, ensure_ascii=False),
@@ -477,8 +477,8 @@ def _persist_live_result(scenario: HandoverScenario, result: Any, fill: dict[str
         gap_rows = [
             {
                 "memory_item_id": memory_item_id,
-                "successor_role": scenario.successor_role,
-                "task_context": scenario.handover_task,
+                "profile": scenario.profile,
+                "task_context": scenario.task_context,
                 "gap_type": gap.gap_type,
                 "slot_name": gap.slot_name,
                 "description": gap.description,
@@ -491,8 +491,8 @@ def _persist_live_result(scenario: HandoverScenario, result: Any, fill: dict[str
         assessment_rows = [
             {
                 "memory_item_id": memory_item_id,
-                "successor_role": scenario.successor_role,
-                "task_context": scenario.handover_task,
+                "profile": scenario.profile,
+                "task_context": scenario.task_context,
                 "transferability_score": result.transferability_score,
                 "unsafe_reason": ", ".join(gap.slot_name for gap in result.gaps),
                 "required_gaps_count": len(result.gaps),
@@ -549,16 +549,16 @@ def _localized_scenario(scenario: HandoverScenario, language: str) -> HandoverSc
     return scenario.model_copy(
         update={
             "memory": localized.get("memory", scenario.memory),
-            "handover_task": localized.get("handover_task", scenario.handover_task),
+            "task_context": localized.get("task_context", scenario.task_context),
             "evidence_events": evidence_events,
         }
     )
 
 
-def _role_from_label(label: str, language: str) -> str:
-    for role, display_label in ROLE_LABELS[language].items():
+def _profile_from_label(label: str, language: str) -> str:
+    for profile, display_label in ROLE_LABELS[language].items():
         if label == display_label:
-            return role
+            return profile
     return "CS"
 
 
@@ -619,7 +619,7 @@ def _render_slot_audit(copy: dict[str, str], scenario: HandoverScenario, live_st
     st.markdown(f'<h2 class="section-title">{copy["slot_audit"]}</h2>', unsafe_allow_html=True)
     rationales = {item["slot_name"]: item for item in live_state.get("slot_rationales", [])} if live_state else {}
     rows = []
-    for slot in ROLE_REQUIRED_SLOTS[scenario.successor_role]:
+    for slot in PROFILE_REQUIRED_SLOTS[scenario.profile]:
         filled = slot in scenario.provided_slots
         rationale = ""
         if slot in rationales:

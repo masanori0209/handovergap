@@ -79,7 +79,7 @@
 
 ```bash
 pip install handovergap
-handovergap detect --scenario S001 --role CS
+handovergap detect --scenario S001 --profile CS
 handovergap evaluate
 ```
 
@@ -93,5 +93,5 @@ handovergap evaluate
 ## まとめ
 
 - RAGは正しい情報を返しても、引き継ぎ可能とは限らない
-- HandoverGap RAGは引き継ぎ先の責任範囲ごとに不足文脈を検出する
+- HandoverGap RAGはプロファイルと作業文脈ごとに不足文脈を検出する
 - TiDBはスロット、証拠、gapを監査する基盤として使える

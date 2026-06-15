@@ -18,7 +18,7 @@ These do not guarantee handover readiness.
 Transferability
 ```
 
-A memory is transferable when a successor can safely act on it for a given role and task.
+A memory is transferable when the selected profile can safely act on it for a given task context.
 
 ## Core Definition
 
@@ -29,7 +29,7 @@ A memory item is valid-but-non-transferable when:
 1. The memory is factually correct.
 2. The memory is relevant to the task.
 3. The memory is not obviously stale or contradictory.
-4. The successor still lacks implicit context required for safe action.
+4. The selected profile still lacks implicit context required for safe action.
 
 ## Formalization
 
@@ -37,20 +37,20 @@ Let:
 
 ```text
 m = memory
-r = successor role
-t = handover task
+p = profile
+t = task context
 E = evidence set
 S(m) = required slots for memory type
-R(r, type(m)) = role-conditioned required slots
+R(p, type(m)) = profile-conditioned required slots
 F(m, E, s) = slot filling function
 ```
 
 Then:
 
 ```text
-RequiredSlots = S(type(m)) ∪ R(r, type(m))
+RequiredSlots = S(type(m)) ∪ R(p, type(m))
 
-Gap(m, r, t) = {
+Gap(m, p, t) = {
   s ∈ RequiredSlots
   | F(m, E, s) is missing or weak
 }
@@ -59,7 +59,7 @@ Gap(m, r, t) = {
 Transferability:
 
 ```text
-Transferable(m, r, t) =
+Transferable(m, p, t) =
   no critical gaps exist
   and transferability_score >= threshold
 ```
@@ -67,7 +67,7 @@ Transferable(m, r, t) =
 ## Contribution Claim
 
 1. Define valid-but-non-transferable memory.
-2. Propose successor-profile-conditioned tacit context gap detection.
+2. Propose profile-conditioned tacit context gap detection.
 3. Implement a TiDB-backed slot/evidence/gap audit store with blocked-transfer SQL.
 4. Provide HandoverGapBench mini and baseline comparison.
 

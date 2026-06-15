@@ -16,7 +16,7 @@ def test_tidb_schema_models_slot_evidence_gap_workflow() -> None:
         "memory_items",
         "memory_chunks",
         "memory_type_schemas",
-        "successor_role_requirements",
+        "profile_requirements",
         "memory_slots",
         "slot_fill_attempts",
         "context_gaps",
@@ -27,6 +27,9 @@ def test_tidb_schema_models_slot_evidence_gap_workflow() -> None:
     assert all(f"CREATE TABLE {table}" in schema for table in required_tables)
     assert "VECTOR(1536)" in schema
     assert "metadata JSON" in schema
+    assert "source_event_id BIGINT" in schema
+    assert "chunk_kind VARCHAR(50)" in schema
+    assert "FULLTEXT INDEX idx_memory_chunks_content" in schema
     assert "retrieved_event_ids JSON" in schema
 
 

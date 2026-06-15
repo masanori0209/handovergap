@@ -1,83 +1,59 @@
 from __future__ import annotations
 
+from handovergap.profiles import ProfileCatalog
 from handovergap.schemas import ClarificationQuestion, DetectionResult, HandoverGap
-from handovergap.slot_rules import GAP_TYPE_BY_SLOT, HIGH_RISK_SLOTS, QUESTION_BY_SLOT, ROLE_REQUIRED_SLOTS
 from handovergap.store import InMemoryStore
 
 
 class HandoverGapDetector:
-    """Deterministic role-conditioned slot-gap detector for the MVP."""
+    """Deterministic profile-conditioned slot-gap detector for the MVP."""
 
-    def __init__(self, store: InMemoryStore):
+    def __init__(self, store: InMemoryStore, profiles: ProfileCatalog | None = None):
         self.store = store
+        self.profiles = profiles or ProfileCatalog.builtins()
 
-    def detect(self, scenario_id: str, successor_role: str) -> DetectionResult:
-        scenario = self.store.get_scenario(scenario_id=scenario_id, successor_role=successor_role)
+    def detect(
+        self,
+        scenario_id: str,
+        profile: str | None = None,
+    ) -> DetectionResult:
+        scenario = self.store.get_scenario(scenario_id=scenario_id, profile=profile)
         return self.detect_scenario(scenario)
 
     def detect_scenario(self, scenario) -> DetectionResult:
-        required_slots = ROLE_REQUIRED_SLOTS[scenario.successor_role]
+        required_slots = self.profiles.required_slots(scenario.profile)
         filled_slots = set(scenario.provided_slots) | set(scenario.evidence_slots)
         missing_slots = [slot for slot in required_slots if slot not in filled_slots]
 
         gaps = [
             HandoverGap(
-                gap_type=GAP_TYPE_BY_SLOT.get(slot, f"{slot}_gap"),
+                gap_type=self.profiles.slot_policy(scenario.profile, slot).gap_type or f"{slot}_gap",
                 slot_name=slot,
-                description=_describe_gap(slot),
-                severity=_severity_for_slot(slot),
+                description=self.profiles.slot_policy(scenario.profile, slot).description or f"{slot} が不足しています",
+                severity=self.profiles.slot_policy(scenario.profile, slot).severity,
             )
             for slot in missing_slots
         ]
         questions = [
-            ClarificationQuestion(slot_name=slot, question=QUESTION_BY_SLOT[slot])
+            ClarificationQuestion(slot_name=slot, question=question)
             for slot in missing_slots
-            if slot in QUESTION_BY_SLOT
+            if (question := self.profiles.slot_policy(scenario.profile, slot).question)
         ]
         transferability_score = max(0.0, 1.0 - (len(missing_slots) / max(len(required_slots), 1)))
         if not missing_slots:
             status = "transferable"
-        elif any(slot in HIGH_RISK_SLOTS for slot in missing_slots):
+        elif any(self.profiles.slot_policy(scenario.profile, slot).high_risk for slot in missing_slots):
             status = "blocked"
         else:
             status = "needs_clarification"
 
         return DetectionResult(
             scenario_id=scenario.scenario_id,
-            successor_role=scenario.successor_role,
+            profile=scenario.profile,
             memory=scenario.memory,
-            handover_task=scenario.handover_task,
+            task_context=scenario.task_context,
             gaps=gaps,
             questions=questions,
             transferability_score=transferability_score,
             transferability_status=status,
         )
-
-
-def _severity_for_slot(slot: str) -> str:
-    if slot in HIGH_RISK_SLOTS:
-        return "HIGH"
-    return "MEDIUM"
-
-
-def _describe_gap(slot: str) -> str:
-    descriptions = {
-        "scope": "引き継ぎ先が適用範囲を判断するための情報が不足しています",
-        "communication_status": "関係者または顧客に説明済みか不明です",
-        "authority": "後任が回答または判断してよい範囲が不明です",
-        "fallback_plan": "想定外の場合の代替手段が不明です",
-        "escalation_path": "問題発生時の相談先またはエスカレーション先が不明です",
-        "customer_facing_wording": "外部向けに使ってよい説明文が不明です",
-        "rationale": "なぜその判断になったかが不明です",
-        "technical_constraint": "技術的制約または前提条件が不明です",
-        "implementation_scope": "実装対象と対象外の境界が不明です",
-        "trigger_for_reconsideration": "再検討が必要になる条件が不明です",
-        "related_issue": "関連するチケットや追跡先が不明です",
-        "failure_modes": "失敗パターンと観測方法が不明です",
-        "contract_impact": "契約や商談への影響が不明です",
-        "promise_boundary": "顧客に約束してよい範囲が不明です",
-        "customer_expectation": "顧客期待値が調整済みか不明です",
-        "timeline_confidence": "提示できる時期の確度が不明です",
-        "negotiation_status": "交渉状況と未合意点が不明です",
-    }
-    return descriptions.get(slot, f"{slot} が不足しています")

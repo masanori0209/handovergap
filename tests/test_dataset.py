@@ -5,7 +5,7 @@ def test_builtin_dataset_has_mvp_coverage() -> None:
     scenarios = InMemoryStore.from_builtin_dataset().list_scenarios()
 
     assert len(scenarios) >= 20
-    assert {scenario.successor_role for scenario in scenarios} == {"CS", "Engineer", "Sales"}
+    assert {scenario.profile for scenario in scenarios} == {"CS", "Engineer", "Sales"}
     gap_types = {gap.gap_type for scenario in scenarios for gap in scenario.gold_gaps}
     assert len(gap_types) >= 5
 
@@ -50,7 +50,7 @@ def test_sanitized_dataset_looks_like_anonymized_work_notes() -> None:
 
     assert len(scenarios) >= 6
     assert all(scenario.scenario_id.startswith("R") for scenario in scenarios)
-    assert {scenario.successor_role for scenario in scenarios} == {"CS", "Engineer", "Sales"}
+    assert {scenario.profile for scenario in scenarios} == {"CS", "Engineer", "Sales"}
     assert any(scenario.unsafe_transfer_label is False for scenario in scenarios)
     assert all(scenario.evidence_events for scenario in scenarios)
     assert all("reviewer_a" in scenario.annotator_gap_slots for scenario in scenarios)

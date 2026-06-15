@@ -23,7 +23,7 @@ This improves evaluation evidence and competitor positioning: HandoverGap is com
 ## Observations
 
 - `naive_rag` returns the memory without detecting transferability risk.
-- `hybrid_rag` can flag one explicit risk from evidence context, but still lacks role-conditioned slot filling.
+- `hybrid_rag` can flag one explicit risk from evidence context, but still lacks profile-conditioned slot filling.
 - `handovergap` remains the only method that checks all role-required slots.
 
 ## Failures

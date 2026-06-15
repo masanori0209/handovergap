@@ -39,7 +39,7 @@ Detect tacit context gaps in handover-oriented RAG — because correct memories 
 
 - [x] `handovergap --help`
 - [x] `handovergap demo`
-- [x] `handovergap detect --scenario S001 --role CS`
+- [x] `handovergap detect --scenario S001 --profile CS`
 - [x] `handovergap evaluate`
 - [x] `handovergap evaluate --compare`
 - [x] `handovergap evaluate --dataset holdout --stress-filling`

@@ -53,7 +53,7 @@
 ```bash
 pip install -e ".[dev]"
 handovergap demo
-handovergap detect --scenario S001 --role CS
+handovergap detect --scenario S001 --profile CS
 handovergap evaluate
 pytest
 ```

@@ -56,7 +56,7 @@ We solved organizational memory transfer.
 Better:
 
 ```text
-We propose a small, reproducible framework for detecting role-conditioned tacit context gaps in handover-oriented RAG.
+We propose a small, reproducible framework for detecting profile-conditioned tacit context gaps in handover-oriented RAG.
 ```
 
 ## Failure Mode 5: Surveillance Framing

@@ -1,4 +1,4 @@
-ROLE_REQUIRED_SLOTS = {
+PROFILE_REQUIRED_SLOTS = {
     "CS": [
         "communication_status",
         "scope",
@@ -55,7 +55,7 @@ GAP_TYPE_BY_SLOT = {
 QUESTION_BY_SLOT = {
     "scope": "この判断の適用範囲はどこまでですか？",
     "communication_status": "関係者または顧客には説明済みですか？",
-    "authority": "後任が回答または判断してよい範囲はどこまでですか？",
+    "authority": "このプロファイルが回答または判断してよい範囲はどこまでですか？",
     "fallback_plan": "想定外の場合の代替手段は何ですか？",
     "escalation_path": "問題が起きた場合のエスカレーション先は誰ですか？",
     "customer_facing_wording": "外部向けにはどの表現で説明すべきですか？",

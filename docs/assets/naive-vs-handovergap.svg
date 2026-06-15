@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 0 1100 560" role="img" aria-labelledby="title desc">
+  <title id="title">Naive RAG vs HandoverGap comparison</title>
+  <desc id="desc">A side-by-side comparison showing Naive RAG answering from a correct but incomplete memory, while HandoverGap blocks and asks clarification questions for missing profile-required slots.</desc>
+  <rect width="1100" height="560" fill="#f7f8f6"/>
+  <text x="48" y="58" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="700" fill="#1f2933">Correct memory is not always ready to answer from</text>
+  <text x="48" y="92" font-family="Inter, Arial, sans-serif" font-size="16" fill="#4b5563">Same retrieved memory, different behavior before final answer generation.</text>
+
+  <rect x="48" y="126" width="472" height="374" rx="10" fill="#ffffff" stroke="#d7dce0"/>
+  <text x="76" y="166" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#6b1d1d">Naive RAG</text>
+  <text x="76" y="198" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">Retrieved memory</text>
+  <rect x="76" y="216" width="416" height="82" rx="8" fill="#fff7ed" stroke="#fed7aa"/>
+  <text x="96" y="246" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">Use CSV for this release.</text>
+  <text x="96" y="272" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">API support is deferred to the next phase.</text>
+  <text x="76" y="334" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">Behavior</text>
+  <rect x="76" y="352" width="416" height="88" rx="8" fill="#fee2e2" stroke="#fca5a5"/>
+  <text x="96" y="383" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#991b1b">Answers directly</text>
+  <text x="96" y="411" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">May miss customer communication, authority,</text>
+  <text x="96" y="435" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">fallback, escalation, and wording gaps.</text>
+
+  <rect x="580" y="126" width="472" height="374" rx="10" fill="#ffffff" stroke="#d7dce0"/>
+  <text x="608" y="166" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f5132">HandoverGap</text>
+  <text x="608" y="198" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">Profile-required slot check</text>
+  <rect x="608" y="216" width="416" height="82" rx="8" fill="#ecfdf5" stroke="#a7f3d0"/>
+  <text x="628" y="246" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">Profile: CS</text>
+  <text x="628" y="272" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">Task: answer customer questions safely</text>
+  <text x="608" y="334" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">Behavior</text>
+  <rect x="608" y="352" width="416" height="112" rx="8" fill="#dbeafe" stroke="#93c5fd"/>
+  <text x="628" y="383" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#1d4ed8">Blocks and asks</text>
+  <text x="628" y="411" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">Has the customer been informed?</text>
+  <text x="628" y="435" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">What may CS promise?</text>
+  <text x="628" y="459" font-family="Inter, Arial, sans-serif" font-size="15" fill="#374151">What is the fallback or escalation path?</text>
+
+  <rect x="48" y="518" width="1004" height="1" fill="#d7dce0"/>
+  <text x="48" y="540" font-family="Inter, Arial, sans-serif" font-size="13" fill="#6b7280">Generated from the S001-style HandoverGap flow: retrieve memory → check profile-required slots → ask before answering.</text>
+</svg>

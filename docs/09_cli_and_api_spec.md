@@ -21,7 +21,7 @@ Runs a built-in demo scenario.
 ### detect
 
 ```bash
-handovergap detect --scenario S001 --role CS
+handovergap detect --scenario S001 --profile CS
 ```
 
 Expected output:
@@ -78,14 +78,16 @@ Starts Streamlit demo.
 ## Python API
 
 ```python
-from handovergap import HandoverGapDetector, InMemoryStore
+from handovergap import TransferabilityGate
 
-store = InMemoryStore.from_builtin_dataset()
-detector = HandoverGapDetector(store=store)
-
-result = detector.detect(
-    scenario_id="S001",
-    successor_role="CS",
+gate = TransferabilityGate()
+result = gate.check(
+    memory="Use CSV for this release; API support is deferred.",
+    profile="CS",
+    task_context="Answer customer questions about the workaround.",
+    evidence=["CSV workaround approved for the release."],
+    provided_slots=["scope"],
+    evidence_slots=["scope"],
 )
 
 print(result.gaps)
@@ -95,6 +97,8 @@ print(result.transferability_score)
 
 ## Public API Objects
 
+- TransferabilityGate
+- ContextReadinessGate
 - HandoverGapDetector
 - HandoverGapEvaluator
 - InMemoryStore

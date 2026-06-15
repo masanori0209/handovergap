@@ -2,15 +2,15 @@
 
 ## Overview
 
-HandoverGap RAG detects missing implicit context required for a successor to safely use a retrieved memory.
+HandoverGap RAG detects missing implicit context required for a selected profile to safely use a retrieved memory in a task context.
 
 ## Pipeline
 
 ```text
-Handover Scenario
+Readiness Scenario
   -> Retrieve memory and evidence
   -> Classify memory type
-  -> Load role-conditioned required slots
+  -> Load profile-conditioned required slots
   -> Fill slots from evidence
   -> Detect missing or weak slots
   -> Generate clarification questions
@@ -21,9 +21,8 @@ Handover Scenario
 
 - memory item
 - source evidence events
-- successor role
-- handover task
-- optional successor profile
+- profile
+- task context
 
 ## Outputs
 
@@ -54,7 +53,7 @@ A simple MVP formula:
 score =
   filled_required_slot_ratio * 0.45
 + evidence_confidence_avg * 0.25
-+ role_requirement_satisfaction * 0.20
++ profile_requirement_satisfaction * 0.20
 - critical_gap_penalty * 0.10
 ```
 
@@ -67,7 +66,7 @@ A memory should be marked unsafe if:
 
 - critical required slots are missing
 - required evidence is absent
-- successor role cannot act safely
+- selected profile cannot act safely
 - clarification questions are mandatory before use
 
 ## Clarification-first Design

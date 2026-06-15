@@ -11,7 +11,8 @@ from typing import Any
 
 from handovergap import TiDBStore
 from handovergap.core.detector import HandoverGapDetector
-from handovergap.slot_rules import ROLE_REQUIRED_SLOTS
+from handovergap.retrieval import chunk_rows_for_scenario
+from handovergap.slot_rules import PROFILE_REQUIRED_SLOTS
 from handovergap.store import InMemoryStore
 
 
@@ -20,6 +21,11 @@ def main() -> int:
     parser.add_argument("--dataset", default="sanitized", help="Built-in dataset to persist: sanitized, adversarial, holdout, mini, or all.")
     parser.add_argument("--iterations", type=int, default=30, help="Repeated SELECT runs for p50/p95 timing.")
     parser.add_argument("--create-schema", action="store_true", help="Create the packaged HandoverGap schema first.")
+    parser.add_argument(
+        "--reset-schema",
+        action="store_true",
+        help="Drop packaged HandoverGap tables before creating them. Intended for alpha validation DBs only.",
+    )
     parser.add_argument("--output-json", default="article/tidb_audit_query_results.json", help="Path for JSON results.")
     parser.add_argument("--output-md", default="article/tidb_audit_query_results.md", help="Path for markdown summary.")
     args = parser.parse_args()
@@ -28,6 +34,9 @@ def main() -> int:
     sqlalchemy, text, URL = _load_sqlalchemy()
     store = _store_from_env(URL)
     engine = store.create_engine(pool_recycle=300, connect_args=_connect_args())
+    if args.reset_schema:
+        store.reset_schema(engine)
+        args.create_schema = True
     if args.create_schema:
         store.create_schema(engine)
 
@@ -70,6 +79,7 @@ def _persist_dataset(engine: Any, text: Any, scenarios: list[Any], run_id: str) 
     counts = {
         "source_events": 0,
         "memory_items": 0,
+        "memory_chunks": 0,
         "slot_fill_attempts": 0,
         "context_gaps": 0,
         "clarification_questions": 0,
@@ -132,25 +142,44 @@ def _persist_dataset(engine: Any, text: Any, scenarios: list[Any], run_id: str) 
                 evidence_ids.append(event_id)
                 counts["source_events"] += 1
 
+            chunk_rows = chunk_rows_for_scenario(scenario, memory_item_id)
+            event_id_by_index = {index: event_id for index, event_id in enumerate(evidence_ids, start=1)}
+            for row in chunk_rows:
+                if row["source_event_id"] is not None:
+                    row["source_event_id"] = event_id_by_index[row["source_event_id"]]
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO memory_chunks (
+                      memory_item_id, source_event_id, content, embedding, chunk_kind, metadata
+                    ) VALUES (
+                      :memory_item_id, :source_event_id, :content, :embedding, :chunk_kind, :metadata
+                    )
+                    """
+                ),
+                chunk_rows,
+            )
+            counts["memory_chunks"] += len(chunk_rows)
+
             filled_slots = set(scenario.provided_slots) | set(scenario.evidence_slots)
             selected_event_id = evidence_ids[0] if evidence_ids else None
-            for slot in ROLE_REQUIRED_SLOTS[scenario.successor_role]:
+            for slot in PROFILE_REQUIRED_SLOTS[scenario.profile]:
                 status = "filled" if slot in filled_slots else "missing"
                 connection.execute(
                     text(
                         """
                         INSERT INTO slot_fill_attempts (
-                          memory_item_id, successor_role, slot_name, query_text,
+                          memory_item_id, profile, slot_name, query_text,
                           retrieved_event_ids, selected_event_id, fill_result, confidence, status
                         ) VALUES (
-                          :memory_item_id, :successor_role, :slot_name, :query_text,
+                          :memory_item_id, :profile, :slot_name, :query_text,
                           :retrieved_event_ids, :selected_event_id, :fill_result, :confidence, :status
                         )
                         """
                     ),
                     {
                         "memory_item_id": memory_item_id,
-                        "successor_role": scenario.successor_role,
+                        "profile": scenario.profile,
                         "slot_name": slot,
                         "query_text": f"Find evidence for {slot} in anonymized handover {scenario.scenario_id}.",
                         "retrieved_event_ids": json.dumps(evidence_ids),
@@ -169,18 +198,18 @@ def _persist_dataset(engine: Any, text: Any, scenarios: list[Any], run_id: str) 
                     text(
                         """
                         INSERT INTO context_gaps (
-                          memory_item_id, successor_role, task_context, gap_type, slot_name,
+                          memory_item_id, profile, task_context, gap_type, slot_name,
                           description, severity, required_evidence_type, status
                         ) VALUES (
-                          :memory_item_id, :successor_role, :task_context, :gap_type, :slot_name,
+                          :memory_item_id, :profile, :task_context, :gap_type, :slot_name,
                           :description, :severity, :required_evidence_type, :status
                         )
                         """
                     ),
                     {
                         "memory_item_id": memory_item_id,
-                        "successor_role": scenario.successor_role,
-                        "task_context": scenario.handover_task,
+                        "profile": scenario.profile,
+                        "task_context": scenario.task_context,
                         "gap_type": gap.gap_type,
                         "slot_name": gap.slot_name,
                         "description": gap.description,
@@ -221,18 +250,18 @@ def _persist_dataset(engine: Any, text: Any, scenarios: list[Any], run_id: str) 
                 text(
                     """
                     INSERT INTO transfer_assessments (
-                      memory_item_id, successor_role, task_context, transferability_score,
+                      memory_item_id, profile, task_context, transferability_score,
                       unsafe_reason, required_gaps_count, status
                     ) VALUES (
-                      :memory_item_id, :successor_role, :task_context, :transferability_score,
+                      :memory_item_id, :profile, :task_context, :transferability_score,
                       :unsafe_reason, :required_gaps_count, :status
                     )
                     """
                 ),
                 {
                     "memory_item_id": memory_item_id,
-                    "successor_role": scenario.successor_role,
-                    "task_context": scenario.handover_task,
+                    "profile": scenario.profile,
+                    "task_context": scenario.task_context,
                     "transferability_score": result.transferability_score,
                     "unsafe_reason": "profile-required slots still need clarification" if result.gaps else None,
                     "required_gaps_count": len(result.gaps),
@@ -269,7 +298,7 @@ SELECT
   ta.transferability_score,
   mi.scenario_id,
   mi.subject,
-  ta.successor_role,
+  ta.profile,
   cg.gap_type,
   cg.slot_name,
   cg.severity,
@@ -282,11 +311,11 @@ JOIN memory_items mi
   ON mi.id = ta.memory_item_id
 LEFT JOIN context_gaps cg
   ON cg.memory_item_id = ta.memory_item_id
- AND cg.successor_role = ta.successor_role
+ AND cg.profile = ta.profile
  AND cg.status = 'open'
 LEFT JOIN slot_fill_attempts sfa
   ON sfa.memory_item_id = cg.memory_item_id
- AND sfa.successor_role = cg.successor_role
+ AND sfa.profile = cg.profile
  AND sfa.slot_name = cg.slot_name
 LEFT JOIN source_events se
   ON se.id = sfa.selected_event_id
@@ -331,9 +360,9 @@ def _render_markdown(result: dict[str, Any]) -> str:
     )
     for row in rows:
         lines.append(
-            "| {scenario_id} | {successor_role} | {slot_name} | {severity} | {slot_fill_status} | {selected_evidence_title} | {question} |".format(
+            "| {scenario_id} | {profile} | {slot_name} | {severity} | {slot_fill_status} | {selected_evidence_title} | {question} |".format(
                 scenario_id=row.get("scenario_id", ""),
-                successor_role=row.get("successor_role", ""),
+                profile=row.get("profile", ""),
                 slot_name=row.get("slot_name", ""),
                 severity=row.get("severity", ""),
                 slot_fill_status=row.get("slot_fill_status", ""),

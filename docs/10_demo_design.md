@@ -19,7 +19,8 @@ Streamlit app.
 Inputs:
 
 - scenario
-- successor role
+- profile
+- task context
 - method
 
 Example:
@@ -27,9 +28,8 @@ Example:
 ```text
 Scenario: S001
 Memory: A社は今回だけCSVで対応し、APIは次フェーズ
-Successor: Suzuki
-Role: CS
-Task: 顧客問い合わせ対応
+Profile: CS
+Task context: 顧客問い合わせ対応
 ```
 
 ### 2. Retrieved Memory

@@ -4,7 +4,7 @@ from handovergap.cli import app
 
 
 def test_detect_cli_prints_transferability_evidence() -> None:
-    result = CliRunner().invoke(app, ["detect", "--scenario", "S001", "--role", "CS"])
+    result = CliRunner().invoke(app, ["detect", "--scenario", "S001", "--profile", "CS"])
 
     assert result.exit_code == 0
     assert "Memory:" in result.output

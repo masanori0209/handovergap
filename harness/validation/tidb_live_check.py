@@ -13,6 +13,11 @@ from handovergap.store import InMemoryStore
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate live TiDB persistence for HandoverGap.")
     parser.add_argument("--create-schema", action="store_true", help="Create the packaged HandoverGap schema first.")
+    parser.add_argument(
+        "--reset-schema",
+        action="store_true",
+        help="Drop packaged HandoverGap tables before creating them. Intended for alpha validation DBs only.",
+    )
     args = parser.parse_args()
 
     _load_dotenv_if_available()
@@ -40,6 +45,9 @@ def main() -> int:
     connect_args = _connect_args()
     engine = store.create_engine(pool_recycle=300, connect_args=connect_args)
 
+    if args.reset_schema:
+        store.reset_schema(engine)
+        args.create_schema = True
     if args.create_schema:
         store.create_schema(engine)
 
@@ -76,7 +84,7 @@ def main() -> int:
     slot_rows = [
         {
             "memory_item_id": memory_item_id,
-            "successor_role": "CS",
+            "profile": "CS",
             "slot_name": "customer_notification_status",
             "query_text": "Was the customer informed about CSV-only support?",
             "retrieved_event_ids": json.dumps([]),
@@ -89,7 +97,7 @@ def main() -> int:
     gap_rows = [
         {
             "memory_item_id": memory_item_id,
-            "successor_role": "CS",
+            "profile": "CS",
             "task_context": "Answering a customer-support handover question.",
             "gap_type": "missing_required_slot",
             "slot_name": "customer_notification_status",
@@ -102,7 +110,7 @@ def main() -> int:
     assessment_rows = [
         {
             "memory_item_id": memory_item_id,
-            "successor_role": "CS",
+            "profile": "CS",
             "task_context": "Answering a customer-support handover question.",
             "transferability_score": 0.0,
             "unsafe_reason": "Missing customer notification status.",

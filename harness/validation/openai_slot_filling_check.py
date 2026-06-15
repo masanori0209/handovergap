@@ -49,7 +49,7 @@ def main() -> int:
         scenario_rows.append(
             {
                 "scenario_id": scenario.scenario_id,
-                "successor_role": scenario.successor_role,
+                "profile": scenario.profile,
                 "unsafe_transfer_label": scenario.unsafe_transfer_label,
                 "llm_filled_slots": fill["filled_slots"],
                 "gold_gap_slots": sorted(gold_slots),

@@ -31,6 +31,7 @@ Every loop must have:
 - context update rule
 - handoff format
 - stop condition
+- evaluation integrity check, when metrics or prompts are touched
 
 ## Global Loop Contract
 
@@ -44,8 +45,9 @@ For every task, the agent must:
 6. Run the validation commands.
 7. If validation fails, fix the smallest cause only.
 8. Update docs or task status if behavior changed.
-9. Write a loop report.
-10. Stop.
+9. For evaluation-affecting work, run the evaluation integrity check.
+10. Write a loop report.
+11. Stop.
 
 ## Forbidden Behavior
 
@@ -60,6 +62,9 @@ The agent must not:
 - skip validation commands
 - hide failing tests
 - broaden the architecture without updating docs
+- improve benchmark scores by matching scenario ids, gold labels, expected slot names, or expected answer strings
+- let predictors, detectors, slot fillers, retrievers, demos, or baselines read `gold_gaps`, `gold_questions`, or `unsafe_transfer_label`
+- tune prompts to the exact wording of bundled gold annotations instead of profile requirements and source evidence
 
 ## Loop Types
 
@@ -106,12 +111,12 @@ Purpose: Make the claim measurable.
 
 ```text
 Scenario
-→ Gold gaps
-→ Run baseline
-→ Run proposed method
-→ Compare
+→ Independent annotation or rubric
+→ Run baseline without labels
+→ Run proposed method without labels
+→ Compare with label metrics and rubric metrics
 → Inspect failure
-→ Improve schema
+→ Improve schema or prompt
 ```
 
 Output:
@@ -119,6 +124,31 @@ Output:
 - benchmark scenarios
 - metrics
 - result table
+- integrity notes
+
+Rules:
+
+- Gold labels are evaluator-only data.
+- The detector must not read `gold_gaps`, `gold_questions`, or `unsafe_transfer_label`.
+- Do not detect gaps by matching the expected answer string.
+- If a score improves, explain which model behavior changed and why it is not label leakage.
+- Treat structurally aligned mini/holdout scores as consistency checks unless an independent annotation, adversarial split, or rubric-based judge supports the claim.
+
+LLM-as-a-judge is allowed for semantic evaluation when:
+
+- it receives source evidence, profile requirements, task context, predicted gaps, and generated questions
+- it grades with a written rubric, preferably returning structured JSON
+- it does not receive scenario ids or gold labels as hints
+- it is calibrated against gold labels or human annotations only in evaluator/reporting code
+- its prompt and model name are recorded with the report
+
+Recommended rubric dimensions:
+
+- missing-context validity
+- evidence grounding
+- clarification question actionability
+- over-clarification on safe cases
+- transfer readiness decision quality
 
 ### Engineering Loop
 
@@ -164,7 +194,7 @@ Output:
 ```bash
 handovergap --help
 handovergap demo
-handovergap detect --scenario S001 --role CS
+handovergap detect --scenario S001 --profile CS
 handovergap evaluate
 ```
 
@@ -214,6 +244,14 @@ Do not add new features.
 3. Add evaluation or evidence.
 4. Update article wording.
 
+### If evaluation improvement looks too good
+
+1. Inspect whether predictors read labels or scenario-specific strings.
+2. Add or update a leakage regression test.
+3. Re-run an adversarial or holdout split.
+4. Add an LLM-as-a-judge or human-rubric check if the improvement is semantic.
+5. Downgrade the article claim if the improvement only holds on structurally aligned data.
+
 ### If TiDB integration blocks progress
 
 1. Keep InMemoryStore working.
@@ -236,6 +274,12 @@ At the end of every loop, produce:
 
 ### Validation
 - [ ] command: result
+
+### Evaluation Integrity
+- [ ] predictors did not read gold labels
+- [ ] no scenario-specific or expected-string matching was added
+- [ ] semantic scores used a rubric or independent annotation
+- [ ] limitations were updated if scores changed
 
 ### Observations
 ...

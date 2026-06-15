@@ -7,12 +7,16 @@ def test_cli_help() -> None:
     result = CliRunner().invoke(app, ["--help"])
 
     assert result.exit_code == 0
-    assert "Detect tacit context gaps" in result.output
+    assert "Detect profile-conditioned context gaps" in result.output
     assert "demo" in result.output
     assert "detect" in result.output
     assert "evaluate" in result.output
+    assert "ingest" in result.output
+    assert "report" in result.output
     assert "schema" in result.output
     assert "audit-sql" in result.output
     assert "audit-example" in result.output
     assert "audit-benchmark" in result.output
+    assert "retrieve-evidence" in result.output
+    assert "workload-benchmark" in result.output
     assert "serve" in result.output

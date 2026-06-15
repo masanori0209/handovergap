@@ -30,7 +30,7 @@ This is what makes the system explainable after it withholds an answer.
 
 | Feature | Usage |
 |---|---|
-| SQL | role, task, slot, status, score management |
+| SQL | profile, task, slot, status, score management |
 | Vector Search | retrieve semantically relevant evidence for a slot |
 | Full-text Search | retrieve exact names, issue IDs, customer/project names |
 | JSON | store source-specific metadata |
@@ -57,6 +57,46 @@ Search:
 
 This makes the retrieval process auditable.
 
+The implemented dry-run command is:
+
+```bash
+handovergap retrieve-evidence --scenario S001 --profile CS --slot communication_status --mode hybrid
+```
+
+For live TiDB retrieval, the store writes evidence chunks into `memory_chunks.embedding VECTOR(1536)` and retrieves top-k candidates with:
+
+```sql
+SELECT
+  id AS chunk_id,
+  memory_item_id,
+  source_event_id,
+  content,
+  VEC_COSINE_DISTANCE(embedding, :query_vector) AS distance
+FROM memory_chunks
+WHERE embedding IS NOT NULL
+ORDER BY distance ASC
+LIMIT :top_k;
+```
+
+The selected chunk/source ids are then persisted in `slot_fill_attempts.retrieved_event_ids` so the blocked-transfer audit query can show what evidence was checked.
+
+For exact identifiers, runbook names, and issue IDs, the full-text path uses:
+
+```sql
+SELECT
+  id AS chunk_id,
+  memory_item_id,
+  source_event_id,
+  content,
+  MATCH(content) AGAINST (:query_text) AS score
+FROM memory_chunks
+WHERE MATCH(content) AGAINST (:query_text)
+ORDER BY score DESC
+LIMIT :top_k;
+```
+
+Hybrid retrieval merges vector and full-text candidates with reciprocal rank fusion. This keeps semantic matches and exact references in one auditable TiDB-backed result set.
+
 ## Implementation Tables
 
 Core tables:
@@ -65,7 +105,7 @@ Core tables:
 - memory_items
 - memory_chunks
 - memory_type_schemas
-- successor_role_requirements
+- profile_requirements
 - memory_slots
 - slot_fill_attempts
 - context_gaps

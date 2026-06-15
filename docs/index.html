@@ -6,7 +6,7 @@
     <title>HandoverGap RAG Usage Guide</title>
     <meta
       name="description"
-      content="Install, run, evaluate, and demo HandoverGap RAG, a Python library for detecting tacit context gaps in handover-oriented RAG memories."
+      content="Install, run, evaluate, and demo HandoverGap RAG, a Python library for checking profile-conditioned context readiness before RAG answers."
     />
     <style>
       :root {
@@ -317,11 +317,11 @@
     <main>
       <div class="wrap hero">
         <div>
-          <p class="eyebrow">Python library for handover-oriented RAG</p>
+          <p class="eyebrow">Python library for profile-conditioned RAG readiness</p>
           <h1>Correct memories are not always transferable.</h1>
           <p class="lead">
             HandoverGap detects missing tacit context in otherwise correct RAG memories,
-            checks the successor responsibility profile, and blocks unsafe transfer with clarification questions.
+            checks the requested profile and task context, and blocks unsafe transfer with clarification questions.
           </p>
           <div class="actions">
             <a class="button primary" href="#install">Start using it</a>
@@ -349,7 +349,7 @@
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
               <h3>Run the built-in demo</h3>
-              <p>See a valid memory that is unsafe to transfer without the successor's required context.</p>
+              <p>See a valid memory that is unsafe to use without the selected profile's required context.</p>
               <pre><code>handovergap demo</code></pre>
             </article>
             <article class="card">
@@ -365,12 +365,12 @@
           <h2>CLI Usage</h2>
           <div class="grid two">
             <article class="card">
-              <h3>Detect gaps for a handover profile</h3>
+              <h3>Detect gaps for a profile</h3>
               <p>
-                `detect` checks a built-in fictional scenario against a successor responsibility
-                profile. `CS`, `Engineer`, and `Sales` are packaged presets, not a fixed industry taxonomy.
+                `detect` checks a built-in fictional scenario against a profile and task context.
+                `CS`, `Engineer`, and `Sales` are packaged presets, not a fixed industry taxonomy.
               </p>
-              <pre><code>handovergap detect --scenario S001 --role CS</code></pre>
+              <pre><code>handovergap detect --scenario S001 --profile CS</code></pre>
             </article>
             <article class="card">
               <h3>Evaluate slot-filling sensitivity</h3>
@@ -379,6 +379,27 @@
                 over-fill required context.
               </p>
               <pre><code>handovergap evaluate --dataset holdout --stress-filling</code></pre>
+            </article>
+            <article class="card">
+              <h3>Retrieve slot evidence</h3>
+              <p>
+                Hybrid retrieval combines vector-style similarity and full-text matching before
+                the gate decides whether the profile has enough context.
+              </p>
+              <pre><code>handovergap retrieve-evidence \
+  --scenario S001 \
+  --profile CS \
+  --slot communication_status \
+  --mode hybrid</code></pre>
+            </article>
+            <article class="card">
+              <h3>Generate a report</h3>
+              <p>
+                Produce a reproducible Markdown report for the bundled mini, holdout,
+                adversarial, and sanitized splits.
+              </p>
+              <pre><code>handovergap report --dataset all \
+  --output reports/evaluation-latest.md</code></pre>
             </article>
           </div>
         </section>
@@ -397,7 +418,7 @@
               <tr>
                 <td>Naive RAG</td>
                 <td>Relevant memory retrieval</td>
-                <td>Whether a successor can safely act</td>
+                <td>Whether a profile can safely act</td>
               </tr>
               <tr>
                 <td>Hybrid RAG</td>
@@ -426,7 +447,7 @@
               <h3>Local bilingual Streamlit demo</h3>
               <p>
                 The UI opens in Japanese by default and can switch to English. Local-sample mode
-                runs the real deterministic detector on fictional handover cases.
+                runs the real deterministic detector on fictional operational cases.
               </p>
               <pre><code>pip install "handovergap[demo]"
 handovergap serve</code></pre>
@@ -466,7 +487,7 @@ handovergap serve</code></pre>
             The generated SQL joins <code>transfer_assessments</code>, <code>memory_items</code>,
             <code>context_gaps</code>, <code>slot_fill_attempts</code>, <code>source_events</code>,
             and <code>clarification_questions</code>. It answers: which required slot was missing,
-            what evidence was checked, and what should be asked before handover.
+            what evidence was checked, and what should be asked before the answer is used.
           </p>
           <table>
             <thead>
@@ -490,16 +511,17 @@ handovergap serve</code></pre>
               </tr>
               <tr>
                 <td>p50 latency</td>
-                <td>22.166 ms</td>
+                <td>48.408 ms</td>
               </tr>
               <tr>
                 <td>p95 latency</td>
-                <td>30.117 ms</td>
+                <td>1510.413 ms</td>
               </tr>
             </tbody>
           </table>
           <p class="small" style="margin-top: 14px">
-            This is a TiDB Cloud smoke result for the audit query path, not a load-test claim.
+            This is a 10-iteration TiDB Cloud smoke result for the audit query path, not a load-test claim.
+            The p95 includes cold or variable cloud latency.
           </p>
         </section>
 
@@ -564,12 +586,18 @@ handovergap serve</code></pre>
           <h2>Python API</h2>
           <div class="grid two">
             <article class="card">
-              <h3>Run the detector in code</h3>
-              <pre><code>from handovergap import HandoverGapDetector, InMemoryStore
+              <h3>Run the gate in code</h3>
+              <pre><code>from handovergap import TransferabilityGate
 
-store = InMemoryStore.from_builtin_dataset()
-detector = HandoverGapDetector(store)
-result = detector.detect(scenario_id="S001", successor_role="CS")
+gate = TransferabilityGate()
+result = gate.check(
+    memory="Use CSV for this release; API support is deferred.",
+    profile="CS",
+    task_context="Answer customer questions about the workaround.",
+    evidence=["CSV workaround approved for the release."],
+    provided_slots=["scope"],
+    evidence_slots=["scope"],
+)
 
 print(result.transferability_status)
 print(result.gaps)

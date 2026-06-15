@@ -50,7 +50,7 @@ Risk:
 
 HandoverGap Position:
 
-> Sayane focuses on accepting and reusing context. HandoverGap focuses on role-conditioned missing tacit context for handover.
+> Sayane focuses on accepting and reusing context. HandoverGap focuses on profile-conditioned missing tacit context for handover.
 
 ## Winning Angle
 

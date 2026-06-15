@@ -11,8 +11,8 @@ Each scenario contains:
 - scenario_id
 - memory
 - evidence_events
-- successor_role
-- handover_task
+- profile
+- task_context
 - gold_gaps
 - gold_questions
 - unsafe_transfer_label
@@ -33,8 +33,8 @@ Each scenario contains:
       "content": "API連携は未着手。CSVインポートで暫定対応する。"
     }
   ],
-  "successor_role": "CS",
-  "handover_task": "顧客問い合わせ対応",
+  "profile": "CS",
+  "task_context": "顧客問い合わせ対応",
   "gold_gaps": [
     {
       "gap_type": "scope_gap",

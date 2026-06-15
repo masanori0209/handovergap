@@ -24,9 +24,9 @@ How many gold questions or their semantic equivalents were generated.
 CQC = covered_gold_questions / total_gold_questions
 ```
 
-## Role-conditioned Gap Accuracy
+## Profile-Conditioned Gap Accuracy
 
-Whether the method detects different gaps for different successor roles.
+Whether the method detects different gaps for different profiles.
 
 Example:
 
@@ -70,7 +70,7 @@ Expected:
 
 ### handovergap
 
-Performs role-conditioned slot filling and gap detection.
+Performs profile-conditioned slot filling and gap detection.
 
 Expected:
 

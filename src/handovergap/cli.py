@@ -4,6 +4,7 @@ import subprocess
 import sys
 from collections import Counter
 from importlib import resources
+from pathlib import Path
 from time import perf_counter
 
 import typer
@@ -13,10 +14,19 @@ from rich.table import Table
 from handovergap.audit import TRANSFER_AUDIT_EXPLANATION, transfer_audit_example_rows, transfer_audit_sql
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
+from handovergap.ingest import scenario_from_jsonl
+from handovergap.profiles import ProfileCatalog
+from handovergap.reporting import generate_evaluation_report
+from handovergap.retrieval import (
+    retrieve_slot_evidence_full_text_local,
+    retrieve_slot_evidence_hybrid_local,
+    retrieve_slot_evidence_local,
+)
 from handovergap.store import InMemoryStore
 from handovergap.stores import TiDBStore
+from handovergap.workload import benchmark_generated_workload
 
-app = typer.Typer(help="Detect tacit context gaps in handover-oriented RAG memories.")
+app = typer.Typer(help="Detect profile-conditioned context gaps in RAG memories.")
 console = Console(width=160)
 
 
@@ -48,17 +58,24 @@ def _print_detection(result) -> None:
 @app.command()
 def demo() -> None:
     """Run the built-in valid-but-non-transferable memory demo."""
-    result = _build_detector().detect(scenario_id="S001", successor_role="CS")
+    result = _build_detector().detect(scenario_id="S001", profile="CS")
     _print_detection(result)
 
 
 @app.command()
 def detect(
     scenario: str = typer.Option(..., "--scenario", "-s", help="Built-in scenario id, e.g. S001."),
-    role: str = typer.Option(..., "--role", "-r", help="Successor role: CS, Engineer, or Sales."),
+    profile: str = typer.Option(..., "--profile", "-p", help="Profile preset: CS, Engineer, or Sales."),
+    profile_file: str | None = typer.Option(None, "--profile-file", help="YAML file with custom profile requirements."),
 ) -> None:
-    """Detect role-conditioned tacit context gaps for one scenario."""
-    result = _build_detector().detect(scenario_id=scenario, successor_role=role)
+    """Detect profile-conditioned tacit context gaps for one scenario."""
+    store = InMemoryStore.from_builtin_dataset()
+    profiles = ProfileCatalog.from_yaml(profile_file) if profile_file else ProfileCatalog.builtins()
+    if profile_file:
+        scenario_input = store.get_scenario_by_id(scenario).model_copy(update={"profile": profile})
+        result = HandoverGapDetector(store=InMemoryStore([scenario_input]), profiles=profiles).detect_scenario(scenario_input)
+    else:
+        result = HandoverGapDetector(store=store, profiles=profiles).detect(scenario_id=scenario, profile=profile)
     _print_detection(result)
 
 
@@ -118,6 +135,83 @@ def evaluate(
 
 
 @app.command()
+def report(
+    dataset: str = typer.Option("all", "--dataset", help="Dataset: mini, holdout, adversarial, sanitized, or all."),
+    output: str | None = typer.Option(None, "--output", "-o", help="Write markdown report to this path."),
+) -> None:
+    """Generate a reproducible markdown evaluation report."""
+    markdown = generate_evaluation_report(dataset)
+    if output:
+        output_path = Path(output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(markdown)
+        console.print(f"Wrote evaluation report: {output_path}")
+    else:
+        console.print(markdown)
+
+
+@app.command()
+def ingest(
+    path: str = typer.Argument(..., help="JSONL source-event file."),
+    memory: str = typer.Option(..., "--memory", help="Retrieved memory text to check."),
+    profile: str = typer.Option(..., "--profile", "-p", help="Profile preset or custom profile name."),
+    task_context: str = typer.Option(..., "--task-context", help="Task context for the readiness check."),
+    scenario: str = typer.Option("jsonl", "--scenario", "-s", help="Scenario id for the in-memory check."),
+    profile_file: str | None = typer.Option(None, "--profile-file", help="YAML file with custom profile requirements."),
+) -> None:
+    """Load JSONL source events and run a profile-conditioned readiness check."""
+    profiles = ProfileCatalog.from_yaml(profile_file) if profile_file else ProfileCatalog.builtins()
+    scenario_input = scenario_from_jsonl(
+        path,
+        scenario_id=scenario,
+        memory=memory,
+        profile=profile,
+        task_context=task_context,
+    )
+    result = HandoverGapDetector(store=InMemoryStore([scenario_input]), profiles=profiles).detect_scenario(scenario_input)
+    console.print(f"Loaded source events: {len(scenario_input.evidence_events)}")
+    _print_detection(result)
+
+
+@app.command("retrieve-evidence")
+def retrieve_evidence(
+    scenario: str = typer.Option(..., "--scenario", "-s", help="Built-in scenario id, e.g. S001."),
+    profile: str = typer.Option(..., "--profile", "-p", help="Profile preset or custom profile name."),
+    slot: str = typer.Option(..., "--slot", help="Required slot to retrieve evidence for."),
+    top_k: int = typer.Option(3, "--top-k", min=1, help="Number of evidence chunks to return."),
+    mode: str = typer.Option("hybrid", "--mode", help="Retrieval mode: vector, fulltext, or hybrid."),
+) -> None:
+    """Retrieve slot-level evidence chunks with deterministic local retrieval."""
+    store = InMemoryStore.from_builtin_dataset()
+    scenario_input = store.get_scenario(scenario, profile)
+    if mode == "vector":
+        chunks = retrieve_slot_evidence_local(scenario_input, slot, top_k=top_k)
+    elif mode == "fulltext":
+        chunks = retrieve_slot_evidence_full_text_local(scenario_input, slot, top_k=top_k)
+    elif mode == "hybrid":
+        chunks = retrieve_slot_evidence_hybrid_local(scenario_input, slot, top_k=top_k)
+    else:
+        raise typer.BadParameter("mode must be one of: vector, fulltext, hybrid")
+
+    table = Table(title=f"Slot evidence / mode={mode} / scenario={scenario} / profile={profile} / slot={slot}")
+    table.add_column("rank", justify="right")
+    table.add_column("chunk_id", no_wrap=True)
+    table.add_column("source", no_wrap=True)
+    table.add_column("distance", justify="right", no_wrap=True)
+    table.add_column("content")
+    for index, chunk in enumerate(chunks, start=1):
+        table.add_row(
+            str(index),
+            chunk.chunk_id,
+            chunk.source_type or "",
+            f"{chunk.distance:.4f}",
+            chunk.content,
+        )
+    console.print(table)
+    console.print(f"retrieved_event_ids={[chunk.source_event_id for chunk in chunks if chunk.source_event_id is not None]}")
+
+
+@app.command()
 def schema(
     dialect: str = typer.Option("tidb", "--dialect", help="Schema dialect to print. Only 'tidb' is bundled."),
 ) -> None:
@@ -150,7 +244,7 @@ def audit_example() -> None:
         table.add_row(
             row["transfer_status"],
             row["scenario_id"],
-            row["successor_role"],
+            row["profile"],
             row["slot_name"],
             row["severity"],
             row["selected_evidence_title"],
@@ -207,6 +301,25 @@ def audit_benchmark(
     for slot, count in slot_counts.most_common(6):
         slot_table.add_row(slot, str(count))
     console.print(slot_table)
+
+
+@app.command("workload-benchmark")
+def workload_benchmark(
+    scenarios: int = typer.Option(1000, "--scenarios", min=1, help="Generated scenario count."),
+    iterations: int = typer.Option(5, "--iterations", min=1, help="Repeated local runs for timing."),
+) -> None:
+    """Benchmark generated workload materialization without requiring live TiDB."""
+    result = benchmark_generated_workload(count=scenarios, iterations=iterations)
+    table = Table(title="Generated workload benchmark")
+    table.add_column("Metric")
+    table.add_column("Value", justify="right")
+    for key, value in result.model_dump().items():
+        if key.endswith("_ms"):
+            table.add_row(key, f"{value:.3f}")
+        else:
+            table.add_row(key, str(value))
+    console.print(table)
+    console.print("This is a generated local workload sizing check, not a TiDB latency claim.")
 
 
 @app.command()

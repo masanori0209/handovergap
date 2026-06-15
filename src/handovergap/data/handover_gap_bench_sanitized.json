@@ -9,9 +9,9 @@
         {"source_type": "crm_note", "content": "Customer success note says the tenant was informed that CSV import remains valid for June only. Support may say API migration is deferred, but may not promise the July date."},
         {"source_type": "runbook", "content": "If CSV import fails twice, escalate to the integration on-call channel and offer manual upload as a temporary fallback."}
       ],
-      "successor_role": "CS",
+      "profile": "CS",
       "memory_type": "decision",
-      "handover_task": "Answer renewal-week questions about CSV import and API timing",
+      "task_context": "Answer renewal-week questions about CSV import and API timing",
       "provided_slots": ["communication_status", "scope", "fallback_plan", "escalation_path"],
       "evidence_slots": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path"],
       "slot_fill_profiles": {
@@ -38,9 +38,9 @@
         {"source_type": "incident_timeline", "content": "Patch 2026-06-12-b fixes the null account segment. Rerun scope is billing_export only. Retry must stop if duplicate invoice rows appear."},
         {"source_type": "runbook", "content": "Runbook RB-77 includes the rerun command, duplicate-row failure mode, dashboard check, and owning issue OPS-4182."}
       ],
-      "successor_role": "Engineer",
+      "profile": "Engineer",
       "memory_type": "procedure",
-      "handover_task": "Take over the billing export rerun during APAC business hours",
+      "task_context": "Take over the billing export rerun during APAC business hours",
       "provided_slots": ["technical_constraint", "implementation_scope", "related_issue", "failure_modes"],
       "evidence_slots": ["rationale", "technical_constraint", "implementation_scope", "related_issue", "failure_modes"],
       "slot_fill_profiles": {
@@ -66,9 +66,9 @@
       "evidence_events": [
         {"source_type": "crm_note", "content": "Procurement approval is not yet received. Customer expects a proposal this week, but the discount cap and exception terms are not confirmed."}
       ],
-      "successor_role": "Sales",
+      "profile": "Sales",
       "memory_type": "decision",
-      "handover_task": "Continue renewal negotiation after account-owner handoff",
+      "task_context": "Continue renewal negotiation after account-owner handoff",
       "provided_slots": ["customer_expectation", "timeline_confidence"],
       "evidence_slots": ["customer_expectation", "timeline_confidence"],
       "slot_fill_profiles": {
@@ -99,9 +99,9 @@
         {"source_type": "support_macro", "content": "Approved macro includes rollout scope, customer-facing wording, escalation path, fallback to password login, and permission to answer standard questions."},
         {"source_type": "release_checklist", "content": "All affected tenants were notified; unresolved SSO edge cases go to identity on-call."}
       ],
-      "successor_role": "CS",
+      "profile": "CS",
       "memory_type": "procedure",
-      "handover_task": "Answer standard rollout questions during the first support shift",
+      "task_context": "Answer standard rollout questions during the first support shift",
       "provided_slots": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"],
       "evidence_slots": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"],
       "slot_fill_profiles": {
@@ -123,9 +123,9 @@
       "evidence_events": [
         {"source_type": "ops_note", "content": "Region-B only. Metrics to watch: queue_age_p95, error_rate, worker_restart_count. Related issue OPS-5020. If error_rate exceeds threshold, disable the job."}
       ],
-      "successor_role": "Engineer",
+      "profile": "Engineer",
       "memory_type": "task",
-      "handover_task": "Decide whether to enable the queue-drain job after handoff",
+      "task_context": "Decide whether to enable the queue-drain job after handoff",
       "provided_slots": ["implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"],
       "evidence_slots": ["technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"],
       "slot_fill_profiles": {
@@ -152,9 +152,9 @@
         {"source_type": "crm_note", "content": "Customer expects pilot expansion, not enterprise add-on. Pricing approval is pending. Current promise boundary is pilot seats only."},
         {"source_type": "deal_review", "content": "No contract impact for pilot expansion. Enterprise add-on commercial terms are unresolved."}
       ],
-      "successor_role": "Sales",
+      "profile": "Sales",
       "memory_type": "task",
-      "handover_task": "Prepare the next customer meeting after account-owner transfer",
+      "task_context": "Prepare the next customer meeting after account-owner transfer",
       "provided_slots": ["contract_impact", "promise_boundary", "customer_expectation", "negotiation_status"],
       "evidence_slots": ["contract_impact", "promise_boundary", "customer_expectation", "negotiation_status"],
       "slot_fill_profiles": {

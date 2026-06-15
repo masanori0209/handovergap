@@ -20,14 +20,14 @@ This improves PyPI first-run experience, evaluation evidence, article comparison
 
 - [x] `.venv/bin/handovergap --help`
 - [x] `.venv/bin/handovergap demo`
-- [x] `.venv/bin/handovergap detect --scenario S001 --role CS`
+- [x] `.venv/bin/handovergap detect --scenario S001 --profile CS`
 - [x] `.venv/bin/handovergap evaluate --compare`
 - [x] `.venv/bin/pytest`
 
 ## Observations
 
 - HandoverGapBench mini contains 20 synthetic scenarios across CS, Engineer, and Sales.
-- The deterministic detector uses role-conditioned missing slots, so P0 does not require OpenAI or TiDB.
+- The deterministic detector uses profile-conditioned missing slots, so P0 does not require OpenAI or TiDB.
 - `hybrid_rag` is intentionally weak but non-zero, giving the article a more credible comparison than a naive-only baseline.
 
 ## Failures
