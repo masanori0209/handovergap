@@ -198,6 +198,34 @@ WHERE ta.status = 'blocked';
 
 これは単なるVector Store利用ではなく、SQL、Vector、JSON、関係スキーマを同じTiDB上で扱うための設計です。読者が知りたい「記憶は取れているのに、なぜ回答を止めたのか」に、評価ログから答えられます。
 
+実TiDB Cloud上でも、匿名化業務メモ風の `sanitized` splitを投入して監査JOINを実行しました。
+
+```bash
+python harness/validation/tidb_audit_query_check.py --create-schema --dataset sanitized --iterations 30
+```
+
+| Item | Observed |
+|---|---:|
+| scenarios | 6 |
+| source_events | 10 |
+| slot_fill_attempts | 34 |
+| context_gaps | 7 |
+| clarification_questions | 7 |
+| transfer_assessments | 6 |
+| audit query result rows | 7 |
+| p50 audit query latency | 22.166 ms |
+| p95 audit query latency | 30.117 ms |
+
+これは負荷試験の主張ではありません。ただし、TiDB上に保存したスロット抽出、gap、質問、transfer判断を、実際にJOINして説明できることは確認できました。
+
+監査クエリの結果例:
+
+| Scenario | Profile | Missing slot | Evidence | Question |
+|---|---|---|---|---|
+| R005 | Engineer | rationale | ops_note | この判断に至った理由は何ですか？ |
+| R006 | Sales | timeline_confidence | crm_note | 提示できる時期の確度はどの程度ですか？ |
+| R001 | CS | customer_facing_wording | crm_note | 外部向けにはどの表現で説明すべきですか？ |
+
 ## HandoverGapBench mini
 
 再現可能な比較のため、20件の合成シナリオを同梱しました。

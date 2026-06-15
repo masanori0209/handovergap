@@ -182,6 +182,24 @@ That query joins `transfer_assessments`, `memory_items`, `context_gaps`, `slot_f
 
 `audit-benchmark` measures local audit-row materialization for the bundled scenarios and reports row counts, blocked-transfer counts, top missing slots, and p50/p95 local runtime. It is not a TiDB latency claim; it sizes the audit workload that TiDB stores and queries.
 
+Live TiDB Cloud smoke result for the blocked-transfer audit query:
+
+| Item | Observed value |
+|---|---:|
+| Dataset persisted | `sanitized` |
+| Scenarios | 6 |
+| Source events | 10 |
+| Slot-fill attempts | 34 |
+| Context gaps | 7 |
+| Clarification questions | 7 |
+| Transfer assessments | 6 |
+| Audit query result rows | 7 |
+| Query iterations | 30 |
+| p50 audit query latency | `22.166 ms` |
+| p95 audit query latency | `30.117 ms` |
+
+This is a live TiDB Cloud smoke result, not a load-test claim. The detailed output is saved in [`article/tidb_audit_query_results.md`](article/tidb_audit_query_results.md).
+
 ### Live TiDB Validation
 
 After creating a TiDB Cloud cluster, open **Connect**, choose a public Python/SQLAlchemy-compatible connection, generate or reset the password, and export the connection values locally:
@@ -199,6 +217,7 @@ Then run:
 
 ```bash
 python harness/validation/tidb_live_check.py --create-schema
+python harness/validation/tidb_audit_query_check.py --create-schema --dataset sanitized --iterations 30
 ```
 
 The check creates the packaged schema if needed, writes one synthetic memory, persists a slot-fill attempt, a context gap, a transfer assessment, and the holdout stress evaluation runs, then prints row counts as JSON. Do not commit `.env` files or TiDB credentials.

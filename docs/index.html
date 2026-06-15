@@ -468,6 +468,39 @@ handovergap serve</code></pre>
             and <code>clarification_questions</code>. It answers: which required slot was missing,
             what evidence was checked, and what should be asked before handover.
           </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Live TiDB smoke check</th>
+                <th>Observed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Dataset</td>
+                <td>sanitized</td>
+              </tr>
+              <tr>
+                <td>Persisted scenarios</td>
+                <td>6</td>
+              </tr>
+              <tr>
+                <td>Audit query rows</td>
+                <td>7</td>
+              </tr>
+              <tr>
+                <td>p50 latency</td>
+                <td>22.166 ms</td>
+              </tr>
+              <tr>
+                <td>p95 latency</td>
+                <td>30.117 ms</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="small" style="margin-top: 14px">
+            This is a TiDB Cloud smoke result for the audit query path, not a load-test claim.
+          </p>
         </section>
 
         <section id="evaluation">

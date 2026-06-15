@@ -158,6 +158,24 @@ handovergap audit-benchmark --dataset all --iterations 100
 
 `audit-benchmark` は、同梱シナリオから監査行をローカル生成し、行数、blocked件数、頻出不足スロット、p50/p95実行時間を表示します。これはTiDBクエリレイテンシの主張ではなく、TiDBに保存・照会する監査ワークロードの規模を見るための実測です。
 
+実TiDB Cloudでのblocked-transfer監査クエリのスモーク結果:
+
+| 項目 | 観測値 |
+|---|---:|
+| 投入dataset | `sanitized` |
+| シナリオ | 6 |
+| source events | 10 |
+| slot-fill attempts | 34 |
+| context gaps | 7 |
+| clarification questions | 7 |
+| transfer assessments | 6 |
+| 監査クエリ結果行 | 7 |
+| クエリ実行回数 | 30 |
+| p50監査クエリlatency | `22.166 ms` |
+| p95監査クエリlatency | `30.117 ms` |
+
+これはTiDB Cloud上のスモーク実測であり、負荷試験の主張ではありません。詳細は [`article/tidb_audit_query_results.md`](article/tidb_audit_query_results.md) に保存しています。
+
 ### TiDB実接続の検証
 
 TiDB Cloudでクラスタを作成したあと、**Connect**を開き、Public接続とPython/SQLAlchemy互換の接続情報を取得します。パスワードを生成またはリセットし、ローカルでは次のように環境変数へ入れてください。
@@ -175,6 +193,7 @@ export TIDB_CA_PATH="/path/to/ca-certificates.crt"
 
 ```bash
 python harness/validation/tidb_live_check.py --create-schema
+python harness/validation/tidb_audit_query_check.py --create-schema --dataset sanitized --iterations 30
 ```
 
 この検証はschemaを作成し、合成memoryを1件、スロット抽出試行、context gap、transfer assessment、holdout stress評価結果を保存して、件数をJSONで出力します。`.env`やTiDB認証情報はコミットしないでください。

@@ -100,3 +100,20 @@ Observed after the `0.1.3` patch:
 ## TiDB Audit Query
 
 `handovergap audit-sql` prints the packaged blocked-transfer audit query. It joins `transfer_assessments`, `memory_items`, `context_gaps`, `slot_fill_attempts`, `source_events`, and `clarification_questions` so a blocked result can be explained from the transfer decision back to missing profile-required slots, checked evidence, and generated questions.
+
+Observed live on TiDB Cloud with the `sanitized` split:
+
+| Item | Value |
+|---|---:|
+| Scenarios persisted | 6 |
+| Source events | 10 |
+| Slot-fill attempts | 34 |
+| Context gaps | 7 |
+| Clarification questions | 7 |
+| Transfer assessments | 6 |
+| Audit query result rows | 7 |
+| Query iterations | 30 |
+| p50 audit query latency | `22.166 ms` |
+| p95 audit query latency | `30.117 ms` |
+
+See `article/tidb_audit_query_results.md` and `article/tidb_audit_query_results.json` for the sample rows and EXPLAIN output.
