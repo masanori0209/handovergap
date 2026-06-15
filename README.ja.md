@@ -178,11 +178,29 @@ handovergap audit-benchmark --dataset all --iterations 100
 | clarification questions | 7 |
 | transfer assessments | 6 |
 | 監査クエリ結果行 | 7 |
-| クエリ実行回数 | 30 |
+| クエリ実行回数 | 10 |
 | p50監査クエリlatency | `48.408 ms` |
 | p95監査クエリlatency | `1510.413 ms` |
 
 これはTiDB Cloud上の10 iteration実DB検証であり、負荷試験の主張ではありません。p95にはcold/クラウド側の揺れが含まれるため、性能ベンチではなく監査パスが実DBで動く証拠として扱います。詳細は [`article/tidb_audit_query_results.md`](article/tidb_audit_query_results.md) に保存しています。
+
+生成ワークロードを実TiDB Cloudに投入した検証結果:
+
+| 項目 | 観測値 |
+|---|---:|
+| 生成シナリオ | 100 |
+| source events | 100 |
+| memory chunks | 200 |
+| slot-fill attempts | 567 |
+| context gaps | 254 |
+| clarification questions | 254 |
+| transfer assessments | 100 |
+| 監査クエリ結果行 | 254 |
+| クエリ実行回数 | 10 |
+| p50監査クエリlatency | `38.818 ms` |
+| p95監査クエリlatency | `574.713 ms` |
+
+生成ワークロードの詳細は [`article/tidb_workload_audit_results.md`](article/tidb_workload_audit_results.md) に保存しています。ローカル生成では100、1,000、10,000シナリオ相当の監査行数も記録しています。
 
 ### TiDB実接続の検証
 

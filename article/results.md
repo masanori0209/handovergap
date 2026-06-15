@@ -112,8 +112,34 @@ Observed live on TiDB Cloud with the `sanitized` split:
 | Clarification questions | 7 |
 | Transfer assessments | 6 |
 | Audit query result rows | 7 |
-| Query iterations | 30 |
+| Query iterations | 10 |
 | p50 audit query latency | `48.408 ms` |
 | p95 audit query latency | `1510.413 ms` |
 
 See `article/tidb_audit_query_results.md` and `article/tidb_audit_query_results.json` for the sample rows and EXPLAIN output.
+
+Generated workload persisted to live TiDB Cloud:
+
+| Item | Value |
+|---|---:|
+| Generated scenarios persisted | 100 |
+| Source events | 100 |
+| Memory chunks | 200 |
+| Slot-fill attempts | 567 |
+| Context gaps | 254 |
+| Clarification questions | 254 |
+| Transfer assessments | 100 |
+| Audit query result rows | 254 |
+| Query iterations | 10 |
+| p50 audit query latency | `38.818 ms` |
+| p95 audit query latency | `574.713 ms` |
+
+Local generated workload scaling:
+
+| Scenarios | Assessments | Gaps | Questions | Blocked | p50 local ms | p95 local ms |
+|---:|---:|---:|---:|---:|---:|---:|
+| 100 | 100 | 254 | 254 | 24 | 2.522 | 3.140 |
+| 1,000 | 1,000 | 2,505 | 2,505 | 238 | 13.386 | 18.147 |
+| 10,000 | 10,000 | 25,007 | 25,007 | 2,382 | 143.003 | 143.636 |
+
+See `article/tidb_workload_audit_results.md` and `article/tidb_workload_audit_results.json` for generated workload rows and sample blocked-transfer audit rows.

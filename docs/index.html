@@ -523,6 +523,36 @@ handovergap serve</code></pre>
             This is a 10-iteration TiDB Cloud validation result for the audit query path, not a load-test claim.
             The p95 includes cold or variable cloud latency.
           </p>
+          <table style="margin-top: 18px">
+            <thead>
+              <tr>
+                <th>Generated workload on TiDB</th>
+                <th>Observed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Generated scenarios</td>
+                <td>100</td>
+              </tr>
+              <tr>
+                <td>Slot-fill attempts</td>
+                <td>567</td>
+              </tr>
+              <tr>
+                <td>Context gaps / questions</td>
+                <td>254 / 254</td>
+              </tr>
+              <tr>
+                <td>Audit query rows</td>
+                <td>254</td>
+              </tr>
+              <tr>
+                <td>p50 / p95 latency</td>
+                <td>38.818 ms / 574.713 ms</td>
+              </tr>
+            </tbody>
+          </table>
         </section>
 
         <section id="evaluation">

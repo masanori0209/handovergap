@@ -220,6 +220,40 @@ python harness/validation/tidb_audit_query_check.py --reset-schema --dataset san
 
 これは負荷試験の主張ではありません。ただし、TiDB上に保存したスロット抽出、gap、質問、transfer判断を、実際にJOINして説明できることは確認できました。
 
+さらに生成ワークロード100件もTiDBへ投入し、同じ監査クエリで追跡しました。
+
+```bash
+python harness/validation/tidb_workload_audit_check.py \
+  --reset-schema \
+  --scenarios 100 \
+  --iterations 10 \
+  --persist-batch-size 10 \
+  --local-scale 100,1000,10000
+```
+
+| Item | Observed |
+|---|---:|
+| generated scenarios | 100 |
+| source_events | 100 |
+| memory_chunks | 200 |
+| slot_fill_attempts | 567 |
+| context_gaps | 254 |
+| clarification_questions | 254 |
+| transfer_assessments | 100 |
+| audit query result rows | 254 |
+| p50 audit query latency | 38.818 ms |
+| p95 audit query latency | 574.713 ms |
+
+ローカル生成では、100件、1,000件、10,000件相当の監査行数も確認しました。
+
+| Scenarios | Assessments | Gaps | Questions | Blocked |
+|---:|---:|---:|---:|---:|
+| 100 | 100 | 254 | 254 | 24 |
+| 1,000 | 1,000 | 2,505 | 2,505 | 238 |
+| 10,000 | 10,000 | 25,007 | 25,007 | 2,382 |
+
+ここで強調したいのは、レイテンシの速さではなく、blocked transferを「どの記憶、どのプロファイル、どの不足slot、どの証拠、どの確認質問」までSQLで追えることです。TiDBを単なるVector Storeではなく、AI判断過程の監査DBとして使う、というこの記事の実装上のポイントです。
+
 監査クエリの結果例:
 
 | Scenario | Profile | Missing slot | Evidence | Question |

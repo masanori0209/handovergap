@@ -103,7 +103,7 @@ Output:
 
 - CLI command
 - README quickstart
-- smoke test
+- quick validation check
 
 ### Evaluation Loop
 
@@ -158,7 +158,7 @@ Purpose: Keep code maintainable.
 Test
 → Implement
 → Lint
-→ Smoke test
+→ Quick validation check
 → Docs update
 → Handoff
 ```
@@ -189,7 +189,7 @@ Output:
 
 ## Validation Levels
 
-### L0: Local Smoke
+### L0: Local Validation
 
 ```bash
 handovergap --help
@@ -234,7 +234,7 @@ Do not add new features.
 
 1. Simplify command.
 2. Update README.
-3. Add smoke test.
+3. Add a quick validation check.
 4. Do not add a new command unless necessary.
 
 ### If novelty claim is unsupported

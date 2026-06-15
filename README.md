@@ -224,11 +224,29 @@ Live TiDB Cloud validation result for the blocked-transfer audit query:
 | Clarification questions | 7 |
 | Transfer assessments | 6 |
 | Audit query result rows | 7 |
-| Query iterations | 30 |
+| Query iterations | 10 |
 | p50 audit query latency | `48.408 ms` |
 | p95 audit query latency | `1510.413 ms` |
 
 This is a live TiDB Cloud validation result over 10 iterations, not a load-test claim. The p95 includes cold/variable cloud latency and should be read as proof that the audit path runs on a real database, not as a performance benchmark. The detailed output is saved in [`article/tidb_audit_query_results.md`](article/tidb_audit_query_results.md).
+
+Generated workload validation on live TiDB Cloud:
+
+| Item | Observed value |
+|---|---:|
+| Generated scenarios persisted | 100 |
+| Source events | 100 |
+| Memory chunks | 200 |
+| Slot-fill attempts | 567 |
+| Context gaps | 254 |
+| Clarification questions | 254 |
+| Transfer assessments | 100 |
+| Audit query result rows | 254 |
+| Query iterations | 10 |
+| p50 audit query latency | `38.818 ms` |
+| p95 audit query latency | `574.713 ms` |
+
+The generated workload result is saved in [`article/tidb_workload_audit_results.md`](article/tidb_workload_audit_results.md). It also records local workload scaling for 100, 1,000, and 10,000 scenarios.
 
 ### Live TiDB Validation
 
