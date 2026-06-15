@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from handovergap import TiDBStore
 from handovergap.core.evaluator import HandoverGapEvaluator
@@ -51,7 +51,7 @@ def main() -> int:
     if args.create_schema:
         store.create_schema(engine)
 
-    scenario_id = "LIVE-TIDB-" + datetime.now(UTC).strftime("%Y%m%d%H%M%S")
+    scenario_id = "LIVE-TIDB-" + datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     with engine.begin() as connection:
         connection.execute(
             text(

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
@@ -15,7 +15,7 @@ def generate_evaluation_report(dataset: str = "all") -> str:
     lines = [
         "# HandoverGap Evaluation Report",
         "",
-        f"Generated at: `{datetime.now(UTC).isoformat()}`",
+        f"Generated at: `{datetime.now(timezone.utc).isoformat()}`",
         "",
         "## Scope",
         "",

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -63,7 +63,7 @@ def main() -> int:
 
     metrics = _metrics_from_rows(scenario_rows)
     payload = {
-        "generated_at": datetime.now(UTC).isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "dataset": args.dataset,
         "model": args.model,
         "prompt_profile": prompt_profile,

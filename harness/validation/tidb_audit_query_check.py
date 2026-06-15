@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
 from time import perf_counter
@@ -40,7 +40,7 @@ def main() -> int:
     if args.create_schema:
         store.create_schema(engine)
 
-    run_id = "AUDIT-" + datetime.now(UTC).strftime("%Y%m%d%H%M%S")
+    run_id = "AUDIT-" + datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     scenarios = InMemoryStore.from_builtin_dataset(args.dataset).list_scenarios()
     inserted = _persist_dataset(engine, text, scenarios, run_id)
     timings, rows = _measure_audit_query(engine, text, run_id, args.iterations)
@@ -332,7 +332,7 @@ def _render_markdown(result: dict[str, Any]) -> str:
     lines = [
         "# TiDB Audit Query Live Result",
         "",
-        f"- Observed at: {datetime.now(UTC).date().isoformat()}",
+        f"- Observed at: {datetime.now(timezone.utc).date().isoformat()}",
         f"- Dataset: `{result['dataset']}`",
         f"- Scenarios persisted: {result['scenario_count']}",
         f"- Audit query result rows: {result['audit_query']['result_rows']}",
