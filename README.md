@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.4`
+Latest tested release: `handovergap==0.1.5`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -88,11 +88,11 @@ In the current MVP, `CS`, `Engineer`, and `Sales` are built-in role profiles use
 
 `handovergap evaluate --compare` runs the bundled synthetic HandoverGapBench mini dataset.
 
-| Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision |
-|---|---:|---:|---:|---:|---:|
-| naive_rag | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 |
-| hybrid_rag | 0.21 | 0.59 | 0.21 | 0.67 | 0.91 |
-| handovergap | 1.00 | 0.65 | 1.00 | 1.00 | 1.00 |
+| Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision | False Clarification Rate |
+|---|---:|---:|---:|---:|---:|---:|
+| naive_rag | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 | 0.00 |
+| hybrid_rag | 0.21 | 0.59 | 0.21 | 0.67 | 0.91 | 1.00 |
+| handovergap | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.00 |
 
 These are deterministic results from the bundled 20-scenario dataset. The benchmark is synthetic and intentionally small; it demonstrates reproducible behavior rather than production accuracy.
 
@@ -102,13 +102,41 @@ For a small unknown holdout set with adjudicated synthetic reviewer labels and s
 handovergap evaluate --dataset holdout --stress-filling
 ```
 
-| Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision |
-|---|---:|---:|---:|---:|---:|
-| handovergap/provided | 1.00 | 0.67 | 1.00 | 1.00 | 1.00 |
-| handovergap/conservative | 1.00 | 0.67 | 1.00 | 0.67 | 0.67 |
-| handovergap/optimistic | 0.64 | 0.67 | 0.64 | 1.00 | 1.00 |
+| Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision | False Clarification Rate |
+|---|---:|---:|---:|---:|---:|---:|
+| handovergap/provided | 1.00 | 0.67 | 1.00 | 1.00 | 1.00 | 0.00 |
+| handovergap/conservative | 1.00 | 0.67 | 1.00 | 0.67 | 0.67 | 1.00 |
+| handovergap/optimistic | 0.64 | 0.67 | 0.64 | 1.00 | 1.00 | 0.00 |
 
 The optimistic profile simulates an LLM over-filling ambiguous slots. It shows a real failure mode: recall drops, while unsafe-transfer prevention stays incomplete at `0.67`.
+
+The adversarial split breaks the structural alignment between `provided_slots` and `gold_gaps`:
+
+```bash
+handovergap evaluate --dataset adversarial --compare
+```
+
+| Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision | False Clarification Rate |
+|---|---:|---:|---:|---:|---:|---:|
+| naive_rag | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 | 0.00 |
+| hybrid_rag | 0.25 | 0.67 | 0.25 | 1.00 | 1.00 | 0.00 |
+| handovergap | 0.38 | 0.67 | 0.38 | 1.00 | 1.00 | 0.00 |
+
+This is intentionally harder. It shows that simply increasing scenario count is not enough when labels and detector inputs share the same structure. In `0.1.5`, HandoverGap also treats explicit evidence slots as filled, which reduces the adversarial false clarification rate from `0.67` to `0.00` without pretending recall is solved.
+
+For a field-realistic but still non-sensitive dataset, use the sanitized split:
+
+```bash
+handovergap evaluate --dataset sanitized --compare
+```
+
+| Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision | False Clarification Rate |
+|---|---:|---:|---:|---:|---:|---:|
+| naive_rag | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 | 0.00 |
+| hybrid_rag | 0.71 | 0.20 | 0.71 | 1.00 | 1.00 | 0.00 |
+| handovergap | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.00 |
+
+The sanitized split is synthetic, but it is written like anonymized CRM notes, incident timelines, runbooks, release checklists, and deal reviews. It does not include real company, employee, customer, ticket, or account data.
 
 With optional live OpenAI semantic slot filling:
 
@@ -144,9 +172,15 @@ The TiDB-specific value is not only vector search. HandoverGap stores the whole 
 
 ```bash
 handovergap audit-sql
+handovergap audit-example
+handovergap audit-benchmark --dataset all --iterations 100
 ```
 
 That query joins `transfer_assessments`, `memory_items`, `context_gaps`, `slot_fill_attempts`, `source_events`, and `clarification_questions`. It answers the operational question: “this memory was retrieved, so exactly which required slot was missing, what evidence was checked, and what should we ask before handing it over?”
+
+`audit-example` prints a compact blocked-transfer result table so the audit path can be reviewed without a live TiDB connection.
+
+`audit-benchmark` measures local audit-row materialization for the bundled scenarios and reports row counts, blocked-transfer counts, top missing slots, and p50/p95 local runtime. It is not a TiDB latency claim; it sizes the audit workload that TiDB stores and queries.
 
 ### Live TiDB Validation
 
@@ -194,7 +228,8 @@ python3 -m venv .venv
 ## Limitations
 
 - The bundled detector and baselines are deterministic rules, not learned models.
-- HandoverGapBench mini and holdout contain synthetic scenarios.
+- HandoverGapBench mini and holdout contain synthetic scenarios; the sanitized split is field-realistic but still synthetic and non-sensitive.
+- Adding more scenarios alone does not prove production accuracy if required slots and gold gaps are structurally aligned; independent annotation is the next step.
 - Slot-filling stress profiles simulate LLM variance; they are not a replacement for a live LLM evaluation.
 - Live OpenAI slot filling is optional and not required for first-run usage.
 - Live OpenAI slot filling is model-sensitive; current holdout results differ materially between `gpt-4.1-mini` and `gpt-5-mini`.

@@ -20,32 +20,37 @@ This means `Tacit Gap Recall = 1.00` is best interpreted as an implementation co
 
 ## Post-Fix Results
 
-After removing direct label access from predictors:
+After removing direct label access from predictors and reconciling explicit evidence slots before asking questions:
 
-| Dataset / Mode | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision |
-|---|---:|---:|---:|---:|---:|
-| mini / handovergap | 1.00 | 0.65 | 1.00 | 1.00 | 1.00 |
-| holdout / provided | 1.00 | 0.67 | 1.00 | 1.00 | 1.00 |
-| holdout / conservative | 1.00 | 0.67 | 1.00 | 0.67 | 0.67 |
-| holdout / optimistic | 0.64 | 0.67 | 0.64 | 1.00 | 1.00 |
+| Dataset / Mode | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision | False Clarification Rate |
+|---|---:|---:|---:|---:|---:|---:|
+| mini / handovergap | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.00 |
+| holdout / provided | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.00 |
+| holdout / conservative | 1.00 | 1.00 | 1.00 | 0.67 | 0.75 | 0.33 |
+| holdout / optimistic | 0.64 | 1.00 | 0.64 | 1.00 | 1.00 | 0.00 |
+| adversarial / handovergap | 0.38 | 0.67 | 0.38 | 1.00 | 1.00 | 0.00 |
+| sanitized / handovergap | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.00 |
 | holdout / OpenAI slot fill / gpt-4.1-mini | 0.91 | 0.33 | n/a | 0.67 | 0.50 |
 | holdout / OpenAI slot fill / gpt-5-mini | 0.45 | 0.33 | n/a | 0.67 | 0.50 |
 | holdout / OpenAI slot fill / gpt-5-mini / gpt5_strict | 1.00 | 0.67 | n/a | 1.00 | 1.00 |
 
 ## Interpretation
 
-The mechanism is still useful as a role-conditioned missing-slot checker, but the previous `1.00` unsafe-transfer claim depended on evaluation leakage.
+The mechanism is still useful as a successor-profile-conditioned missing-slot checker, but the mini and holdout splits remain too structurally aligned for production claims.
+
+The adversarial split is the stricter signal: recall stays low at `0.38`, while evidence-backed slot reconciliation reduces false clarification from the earlier `0.67` failure mode to `0.00`. This is a better article claim than pretending the mini benchmark proves production accuracy.
+
+The sanitized split adds field-realistic, anonymized CRM, incident, runbook, release-checklist, and deal-review style notes. It is still synthetic and contains no real company or customer data, but it exercises more realistic handover phrasing than the original mini dataset.
 
 The `gpt-5-mini` live run used 1,901 input tokens and 8,136 output tokens, including 5,184 reasoning tokens, for an estimated cost of `$0.0167` at the observed GPT-5 mini pricing.
 
 The tuned `gpt5_strict` prompt improved `gpt-5-mini` by adding slot-specific acceptance criteria and a policy for treating synthetic evidence summaries as direct support when they explicitly say a required item is documented. This is useful evidence that prompt calibration matters, but it is also closer to the holdout annotation protocol. It should not be treated as independent production accuracy.
 
-The strict prompt still produced an unnecessary clarification in safe scenario `U006` (`timeline_confidence`). Current headline metrics do not fully penalize this because `safe_transfer_allowance` only checks whether the scenario was blocked, not whether it was marked exactly transferable.
+The strict prompt still produced an unnecessary clarification in safe scenario `U006` (`timeline_confidence`). False Clarification Rate now makes this visible.
 
 The next useful improvement is not more scenarios with the same `provided_slots` structure. It is a stricter input pipeline:
 
 - derive `provided_slots` from evidence with a calibrated slot-filling model;
 - keep `gold_gaps` and `unsafe_transfer_label` evaluation-only;
 - tune the block policy without reading labels;
-- add adversarial safe cases where some slots are ambiguous but transfer should not be blocked.
-- add a false-clarification or exact-transferability metric for safe cases.
+- run the audit query against live TiDB with a larger anonymized workload and record p50/p95 query latency.

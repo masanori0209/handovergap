@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from collections import Counter
 from importlib import resources
+from time import perf_counter
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
-from handovergap.audit import TRANSFER_AUDIT_EXPLANATION, transfer_audit_sql
+from handovergap.audit import TRANSFER_AUDIT_EXPLANATION, transfer_audit_example_rows, transfer_audit_sql
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.store import InMemoryStore
@@ -63,7 +65,11 @@ def detect(
 @app.command()
 def evaluate(
     compare: bool = typer.Option(False, "--compare", help="Compare HandoverGap with naive and hybrid baselines."),
-    dataset: str = typer.Option("mini", "--dataset", help="Built-in dataset: mini, holdout, or all."),
+    dataset: str = typer.Option(
+        "mini",
+        "--dataset",
+        help="Built-in dataset: mini, holdout, adversarial, sanitized, or all.",
+    ),
     slot_profile: str = typer.Option(
         "provided",
         "--slot-profile",
@@ -96,6 +102,7 @@ def evaluate(
     table.add_column("Question Coverage", justify="right", no_wrap=True)
     table.add_column("Safe Transfer Allowance", justify="right", no_wrap=True)
     table.add_column("Blocked Precision", justify="right", no_wrap=True)
+    table.add_column("False Clarification Rate", justify="right", no_wrap=True)
     for metrics in rows:
         table.add_row(
             metrics.method,
@@ -105,6 +112,7 @@ def evaluate(
             f"{metrics.question_coverage:.2f}",
             f"{metrics.safe_transfer_allowance:.2f}",
             f"{metrics.blocked_precision:.2f}",
+            f"{metrics.false_clarification_rate:.2f}",
         )
     console.print(table)
 
@@ -125,6 +133,80 @@ def audit_sql() -> None:
     console.print(f"[bold]Purpose:[/bold] {TRANSFER_AUDIT_EXPLANATION}")
     console.print()
     console.print(transfer_audit_sql())
+
+
+@app.command("audit-example")
+def audit_example() -> None:
+    """Show a compact example of blocked-transfer audit query results."""
+    table = Table(title="Example TiDB blocked-transfer audit result")
+    table.add_column("status", no_wrap=True)
+    table.add_column("scenario", no_wrap=True)
+    table.add_column("profile", no_wrap=True)
+    table.add_column("missing slot", no_wrap=True)
+    table.add_column("severity", no_wrap=True)
+    table.add_column("checked evidence")
+    table.add_column("clarification question")
+    for row in transfer_audit_example_rows():
+        table.add_row(
+            row["transfer_status"],
+            row["scenario_id"],
+            row["successor_role"],
+            row["slot_name"],
+            row["severity"],
+            row["selected_evidence_title"],
+            row["question"],
+        )
+    console.print(table)
+
+
+@app.command("audit-benchmark")
+def audit_benchmark(
+    dataset: str = typer.Option("all", "--dataset", help="Built-in dataset: mini, holdout, adversarial, sanitized, or all."),
+    iterations: int = typer.Option(100, "--iterations", min=1, help="Repeated local runs for timing."),
+) -> None:
+    """Measure local audit-row materialization for the bundled scenarios."""
+    store = InMemoryStore.from_builtin_dataset(dataset)
+    scenarios = store.list_scenarios()
+    detector = HandoverGapDetector(store=store)
+
+    run_durations_ms: list[float] = []
+    last_results = []
+    for _ in range(iterations):
+        start = perf_counter()
+        last_results = [detector.detect_scenario(scenario) for scenario in scenarios]
+        run_durations_ms.append((perf_counter() - start) * 1000)
+
+    status_counts = Counter(result.transferability_status for result in last_results)
+    gap_rows = [gap for result in last_results for gap in result.gaps]
+    question_rows = [question for result in last_results for question in result.questions]
+    blocked_gap_rows = [
+        gap
+        for result in last_results
+        if result.transferability_status == "blocked"
+        for gap in result.gaps
+    ]
+    slot_counts = Counter(gap.slot_name for gap in blocked_gap_rows)
+
+    table = Table(title=f"Audit materialization benchmark / dataset={dataset}")
+    table.add_column("Metric")
+    table.add_column("Value", justify="right")
+    table.add_row("Scenarios", str(len(scenarios)))
+    table.add_row("Iterations", str(iterations))
+    table.add_row("Transfer assessments / run", str(len(last_results)))
+    table.add_row("Blocked assessments / run", str(status_counts["blocked"]))
+    table.add_row("Context gap rows / run", str(len(gap_rows)))
+    table.add_row("Blocked context gap rows / run", str(len(blocked_gap_rows)))
+    table.add_row("Clarification question rows / run", str(len(question_rows)))
+    table.add_row("p50 local materialization ms / run", f"{_percentile(run_durations_ms, 0.50):.3f}")
+    table.add_row("p95 local materialization ms / run", f"{_percentile(run_durations_ms, 0.95):.3f}")
+    console.print(table)
+
+    slot_table = Table(title="Top missing slots in blocked transfers")
+    slot_table.add_column("Slot")
+    slot_table.add_column("Rows", justify="right")
+    for slot, count in slot_counts.most_common(6):
+        slot_table.add_row(slot, str(count))
+    console.print(slot_table)
 
 
 @app.command()
@@ -163,6 +245,14 @@ def init(path: str | None = typer.Argument(None, help="Reserved for future sampl
     console.print(f"HandoverGap sample project target: {target}")
     console.print("Try: handovergap demo")
     console.print("Then: handovergap evaluate --compare")
+
+
+def _percentile(values: list[float], ratio: float) -> float:
+    ordered = sorted(values)
+    if not ordered:
+        return 0.0
+    index = min(len(ordered) - 1, max(0, round((len(ordered) - 1) * ratio)))
+    return ordered[index]
 
 
 if __name__ == "__main__":

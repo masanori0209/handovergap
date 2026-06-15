@@ -1,0 +1,178 @@
+{
+  "name": "Sanitized handover notes",
+  "annotation_protocol": "Synthetic but field-realistic anonymized handover notes. Cases are written like sanitized CRM, incident, runbook, and support notes; no real company, employee, customer, ticket, or account data is included.",
+  "scenarios": [
+    {
+      "scenario_id": "R001",
+      "memory": "Enterprise tenant E-104 is allowed to keep CSV import for the June rollout; API migration is deferred until the July readiness review.",
+      "evidence_events": [
+        {"source_type": "crm_note", "content": "Customer success note says the tenant was informed that CSV import remains valid for June only. Support may say API migration is deferred, but may not promise the July date."},
+        {"source_type": "runbook", "content": "If CSV import fails twice, escalate to the integration on-call channel and offer manual upload as a temporary fallback."}
+      ],
+      "successor_role": "CS",
+      "memory_type": "decision",
+      "handover_task": "Answer renewal-week questions about CSV import and API timing",
+      "provided_slots": ["communication_status", "scope", "fallback_plan", "escalation_path"],
+      "evidence_slots": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path"],
+      "slot_fill_profiles": {
+        "conservative": ["communication_status", "scope", "fallback_plan", "escalation_path"],
+        "optimistic": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["customer_facing_wording"],
+        "reviewer_b": ["customer_facing_wording"]
+      },
+      "annotation_notes": "Field-realistic support handover: decision is mostly transferable, but approved customer-facing wording is still missing.",
+      "gold_gaps": [
+        {"gap_type": "wording_gap", "slot_name": "customer_facing_wording", "description": "API延期を顧客向けにどう説明するかの承認済み文面が不足", "severity": "MEDIUM"}
+      ],
+      "gold_questions": [
+        {"slot_name": "customer_facing_wording", "question": "外部向けにはどの表現で説明すべきですか？"}
+      ],
+      "unsafe_transfer_label": true
+    },
+    {
+      "scenario_id": "R002",
+      "memory": "Nightly billing export failed after the schema migration; rerun is safe after patch 2026-06-12-b has completed.",
+      "evidence_events": [
+        {"source_type": "incident_timeline", "content": "Patch 2026-06-12-b fixes the null account segment. Rerun scope is billing_export only. Retry must stop if duplicate invoice rows appear."},
+        {"source_type": "runbook", "content": "Runbook RB-77 includes the rerun command, duplicate-row failure mode, dashboard check, and owning issue OPS-4182."}
+      ],
+      "successor_role": "Engineer",
+      "memory_type": "procedure",
+      "handover_task": "Take over the billing export rerun during APAC business hours",
+      "provided_slots": ["technical_constraint", "implementation_scope", "related_issue", "failure_modes"],
+      "evidence_slots": ["rationale", "technical_constraint", "implementation_scope", "related_issue", "failure_modes"],
+      "slot_fill_profiles": {
+        "conservative": ["technical_constraint", "implementation_scope", "related_issue", "failure_modes"],
+        "optimistic": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["trigger_for_reconsideration"],
+        "reviewer_b": ["trigger_for_reconsideration"]
+      },
+      "annotation_notes": "Operational runbook-like case: most technical slots are evidenced, but the stop/reconsideration condition beyond duplicate rows is not explicit enough.",
+      "gold_gaps": [
+        {"gap_type": "trigger_gap", "slot_name": "trigger_for_reconsideration", "description": "再実行を中止または再検討する条件が不足", "severity": "MEDIUM"}
+      ],
+      "gold_questions": [
+        {"slot_name": "trigger_for_reconsideration", "question": "どの条件になったら再検討しますか？"}
+      ],
+      "unsafe_transfer_label": true
+    },
+    {
+      "scenario_id": "R003",
+      "memory": "The renewal discount can be discussed verbally, but final commercial terms must wait for procurement's written approval.",
+      "evidence_events": [
+        {"source_type": "crm_note", "content": "Procurement approval is not yet received. Customer expects a proposal this week, but the discount cap and exception terms are not confirmed."}
+      ],
+      "successor_role": "Sales",
+      "memory_type": "decision",
+      "handover_task": "Continue renewal negotiation after account-owner handoff",
+      "provided_slots": ["customer_expectation", "timeline_confidence"],
+      "evidence_slots": ["customer_expectation", "timeline_confidence"],
+      "slot_fill_profiles": {
+        "conservative": ["customer_expectation"],
+        "optimistic": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["contract_impact", "promise_boundary", "negotiation_status"],
+        "reviewer_b": ["contract_impact", "promise_boundary", "negotiation_status"]
+      },
+      "annotation_notes": "Sales handover with realistic ambiguity: discussion is allowed, but final terms and negotiation state are not transferable.",
+      "gold_gaps": [
+        {"gap_type": "contract_gap", "slot_name": "contract_impact", "description": "割引条件の契約影響が未確定", "severity": "HIGH"},
+        {"gap_type": "promise_boundary_gap", "slot_name": "promise_boundary", "description": "口頭で約束してよい範囲が不明", "severity": "MEDIUM"},
+        {"gap_type": "negotiation_gap", "slot_name": "negotiation_status", "description": "未合意点と次の交渉論点が不明", "severity": "MEDIUM"}
+      ],
+      "gold_questions": [
+        {"slot_name": "contract_impact", "question": "契約や商談への影響はありますか？"},
+        {"slot_name": "promise_boundary", "question": "顧客に約束してよい範囲はどこまでですか？"},
+        {"slot_name": "negotiation_status", "question": "交渉状況と未合意点は何ですか？"}
+      ],
+      "unsafe_transfer_label": true
+    },
+    {
+      "scenario_id": "R004",
+      "memory": "The support macro for passwordless login rollout is approved and linked from the rollout checklist.",
+      "evidence_events": [
+        {"source_type": "support_macro", "content": "Approved macro includes rollout scope, customer-facing wording, escalation path, fallback to password login, and permission to answer standard questions."},
+        {"source_type": "release_checklist", "content": "All affected tenants were notified; unresolved SSO edge cases go to identity on-call."}
+      ],
+      "successor_role": "CS",
+      "memory_type": "procedure",
+      "handover_task": "Answer standard rollout questions during the first support shift",
+      "provided_slots": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"],
+      "evidence_slots": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"],
+      "slot_fill_profiles": {
+        "conservative": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"],
+        "optimistic": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": [],
+        "reviewer_b": []
+      },
+      "annotation_notes": "Safe support case with both provided slots and evidence coverage.",
+      "gold_gaps": [],
+      "gold_questions": [],
+      "unsafe_transfer_label": false
+    },
+    {
+      "scenario_id": "R005",
+      "memory": "The queue-drain job may be enabled for Region-B after metrics stay green for two hours.",
+      "evidence_events": [
+        {"source_type": "ops_note", "content": "Region-B only. Metrics to watch: queue_age_p95, error_rate, worker_restart_count. Related issue OPS-5020. If error_rate exceeds threshold, disable the job."}
+      ],
+      "successor_role": "Engineer",
+      "memory_type": "task",
+      "handover_task": "Decide whether to enable the queue-drain job after handoff",
+      "provided_slots": ["implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"],
+      "evidence_slots": ["technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"],
+      "slot_fill_profiles": {
+        "conservative": ["implementation_scope", "related_issue", "failure_modes"],
+        "optimistic": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["rationale"],
+        "reviewer_b": ["rationale"]
+      },
+      "annotation_notes": "Technical case where the action can be executed, but the rationale for the two-hour window is missing.",
+      "gold_gaps": [
+        {"gap_type": "rationale_gap", "slot_name": "rationale", "description": "二時間待つ理由が不明", "severity": "MEDIUM"}
+      ],
+      "gold_questions": [
+        {"slot_name": "rationale", "question": "この判断に至った理由は何ですか？"}
+      ],
+      "unsafe_transfer_label": true
+    },
+    {
+      "scenario_id": "R006",
+      "memory": "The pilot expansion proposal is ready; do not mention the enterprise add-on until pricing approval lands.",
+      "evidence_events": [
+        {"source_type": "crm_note", "content": "Customer expects pilot expansion, not enterprise add-on. Pricing approval is pending. Current promise boundary is pilot seats only."},
+        {"source_type": "deal_review", "content": "No contract impact for pilot expansion. Enterprise add-on commercial terms are unresolved."}
+      ],
+      "successor_role": "Sales",
+      "memory_type": "task",
+      "handover_task": "Prepare the next customer meeting after account-owner transfer",
+      "provided_slots": ["contract_impact", "promise_boundary", "customer_expectation", "negotiation_status"],
+      "evidence_slots": ["contract_impact", "promise_boundary", "customer_expectation", "negotiation_status"],
+      "slot_fill_profiles": {
+        "conservative": ["promise_boundary", "customer_expectation", "negotiation_status"],
+        "optimistic": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence", "negotiation_status"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["timeline_confidence"],
+        "reviewer_b": ["timeline_confidence"]
+      },
+      "annotation_notes": "Sales case where most boundaries are clear, but timing confidence for pricing approval is not.",
+      "gold_gaps": [
+        {"gap_type": "timeline_gap", "slot_name": "timeline_confidence", "description": "価格承認時期の確度が不明", "severity": "MEDIUM"}
+      ],
+      "gold_questions": [
+        {"slot_name": "timeline_confidence", "question": "提示できる時期の確度はどの程度ですか？"}
+      ],
+      "unsafe_transfer_label": true
+    }
+  ]
+}

@@ -8,6 +8,8 @@ from handovergap.schemas import HandoverScenario
 DATASET_FILES = {
     "mini": "handover_gap_bench.json",
     "holdout": "handover_gap_bench_holdout.json",
+    "adversarial": "handover_gap_bench_adversarial.json",
+    "sanitized": "handover_gap_bench_sanitized.json",
 }
 
 

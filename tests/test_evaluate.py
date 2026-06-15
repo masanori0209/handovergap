@@ -21,10 +21,11 @@ def test_evaluate_cli_outputs_required_metrics() -> None:
 
     assert result.exit_code == 0
     assert "HandoverGapBench mini" in result.output
-    assert "Tacit Gap Recall" in result.output
-    assert "Unsafe Transfer Prevention" in result.output
-    assert "Question Coverage" in result.output
-    assert "Safe Transfer Allowance" in result.output
+    assert "Tacit Gap" in result.output
+    assert "Unsafe Transfer" in result.output
+    assert "Question Cover" in result.output
+    assert "Safe Transfer" in result.output
+    assert "False Clarification" in result.output
 
 
 def test_holdout_optimistic_slot_filling_exposes_recall_drop() -> None:
@@ -48,4 +49,26 @@ def test_evaluate_cli_outputs_slot_filling_stress() -> None:
 
     assert result.exit_code == 0
     assert "slot filling stress" in result.output
-    assert "handovergap/optimistic" in result.output
+    assert "handovergap/optimist" in result.output
+
+
+def test_adversarial_dataset_exposes_false_clarifications_and_recall_drop() -> None:
+    metrics = HandoverGapEvaluator(
+        store=InMemoryStore.from_builtin_dataset("adversarial"),
+        slot_profile="provided",
+    ).evaluate_method("handovergap")
+
+    assert metrics.tacit_gap_recall < 1.0
+    assert metrics.false_clarification_rate == 0.0
+    assert metrics.safe_transfer_allowance == 1.0
+
+
+def test_sanitized_dataset_has_field_realistic_signal() -> None:
+    metrics = HandoverGapEvaluator(
+        store=InMemoryStore.from_builtin_dataset("sanitized"),
+        slot_profile="provided",
+    ).evaluate_method("handovergap")
+
+    assert metrics.scenarios >= 6
+    assert metrics.tacit_gap_recall >= 0.8
+    assert metrics.false_clarification_rate == 0.0

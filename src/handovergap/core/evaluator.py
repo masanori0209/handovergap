@@ -28,6 +28,7 @@ class HandoverGapEvaluator:
         covered_gold_questions = 0
         safe_total = 0
         safe_allowed = 0
+        safe_with_clarification = 0
         blocked_total = 0
         blocked_unsafe = 0
 
@@ -50,6 +51,8 @@ class HandoverGapEvaluator:
                 safe_total += 1
                 if not prediction.blocked:
                     safe_allowed += 1
+                if prediction.question_slots:
+                    safe_with_clarification += 1
             if prediction.blocked:
                 blocked_total += 1
                 if scenario.unsafe_transfer_label:
@@ -63,6 +66,7 @@ class HandoverGapEvaluator:
             question_coverage=_ratio(covered_gold_questions, total_gold_questions),
             safe_transfer_allowance=_ratio(safe_allowed, safe_total),
             blocked_precision=_ratio(blocked_unsafe, blocked_total),
+            false_clarification_rate=_ratio(safe_with_clarification, safe_total),
         )
 
     def _predict(self, method: str, scenario) -> BaselinePrediction:
@@ -74,7 +78,7 @@ class HandoverGapEvaluator:
                 method=method,
                 gap_slots={gap.slot_name for gap in result.gaps},
                 question_slots={question.slot_name for question in result.questions},
-                blocked=result.transferability_status == "blocked",
+                blocked=result.transferability_status != "transferable",
                 rationale=(
                     "Performs role-conditioned slot filling and blocks unsafe transfer "
                     "when required slots are missing."

@@ -68,3 +68,4 @@ class EvalMetrics(BaseModel):
     question_coverage: float = Field(ge=0.0, le=1.0)
     safe_transfer_allowance: float = Field(ge=0.0, le=1.0)
     blocked_precision: float = Field(ge=0.0, le=1.0)
+    false_clarification_rate: float = Field(ge=0.0, le=1.0)

@@ -1,5 +1,19 @@
 from __future__ import annotations
 
+from typing import TypedDict
+
+
+class AuditExampleRow(TypedDict):
+    transfer_status: str
+    scenario_id: str
+    successor_role: str
+    slot_name: str
+    severity: str
+    slot_fill_status: str
+    selected_evidence_title: str
+    question: str
+
+
 TRANSFER_AUDIT_SQL = """\
 SELECT
   ta.id AS assessment_id,
@@ -50,3 +64,39 @@ TRANSFER_AUDIT_EXPLANATION = (
 
 def transfer_audit_sql() -> str:
     return TRANSFER_AUDIT_SQL
+
+
+def transfer_audit_example_rows() -> list[AuditExampleRow]:
+    """Return a compact example of what the TiDB audit query explains."""
+    return [
+        {
+            "transfer_status": "blocked",
+            "scenario_id": "S001",
+            "successor_role": "CS",
+            "slot_name": "communication_status",
+            "severity": "HIGH",
+            "slot_fill_status": "missing",
+            "selected_evidence_title": "Slack: CSV fallback agreement",
+            "question": "顧客にはAPI延期を説明済みですか？",
+        },
+        {
+            "transfer_status": "blocked",
+            "scenario_id": "S001",
+            "successor_role": "CS",
+            "slot_name": "authority",
+            "severity": "HIGH",
+            "slot_fill_status": "missing",
+            "selected_evidence_title": "Issue: API integration postponed",
+            "question": "次フェーズ時期を顧客向けに回答してよい範囲はどこまでですか？",
+        },
+        {
+            "transfer_status": "blocked",
+            "scenario_id": "S001",
+            "successor_role": "CS",
+            "slot_name": "fallback_plan",
+            "severity": "HIGH",
+            "slot_fill_status": "missing",
+            "selected_evidence_title": "Issue: CSV import workaround",
+            "question": "CSV対応が失敗した場合の代替手段は何ですか？",
+        },
+    ]

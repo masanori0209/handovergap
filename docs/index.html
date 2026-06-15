@@ -344,7 +344,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.4</code></pre>
+              <pre><code>pip install handovergap==0.1.5</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -507,7 +507,7 @@ handovergap serve</code></pre>
               <tr>
                 <td><strong>handovergap</strong></td>
                 <td><strong>1.00</strong></td>
-                <td><strong>0.65</strong></td>
+                <td><strong>1.00</strong></td>
                 <td><strong>1.00</strong></td>
                 <td><strong>1.00</strong></td>
                 <td><strong>1.00</strong></td>
@@ -516,9 +516,14 @@ handovergap serve</code></pre>
           </table>
           <p class="small" style="margin-top: 14px">
             Live gpt-5-mini with the tuned <code>gpt5_strict</code> prompt reached tacit gap recall
-            1.00, unsafe transfer prevention 0.67, safe transfer allowance 1.00, and blocked
+            1.00, unsafe transfer prevention 1.00, safe transfer allowance 1.00, and blocked
             precision 1.00 on the holdout protocol. See
             <a href="https://github.com/masanori0209/handovergap/blob/main/article/results.md">results notes</a>.
+          </p>
+          <p class="small">
+            The adversarial split keeps recall low at 0.38 but reduces false clarification to 0.00
+            after evidence-backed slot reconciliation. The sanitized split uses field-realistic
+            anonymized CRM, incident, runbook, and deal-review style notes without real company data.
           </p>
         </section>
 

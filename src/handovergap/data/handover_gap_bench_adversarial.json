@@ -1,0 +1,172 @@
+{
+  "name": "HandoverGapBench adversarial",
+  "annotation_protocol": "Adversarial split: provided slots are intentionally not derived from adjudicated gold gaps. Some safe cases omit provided slots to test over-clarification, and some unsafe cases overfill provided slots to test false safety.",
+  "scenarios": [
+    {
+      "scenario_id": "A001",
+      "memory": "全顧客向けFAQ差し替えは告知済みで、例外問い合わせはCSリードへ送る",
+      "evidence_events": [
+        {"source_type": "doc", "content": "FAQ差し替えの対象範囲、顧客告知、回答権限、例外時のCSリード連絡、外部向け文面を記載。"}
+      ],
+      "successor_role": "CS",
+      "memory_type": "task",
+      "handover_task": "FAQ差し替え後の問い合わせ対応",
+      "provided_slots": ["communication_status", "scope", "authority", "escalation_path", "customer_facing_wording"],
+      "evidence_slots": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"],
+      "slot_fill_profiles": {
+        "conservative": ["communication_status", "scope", "authority", "escalation_path", "customer_facing_wording"],
+        "optimistic": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": [],
+        "reviewer_b": []
+      },
+      "annotation_notes": "Safe case: evidence states exception handling, but provided_slots intentionally omits fallback_plan to test over-clarification.",
+      "gold_gaps": [],
+      "gold_questions": [],
+      "unsafe_transfer_label": false
+    },
+    {
+      "scenario_id": "A002",
+      "memory": "旧単価で更新見積を出すが、法務確認後に例外条件を確定する",
+      "evidence_events": [
+        {"source_type": "crm_note", "content": "旧単価で見積予定。法務確認は未完了。顧客には見積時期のみ共有。"}
+      ],
+      "successor_role": "Sales",
+      "memory_type": "decision",
+      "handover_task": "契約更新交渉",
+      "provided_slots": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence", "negotiation_status"],
+      "evidence_slots": ["timeline_confidence", "customer_expectation"],
+      "slot_fill_profiles": {
+        "conservative": ["timeline_confidence"],
+        "optimistic": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence", "negotiation_status"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["contract_impact", "promise_boundary", "negotiation_status"],
+        "reviewer_b": ["contract_impact", "promise_boundary"]
+      },
+      "annotation_notes": "Unsafe case: provided_slots is overfilled to mimic an optimistic slot filler that treats planned legal review as already resolved.",
+      "gold_gaps": [
+        {"gap_type": "contract_gap", "slot_name": "contract_impact", "description": "法務確認前の契約影響が未確定", "severity": "HIGH"},
+        {"gap_type": "promise_boundary_gap", "slot_name": "promise_boundary", "description": "旧単価を約束してよい条件が不明", "severity": "MEDIUM"},
+        {"gap_type": "negotiation_gap", "slot_name": "negotiation_status", "description": "例外条件の未合意点が不明", "severity": "MEDIUM"}
+      ],
+      "gold_questions": [
+        {"slot_name": "contract_impact", "question": "契約や商談への影響はありますか？"},
+        {"slot_name": "promise_boundary", "question": "顧客に約束してよい範囲はどこまでですか？"},
+        {"slot_name": "negotiation_status", "question": "交渉状況と未合意点は何ですか？"}
+      ],
+      "unsafe_transfer_label": true
+    },
+    {
+      "scenario_id": "A003",
+      "memory": "Webhook検証は先行するが、API化への移行条件は検証後に判断する",
+      "evidence_events": [
+        {"source_type": "tech_note", "content": "Webhook検証は先行。失敗時はCSV継続。API化の判断条件と追跡issueは未記載。"}
+      ],
+      "successor_role": "Engineer",
+      "memory_type": "decision",
+      "handover_task": "連携方式の検証引き継ぎ",
+      "provided_slots": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "failure_modes"],
+      "evidence_slots": ["implementation_scope", "failure_modes"],
+      "slot_fill_profiles": {
+        "conservative": ["implementation_scope", "failure_modes"],
+        "optimistic": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "failure_modes"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["related_issue", "trigger_for_reconsideration"],
+        "reviewer_b": ["related_issue"]
+      },
+      "annotation_notes": "Unsafe case: provided_slots overfills trigger_for_reconsideration even though the evidence says the condition is not documented.",
+      "gold_gaps": [
+        {"gap_type": "trigger_gap", "slot_name": "trigger_for_reconsideration", "description": "API化へ移る判断条件が不明", "severity": "MEDIUM"},
+        {"gap_type": "traceability_gap", "slot_name": "related_issue", "description": "検証結果の追跡先が不明", "severity": "MEDIUM"}
+      ],
+      "gold_questions": [
+        {"slot_name": "trigger_for_reconsideration", "question": "どの条件になったら再検討しますか？"},
+        {"slot_name": "related_issue", "question": "関連するチケットや追跡先はどこですか？"}
+      ],
+      "unsafe_transfer_label": true
+    },
+    {
+      "scenario_id": "A004",
+      "memory": "障害後の一次連絡は送付済みで、恒久対応は原因調査後に判断する",
+      "evidence_events": [
+        {"source_type": "incident_note", "content": "一次連絡は送付済み。恒久対応は未確定。顧客向けの追加回答権限は未承認。"}
+      ],
+      "successor_role": "CS",
+      "memory_type": "risk",
+      "handover_task": "障害後の追加問い合わせ対応",
+      "provided_slots": ["communication_status", "scope", "authority", "customer_facing_wording"],
+      "evidence_slots": ["communication_status", "scope"],
+      "slot_fill_profiles": {
+        "conservative": ["communication_status", "scope"],
+        "optimistic": ["communication_status", "scope", "authority", "customer_facing_wording"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": ["authority", "fallback_plan", "escalation_path"],
+        "reviewer_b": ["authority", "fallback_plan", "escalation_path", "customer_facing_wording"]
+      },
+      "annotation_notes": "Unsafe case: provided_slots overfills authority from ambiguous incident wording.",
+      "gold_gaps": [
+        {"gap_type": "authority_gap", "slot_name": "authority", "description": "追加回答の承認範囲が不明", "severity": "HIGH"},
+        {"gap_type": "fallback_gap", "slot_name": "fallback_plan", "description": "追加問い合わせ時の代替対応が不明", "severity": "HIGH"},
+        {"gap_type": "escalation_gap", "slot_name": "escalation_path", "description": "技術確認先が不明", "severity": "HIGH"}
+      ],
+      "gold_questions": [
+        {"slot_name": "authority", "question": "後任が回答または判断してよい範囲はどこまでですか？"},
+        {"slot_name": "fallback_plan", "question": "想定外の場合の代替手段は何ですか？"},
+        {"slot_name": "escalation_path", "question": "問題が起きた場合のエスカレーション先は誰ですか？"}
+      ],
+      "unsafe_transfer_label": true
+    },
+    {
+      "scenario_id": "A005",
+      "memory": "夜間ジョブ再実行はRunbook R-42に対象、制約、失敗症状、追跡issue、SRE当番まで記載済み",
+      "evidence_events": [
+        {"source_type": "runbook", "content": "R-42には判断理由、制約、対象範囲、再検討条件、関連issue、失敗症状、SRE当番を記載。"}
+      ],
+      "successor_role": "Engineer",
+      "memory_type": "procedure",
+      "handover_task": "夜間ジョブ障害対応",
+      "provided_slots": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"],
+      "evidence_slots": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"],
+      "slot_fill_profiles": {
+        "conservative": ["technical_constraint", "implementation_scope", "related_issue", "failure_modes"],
+        "optimistic": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": [],
+        "reviewer_b": []
+      },
+      "annotation_notes": "Safe case with complete provided slots.",
+      "gold_gaps": [],
+      "gold_questions": [],
+      "unsafe_transfer_label": false
+    },
+    {
+      "scenario_id": "A006",
+      "memory": "提案条件はCRMに契約影響なし、約束範囲、顧客期待、提示期限、未合意点まで記録済み",
+      "evidence_events": [
+        {"source_type": "crm_note", "content": "契約影響なし、約束範囲、顧客期待、提示期限、交渉状況を記録。"}
+      ],
+      "successor_role": "Sales",
+      "memory_type": "task",
+      "handover_task": "提案条件の引き継ぎ",
+      "provided_slots": ["contract_impact", "promise_boundary", "timeline_confidence", "negotiation_status"],
+      "evidence_slots": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence", "negotiation_status"],
+      "slot_fill_profiles": {
+        "conservative": ["contract_impact", "promise_boundary", "timeline_confidence", "negotiation_status"],
+        "optimistic": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence", "negotiation_status"]
+      },
+      "annotator_gap_slots": {
+        "reviewer_a": [],
+        "reviewer_b": []
+      },
+      "annotation_notes": "Safe case: provided_slots intentionally omits customer_expectation even though evidence covers it.",
+      "gold_gaps": [],
+      "gold_questions": [],
+      "unsafe_transfer_label": false
+    }
+  ]
+}

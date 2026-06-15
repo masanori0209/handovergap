@@ -12,7 +12,7 @@ Observed on June 14, 2026:
 |---|---:|---:|---:|---:|---:|---:|
 | naive_rag | 20 | 0.00 | 0.00 | 0.00 | 1.00 | 0.00 |
 | hybrid_rag | 20 | 0.21 | 0.59 | 0.21 | 0.67 | 0.91 |
-| handovergap | 20 | 1.00 | 0.65 | 1.00 | 1.00 | 1.00 |
+| handovergap | 20 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
 
 ## Holdout And Slot Filling Stress
 
@@ -26,9 +26,20 @@ Observed on June 14, 2026:
 
 | Method | Scenarios | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision |
 |---|---:|---:|---:|---:|---:|---:|
-| handovergap/provided | 6 | 1.00 | 0.67 | 1.00 | 1.00 | 1.00 |
-| handovergap/conservative | 6 | 1.00 | 0.67 | 1.00 | 0.67 | 0.67 |
-| handovergap/optimistic | 6 | 0.64 | 0.67 | 0.64 | 1.00 | 1.00 |
+| handovergap/provided | 6 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| handovergap/conservative | 6 | 1.00 | 1.00 | 1.00 | 0.67 | 0.75 |
+| handovergap/optimistic | 6 | 0.64 | 1.00 | 0.64 | 1.00 | 1.00 |
+
+## Adversarial And Sanitized Splits
+
+The adversarial split breaks the structural alignment between slot-filler output and gold gaps. After evidence-backed slot reconciliation in `0.1.5`, HandoverGap still has low recall on this split, but it no longer over-asks on safe cases.
+
+| Dataset | Method | Scenarios | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision | False Clarification Rate |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| adversarial | handovergap | 6 | 0.38 | 0.67 | 0.38 | 1.00 | 1.00 | 0.00 |
+| sanitized | handovergap | 6 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.00 |
+
+The sanitized split is still synthetic, but it is written like anonymized CRM notes, incident timelines, runbooks, release checklists, and deal reviews. It is meant to be more realistic than the mini benchmark without introducing real company or customer data.
 
 ## Live OpenAI Semantic Slot Filling
 
