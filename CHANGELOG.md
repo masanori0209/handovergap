@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Notes
+
+- No unreleased changes yet.
+
+## 0.1.6 - 2026-06-15
+
 ### Changed
 
 - Replaced the public `successor_role` / `handover_task` vocabulary with `profile` / `task_context`.
