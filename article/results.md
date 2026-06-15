@@ -30,7 +30,7 @@ Observed on June 14, 2026:
 | handovergap/conservative | 6 | 1.00 | 0.67 | 1.00 | 0.67 | 0.67 |
 | handovergap/optimistic | 6 | 0.64 | 0.67 | 0.64 | 1.00 | 1.00 |
 
-## Live OpenAI Slot Filling
+## Live OpenAI Semantic Slot Filling
 
 Command:
 
@@ -56,9 +56,9 @@ The tuned `gpt5_strict` prompt used 4,351 input tokens and 8,803 output tokens, 
 
 - `naive_rag` returns retrieved memories without checking transferability.
 - `hybrid_rag` can identify one explicit risk and blocks only when that risk is high severity.
-- `handovergap` checks every slot required by the successor role.
+- `handovergap` checks every slot required by the successor responsibility profile.
 - `handovergap/optimistic` simulates an LLM over-filling ambiguous slots; recall drops because some truly missing slots are treated as filled.
-- Live OpenAI slot filling is model-sensitive. `gpt-4.1-mini` improves recall versus the optimistic simulation, while the first `gpt-5-mini` prompt drops recall to 0.45. A model-specific strict-evidence prompt raises `gpt-5-mini` recall to 1.00 on this holdout split by preventing optimistic slot filling.
+- Live OpenAI semantic slot filling is model-sensitive. `gpt-4.1-mini` improves recall versus the optimistic simulation, while the first `gpt-5-mini` prompt drops recall to 0.45. A model-specific strict-evidence prompt raises `gpt-5-mini` recall to 1.00 on this holdout split by preventing optimistic filling of ambiguous slots.
 - The strict prompt still over-asks in at least one safe case (`U006`: `timeline_confidence`). Current headline metrics punish unsafe blocking, but do not fully penalize unnecessary clarification.
 
 ## Important Limitation
@@ -67,10 +67,12 @@ These are results on small synthetic benchmarks. The holdout split, slot-filling
 
 ## Live Demo Smoke Check
 
-The Streamlit demo has two modes:
+The Streamlit demo has two modes and defaults to Japanese copy:
 
-- `Local sample`: runs the deterministic HandoverGap detector against fictional handover cases without OpenAI or TiDB.
-- `Live OpenAI + TiDB`: fills role-required slots with OpenAI, runs HandoverGap on the filled slots, and persists slot-fill attempts, context gaps, and transfer assessments to TiDB.
+- `ローカルサンプル` / `Local sample`: runs the deterministic HandoverGap detector against fictional handover cases without OpenAI or TiDB.
+- `実LLM + TiDB` / `Live OpenAI + TiDB`: fills profile-required slots with OpenAI, runs HandoverGap on the filled slots, and persists slot-fill attempts, context gaps, and transfer assessments to TiDB.
+
+The packaged `CS`, `Engineer`, and `Sales` values are preset IDs, not a fixed industry taxonomy. The UI presents them as handover profiles: support handover, engineering operations handover, and sales handover.
 
 Observed after the `0.1.3` patch:
 
