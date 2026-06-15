@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.5`
+Latest tested release: `handovergap==0.1.6`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -21,20 +21,22 @@ A normal RAG system may retrieve:
 For Company A, use CSV for this release. The API will come in the next phase.
 ```
 
-The statement can be correct while still being unsafe for a successor who must answer customers. They may not know:
+The statement can be correct while still being unsafe for a specific profile and task context. The person or agent acting on it may not know:
 
 - whether the customer was informed;
 - what “this release” covers;
-- what support is authorized to promise;
+- what the selected profile is authorized to promise;
 - what fallback or escalation path to use.
 
-HandoverGap performs successor-profile-conditioned slot checks, blocks unsafe transfer, and generates clarification questions. The packaged dataset uses Support, Engineering, and Sales handover profiles as examples; the thesis is not limited to those business functions.
+HandoverGap performs profile-conditioned context readiness checks, blocks unsafe transfer, and generates clarification questions. The packaged dataset uses Support, Engineering, and Sales handover presets as examples; the thesis is not limited to those business functions or to handover workflows.
+
+![Naive RAG answers directly while HandoverGap blocks and asks profile-required questions](docs/assets/naive-vs-handovergap.svg)
 
 ## What HandoverGap Adds
 
 | Approach | What it optimizes | What it misses |
 |---|---|---|
-| Naive RAG | Return a relevant memory | Whether a successor can safely act on it |
+| Naive RAG | Return a relevant memory | Whether a profile can safely act on it |
 | Hybrid RAG | Add related evidence or risk warnings | Profile-specific missing context |
 | General context engineering | Better prompts and context packaging | A durable audit trail for why an answer was withheld |
 | HandoverGap RAG | Check profile-required slots before answering | Production tuning still needs real organizational annotation |
@@ -42,7 +44,7 @@ HandoverGap performs successor-profile-conditioned slot checks, blocks unsafe tr
 The practical pattern is:
 
 1. Treat correctness and transferability as separate checks.
-2. Define required slots per successor responsibility profile.
+2. Define required slots per profile and task context.
 3. Do not invent missing context; turn missing slots into questions.
 4. Store the slot attempts, gaps, questions, and transfer decision so the stop reason is explainable.
 
@@ -52,7 +54,7 @@ The practical pattern is:
 pip install handovergap
 
 handovergap demo
-handovergap detect --scenario S001 --role CS
+handovergap detect --scenario S001 --profile CS
 handovergap evaluate --compare
 ```
 
@@ -67,7 +69,7 @@ pip install "handovergap[demo]"
 handovergap serve
 ```
 
-The demo defaults to Japanese and includes an English language switch. The default local-sample mode runs the real deterministic HandoverGap detector against bundled fictional handover cases. It compares:
+The demo defaults to Japanese and includes an English language switch. The default local-sample mode runs the real deterministic HandoverGap detector against bundled fictional operational cases. It compares:
 
 - `naive_rag`: answers directly;
 - `hybrid_rag`: adds related evidence;
@@ -82,11 +84,19 @@ handovergap serve
 
 Set `OPENAI_API_KEY` plus either `HANDOVERGAP_TIDB_URL` or the `TIDB_HOST` / `TIDB_USER` / `TIDB_PASSWORD` environment variables. In **Live OpenAI + TiDB** mode, the app asks the selected model to fill profile-required slots, runs HandoverGap on those filled slots, and persists slot-fill attempts, context gaps, and transfer assessments to TiDB.
 
-In the current MVP, `CS`, `Engineer`, and `Sales` are built-in role profiles used to demonstrate different successor responsibilities. They are not meant to imply that HandoverGap only works for those departments; custom role/slot taxonomies are the natural extension point beyond the packaged benchmark.
+In the current MVP, `CS`, `Engineer`, and `Sales` are built-in profile presets used to demonstrate different profile-specific responsibilities. They are not meant to imply that HandoverGap only works for those departments; custom profile/slot taxonomies are the natural extension point beyond the packaged benchmark.
 
 ## Evaluation
 
 `handovergap evaluate --compare` runs the bundled synthetic HandoverGapBench mini dataset.
+
+To generate a reproducible markdown report across all bundled datasets:
+
+```bash
+handovergap report --dataset all --output reports/evaluation-latest.md
+```
+
+The report includes deterministic comparison metrics and a question-quality section for slot coverage, actionability, and redundancy.
 
 | Method | Tacit Gap Recall | Unsafe Transfer Prevention | Question Coverage | Safe Transfer Allowance | Blocked Precision | False Clarification Rate |
 |---|---:|---:|---:|---:|---:|---:|
@@ -166,7 +176,19 @@ store = TiDBStore("mysql+pymysql://user:password@host:4000/handovergap")
 store.create_schema()
 ```
 
-The packaged schema models source evidence, memories, role requirements, slot-fill attempts, context gaps, clarification questions, transfer assessments, and evaluation runs. Live persistence methods are available for slot-fill attempts, context gaps, transfer assessments, and evaluation runs.
+The packaged schema models source evidence, memories, profile requirements, vectorized memory chunks, slot-fill attempts, context gaps, clarification questions, transfer assessments, and evaluation runs. Live persistence methods are available for memory chunks, slot-fill attempts, context gaps, transfer assessments, and evaluation runs.
+
+Slot-level evidence retrieval can be inspected without a live database:
+
+```bash
+handovergap retrieve-evidence \
+  --scenario S001 \
+  --profile CS \
+  --slot communication_status \
+  --mode hybrid
+```
+
+The dry-run path uses deterministic local embeddings and token matching so first-run behavior is reproducible. The TiDB store exposes the matching live path with `memory_chunks.embedding VECTOR(1536)`, `VEC_COSINE_DISTANCE(embedding, :query_vector) ORDER BY distance ASC LIMIT :top_k`, and `MATCH(content) AGAINST (:query_text)` for exact names, issue IDs, and runbook references. Hybrid retrieval merges vector and full-text candidates with reciprocal rank fusion.
 
 The TiDB-specific value is not only vector search. HandoverGap stores the whole decision path so a blocked answer can be traced with SQL:
 
@@ -182,7 +204,15 @@ That query joins `transfer_assessments`, `memory_items`, `context_gaps`, `slot_f
 
 `audit-benchmark` measures local audit-row materialization for the bundled scenarios and reports row counts, blocked-transfer counts, top missing slots, and p50/p95 local runtime. It is not a TiDB latency claim; it sizes the audit workload that TiDB stores and queries.
 
-Live TiDB Cloud smoke result for the blocked-transfer audit query:
+For a larger generated workload sizing check:
+
+```bash
+handovergap workload-benchmark --scenarios 1000 --iterations 5
+```
+
+This reports local materialization counts and p50/p95 runtime for generated synthetic scenarios. It is not a live TiDB load test.
+
+Live TiDB Cloud validation result for the blocked-transfer audit query:
 
 | Item | Observed value |
 |---|---:|
@@ -194,11 +224,29 @@ Live TiDB Cloud smoke result for the blocked-transfer audit query:
 | Clarification questions | 7 |
 | Transfer assessments | 6 |
 | Audit query result rows | 7 |
-| Query iterations | 30 |
-| p50 audit query latency | `22.166 ms` |
-| p95 audit query latency | `30.117 ms` |
+| Query iterations | 10 |
+| p50 audit query latency | `48.408 ms` |
+| p95 audit query latency | `1510.413 ms` |
 
-This is a live TiDB Cloud smoke result, not a load-test claim. The detailed output is saved in [`article/tidb_audit_query_results.md`](article/tidb_audit_query_results.md).
+This is a live TiDB Cloud validation result over 10 iterations, not a load-test claim. The p95 includes cold/variable cloud latency and should be read as proof that the audit path runs on a real database, not as a performance benchmark. The detailed output is saved in [`article/tidb_audit_query_results.md`](article/tidb_audit_query_results.md).
+
+Generated workload validation on live TiDB Cloud:
+
+| Item | Observed value |
+|---|---:|
+| Generated scenarios persisted | 100 |
+| Source events | 100 |
+| Memory chunks | 200 |
+| Slot-fill attempts | 567 |
+| Context gaps | 254 |
+| Clarification questions | 254 |
+| Transfer assessments | 100 |
+| Audit query result rows | 254 |
+| Query iterations | 10 |
+| p50 audit query latency | `38.818 ms` |
+| p95 audit query latency | `574.713 ms` |
+
+The generated workload result is saved in [`article/tidb_workload_audit_results.md`](article/tidb_workload_audit_results.md). It also records local workload scaling for 100, 1,000, and 10,000 scenarios.
 
 ### Live TiDB Validation
 
@@ -216,24 +264,77 @@ export TIDB_CA_PATH="/path/to/ca-certificates.crt"
 Then run:
 
 ```bash
-python harness/validation/tidb_live_check.py --create-schema
-python harness/validation/tidb_audit_query_check.py --create-schema --dataset sanitized --iterations 30
+python harness/validation/tidb_live_check.py --reset-schema
+python harness/validation/tidb_audit_query_check.py --reset-schema --dataset sanitized --iterations 10
 ```
 
-The check creates the packaged schema if needed, writes one synthetic memory, persists a slot-fill attempt, a context gap, a transfer assessment, and the holdout stress evaluation runs, then prints row counts as JSON. Do not commit `.env` files or TiDB credentials.
+The check recreates the packaged schema, writes synthetic memory and evidence rows, persists slot-fill attempts, context gaps, transfer assessments, and evaluation runs, then prints row counts as JSON. `--reset-schema` drops packaged HandoverGap tables first, so use it only for alpha validation databases without user data. Do not commit `.env` files or TiDB credentials.
 
 ## Python API
 
 ```python
-from handovergap import HandoverGapDetector, InMemoryStore
+from handovergap import TransferabilityGate
 
-store = InMemoryStore.from_builtin_dataset()
-detector = HandoverGapDetector(store)
-result = detector.detect(scenario_id="S001", successor_role="CS")
+gate = TransferabilityGate()
+result = gate.check(
+    memory="Use CSV for this release; API support is deferred.",
+    profile="CS",
+    task_context="Answer customer questions about the workaround.",
+    evidence=["CSV workaround approved for the release."],
+    provided_slots=["scope"],
+    evidence_slots=["scope"],
+)
 
 print(result.transferability_status)
 print(result.gaps)
 print(result.questions)
+```
+
+Use `TransferabilityGate.from_builtin_dataset().check_builtin("S001", profile="CS")` to inspect the packaged scenarios. The current built-in presets use `CS`, `Engineer`, and `Sales`, but the public data model is intentionally named around `profile` and `task_context` so custom domains can define their own readiness checks.
+
+### Custom Profiles
+
+```python
+from handovergap import TransferabilityGate
+
+gate = TransferabilityGate.from_profile_file("examples/profiles/incident_readiness.yml")
+result = gate.check(
+    memory="The checkout incident is mitigated by disabling the new queue worker.",
+    profile="IncidentCommander",
+    task_context="Decide whether customer-facing mitigation is complete.",
+    provided_slots=["rollback_owner"],
+)
+```
+
+The same profile file can be used from the CLI:
+
+```bash
+handovergap detect \
+  --scenario S001 \
+  --profile IncidentCommander \
+  --profile-file examples/profiles/incident_readiness.yml
+```
+
+### JSONL Source Events
+
+Use JSONL when you want to test Slack/Issue/CRM-style records without adding direct integrations:
+
+```bash
+handovergap ingest examples/source_events/customer_escalation.jsonl \
+  --memory "Use CSV for this release; API support is deferred." \
+  --profile CS \
+  --task-context "Answer customer questions about the workaround."
+```
+
+Each line is a source event with `source_type`, `content`, and optional `title`, `source_url`, `actor_name`, `project_name`, `occurred_at`, and `metadata`.
+
+### RAG Framework Examples
+
+Dry-run examples show where to place the gate before final answer generation:
+
+```bash
+python examples/langchain_gate.py
+python examples/llamaindex_gate.py
 ```
 
 ## Development
@@ -244,6 +345,12 @@ python3 -m venv .venv
 .venv/bin/pytest
 ```
 
+## Production And Security
+
+- [Production adoption guide](docs/29_production_adoption.md)
+- [Security policy](SECURITY.md)
+- [Changelog](CHANGELOG.md)
+
 ## Limitations
 
 - The bundled detector and baselines are deterministic rules, not learned models.
@@ -252,7 +359,7 @@ python3 -m venv .venv
 - Slot-filling stress profiles simulate LLM variance; they are not a replacement for a live LLM evaluation.
 - Live OpenAI slot filling is optional and not required for first-run usage.
 - Live OpenAI slot filling is model-sensitive; current holdout results differ materially between `gpt-4.1-mini` and `gpt-5-mini`.
-- The Streamlit demo uses fictional handover cases. Live OpenAI + TiDB mode exercises OpenAI slot filling and TiDB audit persistence, but it is still a local demo rather than a production retrieval service.
+- The Streamlit demo uses fictional operational cases. Live OpenAI + TiDB mode exercises OpenAI slot filling and TiDB audit persistence, but it is still a local demo rather than a production retrieval service.
 - Semantic equivalence scoring for generated questions is not implemented in the MVP.
 - Live TiDB integration requires the optional `tidb` extra and a configured database.
 
@@ -262,14 +369,14 @@ MIT
 
 ## 日本語
 
-HandoverGap RAGは、正しい業務記憶に不足している暗黙前提を、引き継ぎ先の責任範囲ごとに検出します。
+HandoverGap RAGは、正しい業務記憶に不足している暗黙前提を、プロファイルと作業文脈ごとに検出します。
 
 > 正しい記憶でも、引き継げるとは限らない。
 
 ```bash
 pip install handovergap
 handovergap demo
-handovergap detect --scenario S001 --role CS
+handovergap detect --scenario S001 --profile CS
 handovergap evaluate --compare
 ```
 

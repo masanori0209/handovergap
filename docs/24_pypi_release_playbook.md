@@ -5,7 +5,7 @@
 ```bash
 pip install handovergap
 handovergap demo
-handovergap detect --scenario S001 --role CS
+handovergap detect --scenario S001 --profile CS
 handovergap evaluate
 ```
 
@@ -20,9 +20,11 @@ This should work without:
 
 ```bash
 handovergap schema --dialect tidb
-handovergap ingest --store tidb --dataset sample
-handovergap detect --store tidb --scenario S001 --role CS
+python harness/validation/tidb_live_check.py --reset-schema
+python harness/validation/tidb_audit_query_check.py --reset-schema --dataset sanitized --iterations 10
 ```
+
+Use `--reset-schema` only for alpha validation databases with no user data.
 
 ## Release Checklist
 

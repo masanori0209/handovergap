@@ -7,9 +7,9 @@ def test_scenario_schema_validates_representative_data() -> None:
             "scenario_id": "S999",
             "memory": "A社は今回だけCSVで対応する",
             "evidence_events": [{"source_type": "chat", "content": "今回だけCSV"}],
-            "successor_role": "CS",
+            "profile": "CS",
             "memory_type": "decision",
-            "handover_task": "問い合わせ対応",
+            "task_context": "問い合わせ対応",
             "provided_slots": ["scope"],
             "evidence_slots": ["scope"],
             "gold_gaps": [
@@ -25,5 +25,23 @@ def test_scenario_schema_validates_representative_data() -> None:
         }
     )
 
-    assert scenario.successor_role == "CS"
+    assert scenario.profile == "CS"
     assert scenario.gold_gaps[0].slot_name == "communication_status"
+
+
+def test_scenario_schema_uses_profile_and_task_context() -> None:
+    scenario = HandoverScenario.model_validate(
+        {
+            "scenario_id": "S998",
+            "memory": "Release can proceed only after the rollback owner is confirmed.",
+            "evidence_events": [],
+            "profile": "Engineer",
+            "memory_type": "risk",
+            "task_context": "Release readiness review",
+            "provided_slots": ["scope"],
+            "unsafe_transfer_label": True,
+        }
+    )
+
+    assert scenario.profile == "Engineer"
+    assert scenario.task_context == "Release readiness review"

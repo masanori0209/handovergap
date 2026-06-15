@@ -1,45 +1,32 @@
 {
   "status": "ok",
-  "run_id": "AUDIT-20260615095306",
+  "run_id": "AUDIT-20260615135741",
   "dataset": "sanitized",
   "scenario_count": 6,
   "inserted": {
     "source_events": 10,
     "memory_items": 6,
+    "memory_chunks": 16,
     "slot_fill_attempts": 34,
     "context_gaps": 7,
     "clarification_questions": 7,
     "transfer_assessments": 6
   },
   "audit_query": {
-    "iterations": 30,
+    "iterations": 10,
     "result_rows": 7,
-    "p50_ms": 22.166,
-    "p95_ms": 30.117,
-    "min_ms": 19.043,
-    "max_ms": 32.838
+    "p50_ms": 48.408,
+    "p95_ms": 1510.413,
+    "min_ms": 41.402,
+    "max_ms": 1510.413
   },
   "sample_rows": [
     {
       "transfer_status": "blocked",
-      "transferability_score": 0.833,
-      "scenario_id": "AUDIT-20260615095306-R005",
-      "subject": "Anonymized handover R005",
-      "successor_role": "Engineer",
-      "gap_type": "rationale_gap",
-      "slot_name": "rationale",
-      "severity": "MEDIUM",
-      "slot_fill_status": "missing",
-      "slot_fill_confidence": 0.15,
-      "selected_evidence_title": "R005 evidence 1: ops_note",
-      "question": "この判断に至った理由は何ですか？"
-    },
-    {
-      "transfer_status": "blocked",
       "transferability_score": 0.8,
-      "scenario_id": "AUDIT-20260615095306-R006",
+      "scenario_id": "AUDIT-20260615135741-R006",
       "subject": "Anonymized handover R006",
-      "successor_role": "Sales",
+      "profile": "Sales",
       "gap_type": "timeline_gap",
       "slot_name": "timeline_confidence",
       "severity": "MEDIUM",
@@ -51,23 +38,23 @@
     {
       "transfer_status": "blocked",
       "transferability_score": 0.833,
-      "scenario_id": "AUDIT-20260615095306-R001",
-      "subject": "Anonymized handover R001",
-      "successor_role": "CS",
-      "gap_type": "wording_gap",
-      "slot_name": "customer_facing_wording",
+      "scenario_id": "AUDIT-20260615135741-R005",
+      "subject": "Anonymized handover R005",
+      "profile": "Engineer",
+      "gap_type": "rationale_gap",
+      "slot_name": "rationale",
       "severity": "MEDIUM",
       "slot_fill_status": "missing",
       "slot_fill_confidence": 0.15,
-      "selected_evidence_title": "R001 evidence 1: crm_note",
-      "question": "外部向けにはどの表現で説明すべきですか？"
+      "selected_evidence_title": "R005 evidence 1: ops_note",
+      "question": "この判断に至った理由は何ですか？"
     },
     {
       "transfer_status": "blocked",
       "transferability_score": 0.4,
-      "scenario_id": "AUDIT-20260615095306-R003",
+      "scenario_id": "AUDIT-20260615135741-R003",
       "subject": "Anonymized handover R003",
-      "successor_role": "Sales",
+      "profile": "Sales",
       "gap_type": "negotiation_gap",
       "slot_name": "negotiation_status",
       "severity": "MEDIUM",
@@ -79,9 +66,9 @@
     {
       "transfer_status": "blocked",
       "transferability_score": 0.4,
-      "scenario_id": "AUDIT-20260615095306-R003",
+      "scenario_id": "AUDIT-20260615135741-R003",
       "subject": "Anonymized handover R003",
-      "successor_role": "Sales",
+      "profile": "Sales",
       "gap_type": "promise_boundary_gap",
       "slot_name": "promise_boundary",
       "severity": "MEDIUM",
@@ -92,10 +79,24 @@
     },
     {
       "transfer_status": "blocked",
+      "transferability_score": 0.4,
+      "scenario_id": "AUDIT-20260615135741-R003",
+      "subject": "Anonymized handover R003",
+      "profile": "Sales",
+      "gap_type": "contract_gap",
+      "slot_name": "contract_impact",
+      "severity": "HIGH",
+      "slot_fill_status": "missing",
+      "slot_fill_confidence": 0.15,
+      "selected_evidence_title": "R003 evidence 1: crm_note",
+      "question": "契約や商談への影響はありますか？"
+    },
+    {
+      "transfer_status": "blocked",
       "transferability_score": 0.833,
-      "scenario_id": "AUDIT-20260615095306-R002",
+      "scenario_id": "AUDIT-20260615135741-R002",
       "subject": "Anonymized handover R002",
-      "successor_role": "Engineer",
+      "profile": "Engineer",
       "gap_type": "trigger_gap",
       "slot_name": "trigger_for_reconsideration",
       "severity": "MEDIUM",
@@ -106,103 +107,103 @@
     },
     {
       "transfer_status": "blocked",
-      "transferability_score": 0.4,
-      "scenario_id": "AUDIT-20260615095306-R003",
-      "subject": "Anonymized handover R003",
-      "successor_role": "Sales",
-      "gap_type": "contract_gap",
-      "slot_name": "contract_impact",
-      "severity": "HIGH",
+      "transferability_score": 0.833,
+      "scenario_id": "AUDIT-20260615135741-R001",
+      "subject": "Anonymized handover R001",
+      "profile": "CS",
+      "gap_type": "wording_gap",
+      "slot_name": "customer_facing_wording",
+      "severity": "MEDIUM",
       "slot_fill_status": "missing",
       "slot_fill_confidence": 0.15,
-      "selected_evidence_title": "R003 evidence 1: crm_note",
-      "question": "契約や商談への影響はありますか？"
+      "selected_evidence_title": "R001 evidence 1: crm_note",
+      "question": "外部向けにはどの表現で説明すべきですか？"
     }
   ],
   "explain_rows": [
     {
       "id": "Projection_28",
-      "estRows": "0.00",
+      "estRows": "30.52",
       "task": "root",
       "access object": "",
-      "operator info": "test.transfer_assessments.status, test.transfer_assessments.transferability_score, test.memory_items.scenario_id, test.memory_items.subject, test.transfer_assessments.successor_role, test.context_gaps.gap_type, test.context_gaps.slot_name, test.context_gaps.severity, test.slot_fill_attempts.status, test.slot_fill_attempts.confidence, test.source_events.title, test.clarification_questions.question"
+      "operator info": "test.transfer_assessments.status, test.transfer_assessments.transferability_score, test.memory_items.scenario_id, test.memory_items.subject, test.transfer_assessments.profile, test.context_gaps.gap_type, test.context_gaps.slot_name, test.context_gaps.severity, test.slot_fill_attempts.status, test.slot_fill_attempts.confidence, test.source_events.title, test.clarification_questions.question"
     },
     {
       "id": "└─Sort_29",
-      "estRows": "0.00",
+      "estRows": "30.52",
       "task": "root",
       "access object": "",
       "operator info": "test.transfer_assessments.created_at:desc, test.context_gaps.severity:desc, test.context_gaps.slot_name"
     },
     {
       "id": "  └─Projection_31",
-      "estRows": "0.00",
+      "estRows": "30.52",
       "task": "root",
       "access object": "",
-      "operator info": "test.transfer_assessments.successor_role, test.transfer_assessments.transferability_score, test.transfer_assessments.status, test.transfer_assessments.created_at, test.memory_items.scenario_id, test.memory_items.subject, test.context_gaps.gap_type, test.context_gaps.slot_name, test.context_gaps.severity, test.slot_fill_attempts.confidence, test.slot_fill_attempts.status, test.source_events.title, test.clarification_questions.question"
+      "operator info": "test.transfer_assessments.profile, test.transfer_assessments.transferability_score, test.transfer_assessments.status, test.transfer_assessments.created_at, test.memory_items.scenario_id, test.memory_items.subject, test.context_gaps.gap_type, test.context_gaps.slot_name, test.context_gaps.severity, test.slot_fill_attempts.confidence, test.slot_fill_attempts.status, test.source_events.title, test.clarification_questions.question"
     },
     {
       "id": "    └─IndexHashJoin_37",
-      "estRows": "0.00",
+      "estRows": "30.52",
       "task": "root",
       "access object": "",
       "operator info": "left outer join, inner:IndexLookUp_34, outer key:test.context_gaps.id, inner key:test.clarification_questions.context_gap_id, equal cond:eq(test.context_gaps.id, test.clarification_questions.context_gap_id)"
     },
     {
       "id": "      ├─IndexJoin_50(Build)",
-      "estRows": "0.00",
+      "estRows": "24.41",
       "task": "root",
       "access object": "",
       "operator info": "left outer join, inner:TableReader_47, outer key:test.slot_fill_attempts.selected_event_id, inner key:test.source_events.id, equal cond:eq(test.slot_fill_attempts.selected_event_id, test.source_events.id)"
     },
     {
       "id": "      │ ├─IndexJoin_60(Build)",
-      "estRows": "0.00",
+      "estRows": "19.53",
       "task": "root",
       "access object": "",
-      "operator info": "left outer join, inner:IndexLookUp_59, outer key:test.context_gaps.memory_item_id, test.context_gaps.successor_role, inner key:test.slot_fill_attempts.memory_item_id, test.slot_fill_attempts.successor_role, equal cond:eq(test.context_gaps.memory_item_id, test.slot_fill_attempts.memory_item_id), eq(test.context_gaps.slot_name, test.slot_fill_attempts.slot_name), eq(test.context_gaps.successor_role, test.slot_fill_attempts.successor_role)"
+      "operator info": "left outer join, inner:IndexLookUp_59, outer key:test.context_gaps.memory_item_id, test.context_gaps.profile, inner key:test.slot_fill_attempts.memory_item_id, test.slot_fill_attempts.profile, equal cond:eq(test.context_gaps.memory_item_id, test.slot_fill_attempts.memory_item_id), eq(test.context_gaps.profile, test.slot_fill_attempts.profile), eq(test.context_gaps.slot_name, test.slot_fill_attempts.slot_name)"
     },
     {
       "id": "      │ │ ├─IndexJoin_77(Build)",
-      "estRows": "0.00",
+      "estRows": "15.62",
       "task": "root",
       "access object": "",
       "operator info": "inner join, inner:TableReader_73, outer key:test.transfer_assessments.memory_item_id, inner key:test.memory_items.id, equal cond:eq(test.transfer_assessments.memory_item_id, test.memory_items.id)"
     },
     {
-      "id": "      │ │ │ ├─MergeJoin_113(Build)",
-      "estRows": "0.00",
+      "id": "      │ │ │ ├─IndexHashJoin_119(Build)",
+      "estRows": "12.50",
       "task": "root",
       "access object": "",
-      "operator info": "left outer join, left key:test.transfer_assessments.memory_item_id, test.transfer_assessments.successor_role, right key:test.context_gaps.memory_item_id, test.context_gaps.successor_role"
+      "operator info": "left outer join, inner:IndexLookUp_116, outer key:test.transfer_assessments.memory_item_id, test.transfer_assessments.profile, inner key:test.context_gaps.memory_item_id, test.context_gaps.profile, equal cond:eq(test.transfer_assessments.memory_item_id, test.context_gaps.memory_item_id), eq(test.transfer_assessments.profile, test.context_gaps.profile)"
     },
     {
-      "id": "      │ │ │ │ ├─IndexLookUp_104(Build)",
-      "estRows": "0.00",
+      "id": "      │ │ │ │ ├─TableReader_129(Build)",
+      "estRows": "10.00",
+      "task": "root",
+      "access object": "",
+      "operator info": "data:Selection_128"
+    },
+    {
+      "id": "      │ │ │ │ │ └─Selection_128",
+      "estRows": "10.00",
+      "task": "cop[tikv]",
+      "access object": "",
+      "operator info": "eq(test.transfer_assessments.status, ?)"
+    },
+    {
+      "id": "      │ │ │ │ │   └─TableFullScan_127",
+      "estRows": "10000.00",
+      "task": "cop[tikv]",
+      "access object": "table:ta",
+      "operator info": "keep order:false, stats:pseudo"
+    },
+    {
+      "id": "      │ │ │ │ └─IndexLookUp_116(Probe)",
+      "estRows": "12.50",
       "task": "root",
       "access object": "",
       "operator info": ""
-    },
-    {
-      "id": "      │ │ │ │ │ ├─Selection_103(Build)",
-      "estRows": "0.00",
-      "task": "cop[tikv]",
-      "access object": "",
-      "operator info": "eq(test.context_gaps.status, ?)"
-    },
-    {
-      "id": "      │ │ │ │ │ │ └─IndexFullScan_101",
-      "estRows": "4.00",
-      "task": "cop[tikv]",
-      "access object": "table:cg, index:idx_gap_memory_role_status(memory_item_id, successor_role, status)",
-      "operator info": "keep order:true, stats:pseudo"
-    },
-    {
-      "id": "      │ │ │ │ │ └─TableRowIDScan_102(Probe)",
-      "estRows": "0.00",
-      "task": "cop[tikv]",
-      "access object": "table:cg",
-      "operator info": "keep order:false, stats:pseudo"
     }
   ]
 }

@@ -20,7 +20,7 @@ Enable users to run:
 
 ```bash
 pip install handovergap
-handovergap detect --scenario S001 --role CS
+handovergap detect --scenario S001 --profile CS
 handovergap evaluate --compare
 handovergap serve
 ```

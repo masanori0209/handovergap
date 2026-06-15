@@ -67,7 +67,7 @@ The tuned `gpt5_strict` prompt used 4,351 input tokens and 8,803 output tokens, 
 
 - `naive_rag` returns retrieved memories without checking transferability.
 - `hybrid_rag` can identify one explicit risk and blocks only when that risk is high severity.
-- `handovergap` checks every slot required by the successor responsibility profile.
+- `handovergap` checks every slot required by the selected profile and task context.
 - `handovergap/optimistic` simulates an LLM over-filling ambiguous slots; recall drops because some truly missing slots are treated as filled.
 - Live OpenAI semantic slot filling is model-sensitive. `gpt-4.1-mini` improves recall versus the optimistic simulation, while the first `gpt-5-mini` prompt drops recall to 0.45. A model-specific strict-evidence prompt raises `gpt-5-mini` recall to 1.00 on this holdout split by preventing optimistic filling of ambiguous slots.
 - The strict prompt still over-asks in at least one safe case (`U006`: `timeline_confidence`). Current headline metrics punish unsafe blocking, but do not fully penalize unnecessary clarification.
@@ -76,7 +76,7 @@ The tuned `gpt5_strict` prompt used 4,351 input tokens and 8,803 output tokens, 
 
 These are results on small synthetic benchmarks. The holdout split, slot-filling stress profiles, and live OpenAI check expose real limitations, but they are still not a substitute for independent real-world annotation or online production validation.
 
-## Live Demo Smoke Check
+## Live Demo Validation
 
 The Streamlit demo has two modes and defaults to Japanese copy:
 
@@ -112,8 +112,34 @@ Observed live on TiDB Cloud with the `sanitized` split:
 | Clarification questions | 7 |
 | Transfer assessments | 6 |
 | Audit query result rows | 7 |
-| Query iterations | 30 |
-| p50 audit query latency | `22.166 ms` |
-| p95 audit query latency | `30.117 ms` |
+| Query iterations | 10 |
+| p50 audit query latency | `48.408 ms` |
+| p95 audit query latency | `1510.413 ms` |
 
 See `article/tidb_audit_query_results.md` and `article/tidb_audit_query_results.json` for the sample rows and EXPLAIN output.
+
+Generated workload persisted to live TiDB Cloud:
+
+| Item | Value |
+|---|---:|
+| Generated scenarios persisted | 100 |
+| Source events | 100 |
+| Memory chunks | 200 |
+| Slot-fill attempts | 567 |
+| Context gaps | 254 |
+| Clarification questions | 254 |
+| Transfer assessments | 100 |
+| Audit query result rows | 254 |
+| Query iterations | 10 |
+| p50 audit query latency | `38.818 ms` |
+| p95 audit query latency | `574.713 ms` |
+
+Local generated workload scaling:
+
+| Scenarios | Assessments | Gaps | Questions | Blocked | p50 local ms | p95 local ms |
+|---:|---:|---:|---:|---:|---:|---:|
+| 100 | 100 | 254 | 254 | 24 | 2.522 | 3.140 |
+| 1,000 | 1,000 | 2,505 | 2,505 | 238 | 13.386 | 18.147 |
+| 10,000 | 10,000 | 25,007 | 25,007 | 2,382 | 143.003 | 143.636 |
+
+See `article/tidb_workload_audit_results.md` and `article/tidb_workload_audit_results.json` for generated workload rows and sample blocked-transfer audit rows.

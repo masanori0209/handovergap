@@ -6,7 +6,7 @@ from typing import TypedDict
 class AuditExampleRow(TypedDict):
     transfer_status: str
     scenario_id: str
-    successor_role: str
+    profile: str
     slot_name: str
     severity: str
     slot_fill_status: str
@@ -23,7 +23,7 @@ SELECT
   mi.scenario_id,
   mi.subject,
   mi.memory_type,
-  ta.successor_role,
+  ta.profile,
   cg.gap_type,
   cg.slot_name,
   cg.severity,
@@ -41,11 +41,11 @@ JOIN memory_items mi
   ON mi.id = ta.memory_item_id
 LEFT JOIN context_gaps cg
   ON cg.memory_item_id = ta.memory_item_id
- AND cg.successor_role = ta.successor_role
+ AND cg.profile = ta.profile
  AND cg.status = 'open'
 LEFT JOIN slot_fill_attempts sfa
   ON sfa.memory_item_id = cg.memory_item_id
- AND sfa.successor_role = cg.successor_role
+ AND sfa.profile = cg.profile
  AND sfa.slot_name = cg.slot_name
 LEFT JOIN source_events se
   ON se.id = sfa.selected_event_id
@@ -72,7 +72,7 @@ def transfer_audit_example_rows() -> list[AuditExampleRow]:
         {
             "transfer_status": "blocked",
             "scenario_id": "S001",
-            "successor_role": "CS",
+            "profile": "CS",
             "slot_name": "communication_status",
             "severity": "HIGH",
             "slot_fill_status": "missing",
@@ -82,7 +82,7 @@ def transfer_audit_example_rows() -> list[AuditExampleRow]:
         {
             "transfer_status": "blocked",
             "scenario_id": "S001",
-            "successor_role": "CS",
+            "profile": "CS",
             "slot_name": "authority",
             "severity": "HIGH",
             "slot_fill_status": "missing",
@@ -92,7 +92,7 @@ def transfer_audit_example_rows() -> list[AuditExampleRow]:
         {
             "transfer_status": "blocked",
             "scenario_id": "S001",
-            "successor_role": "CS",
+            "profile": "CS",
             "slot_name": "fallback_plan",
             "severity": "HIGH",
             "slot_fill_status": "missing",

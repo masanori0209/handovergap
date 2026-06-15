@@ -24,7 +24,15 @@ jobs:
       - run: ruff check .
       - run: pytest
       - run: handovergap demo
+      - run: handovergap detect --scenario S001 --profile CS
       - run: handovergap evaluate --compare
+      - run: handovergap retrieve-evidence --scenario S001 --profile CS --slot communication_status --mode hybrid
+      - run: handovergap ingest examples/source_events/customer_escalation.jsonl --memory "Use CSV for this release; API support is deferred." --profile CS --task-context "Answer customer questions about the workaround."
+      - run: handovergap report --dataset all --output reports/evaluation-latest.md
+      - run: test -s reports/evaluation-latest.md
+      - run: handovergap workload-benchmark --scenarios 100 --iterations 1
+      - run: python examples/langchain_gate.py
+      - run: python examples/llamaindex_gate.py
 
   package:
     runs-on: ubuntu-latest

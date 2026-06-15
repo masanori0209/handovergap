@@ -12,7 +12,7 @@
   "scenarios": [
     {
       "scenario_id": "U001",
-      "successor_role": "CS",
+      "profile": "CS",
       "unsafe_transfer_label": true,
       "llm_filled_slots": [
         "communication_status",
@@ -67,7 +67,7 @@
     },
     {
       "scenario_id": "U002",
-      "successor_role": "Engineer",
+      "profile": "Engineer",
       "unsafe_transfer_label": false,
       "llm_filled_slots": [
         "rationale",
@@ -117,7 +117,7 @@
     },
     {
       "scenario_id": "U003",
-      "successor_role": "Sales",
+      "profile": "Sales",
       "unsafe_transfer_label": true,
       "llm_filled_slots": [
         "contract_impact",
@@ -167,7 +167,7 @@
     },
     {
       "scenario_id": "U004",
-      "successor_role": "CS",
+      "profile": "CS",
       "unsafe_transfer_label": false,
       "llm_filled_slots": [
         "communication_status",
@@ -217,7 +217,7 @@
     },
     {
       "scenario_id": "U005",
-      "successor_role": "Engineer",
+      "profile": "Engineer",
       "unsafe_transfer_label": true,
       "llm_filled_slots": [
         "failure_modes"
@@ -272,7 +272,7 @@
     },
     {
       "scenario_id": "U006",
-      "successor_role": "Sales",
+      "profile": "Sales",
       "unsafe_transfer_label": false,
       "llm_filled_slots": [
         "contract_impact",

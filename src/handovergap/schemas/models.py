@@ -4,12 +4,18 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-Role = Literal["CS", "Engineer", "Sales"]
+Profile = str
 
 
 class EvidenceEvent(BaseModel):
     source_type: str
     content: str
+    title: str | None = None
+    source_url: str | None = None
+    actor_name: str | None = None
+    project_name: str | None = None
+    occurred_at: str | None = None
+    metadata: dict[str, object] = Field(default_factory=dict)
 
 
 class HandoverGap(BaseModel):
@@ -33,9 +39,9 @@ class HandoverScenario(BaseModel):
     scenario_id: str
     memory: str
     evidence_events: list[EvidenceEvent] = Field(default_factory=list)
-    successor_role: Role
+    profile: Profile
     memory_type: Literal["decision", "procedure", "risk", "task"]
-    handover_task: str
+    task_context: str
     provided_slots: list[str] = Field(default_factory=list)
     evidence_slots: list[str] = Field(default_factory=list)
     slot_fill_profiles: dict[str, list[str]] = Field(default_factory=dict)
@@ -48,9 +54,9 @@ class HandoverScenario(BaseModel):
 
 class DetectionResult(BaseModel):
     scenario_id: str
-    successor_role: Role
+    profile: Profile
     memory: str
-    handover_task: str
+    task_context: str
     gaps: list[HandoverGap]
     questions: list[ClarificationQuestion]
     transferability_score: float = Field(ge=0.0, le=1.0)

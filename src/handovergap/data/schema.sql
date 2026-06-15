@@ -31,10 +31,14 @@ CREATE TABLE memory_items (
 CREATE TABLE memory_chunks (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   memory_item_id BIGINT NOT NULL,
+  source_event_id BIGINT,
   content TEXT NOT NULL,
   embedding VECTOR(1536),
+  chunk_kind VARCHAR(50) NOT NULL DEFAULT 'memory',
+  metadata JSON,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_memory_chunks_item (memory_item_id)
+  INDEX idx_memory_chunks_item (memory_item_id),
+  FULLTEXT INDEX idx_memory_chunks_content (content)
 );
 
 CREATE TABLE memory_type_schemas (
@@ -47,15 +51,15 @@ CREATE TABLE memory_type_schemas (
   UNIQUE KEY uk_memory_type_slot (memory_type, slot_name)
 );
 
-CREATE TABLE successor_role_requirements (
+CREATE TABLE profile_requirements (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  role_name VARCHAR(100) NOT NULL,
+  profile_name VARCHAR(100) NOT NULL,
   memory_type VARCHAR(50) NOT NULL,
   slot_name VARCHAR(100) NOT NULL,
   importance DECIMAL(4,3),
   reason TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uk_role_memory_slot (role_name, memory_type, slot_name)
+  UNIQUE KEY uk_profile_memory_slot (profile_name, memory_type, slot_name)
 );
 
 CREATE TABLE memory_slots (
@@ -73,7 +77,7 @@ CREATE TABLE memory_slots (
 CREATE TABLE slot_fill_attempts (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   memory_item_id BIGINT NOT NULL,
-  successor_role VARCHAR(100) NOT NULL,
+  profile VARCHAR(100) NOT NULL,
   slot_name VARCHAR(100) NOT NULL,
   query_text TEXT NOT NULL,
   retrieved_event_ids JSON,
@@ -82,13 +86,13 @@ CREATE TABLE slot_fill_attempts (
   confidence DECIMAL(4,3),
   status VARCHAR(50) NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_slot_attempt_memory_role (memory_item_id, successor_role)
+  INDEX idx_slot_attempt_memory_profile (memory_item_id, profile)
 );
 
 CREATE TABLE context_gaps (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   memory_item_id BIGINT NOT NULL,
-  successor_role VARCHAR(100) NOT NULL,
+  profile VARCHAR(100) NOT NULL,
   task_context TEXT,
   gap_type VARCHAR(50) NOT NULL,
   slot_name VARCHAR(100) NOT NULL,
@@ -97,7 +101,7 @@ CREATE TABLE context_gaps (
   required_evidence_type VARCHAR(100),
   status VARCHAR(50) NOT NULL DEFAULT 'open',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_gap_memory_role_status (memory_item_id, successor_role, status)
+  INDEX idx_gap_memory_profile_status (memory_item_id, profile, status)
 );
 
 CREATE TABLE clarification_questions (
@@ -114,14 +118,14 @@ CREATE TABLE clarification_questions (
 CREATE TABLE transfer_assessments (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   memory_item_id BIGINT NOT NULL,
-  successor_role VARCHAR(100) NOT NULL,
+  profile VARCHAR(100) NOT NULL,
   task_context TEXT,
   transferability_score DECIMAL(5,3) NOT NULL,
   unsafe_reason TEXT,
   required_gaps_count INT NOT NULL,
   status VARCHAR(50) NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_assessment_memory_role (memory_item_id, successor_role)
+  INDEX idx_assessment_memory_profile (memory_item_id, profile)
 );
 
 CREATE TABLE evaluation_runs (

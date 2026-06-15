@@ -54,3 +54,36 @@ The next useful improvement is not more scenarios with the same `provided_slots`
 - keep `gold_gaps` and `unsafe_transfer_label` evaluation-only;
 - tune the block policy without reading labels;
 - run the audit query against live TiDB with a larger anonymized workload and record p50/p95 query latency.
+
+## Evaluation Integrity Policy
+
+Future improvements must not maximize scores by hard-coding the benchmark.
+
+Do not:
+
+- read `gold_gaps`, `gold_questions`, or `unsafe_transfer_label` from detector, retriever, slot filler, baseline, or demo code;
+- detect a gap by matching scenario ids, expected slot labels, expected answer strings, or the wording of bundled gold annotations;
+- tune prompts against the exact gold annotation phrasing and then present the result as independent generalization;
+- use structurally aligned mini/holdout scores as production-accuracy evidence.
+
+Do:
+
+- keep gold labels inside evaluator/reporting code only;
+- separate slot filling, gap prediction, question generation, and scoring;
+- use adversarial/holdout/sanitized splits to expose failure modes;
+- report prompt and model variance when an LLM is involved;
+- treat improved mini scores as implementation consistency unless supported by independent annotation or rubric-based semantic scoring.
+
+## LLM-as-a-Judge Evaluation
+
+LLM-as-a-judge is acceptable here, but only as an evaluator, not as a hidden detector shortcut.
+
+Recommended use:
+
+1. Give the judge the source evidence, profile requirements, task context, predicted gaps, generated questions, and transfer decision.
+2. Do not give the judge gold labels, scenario ids, or expected strings as hints.
+3. Ask for structured JSON scores with a written rubric.
+4. Score dimensions such as missing-context validity, evidence grounding, question actionability, over-clarification, and transfer readiness.
+5. Compare judge scores against gold labels or human annotations only in evaluator/reporting code to calibrate the rubric.
+
+This is closer to common LLM evaluation practice than exact string matching. Exact matching is still useful for narrow schema checks, but it is the wrong primary metric for tacit context gaps because the same missing context can be phrased many ways.

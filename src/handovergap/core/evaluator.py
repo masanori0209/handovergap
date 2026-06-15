@@ -80,7 +80,7 @@ class HandoverGapEvaluator:
                 question_slots={question.slot_name for question in result.questions},
                 blocked=result.transferability_status != "transferable",
                 rationale=(
-                    "Performs role-conditioned slot filling and blocks unsafe transfer "
+                    "Performs profile-conditioned slot filling and blocks unsafe transfer "
                     "when required slots are missing."
                 ),
             )

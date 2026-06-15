@@ -2,7 +2,7 @@
 
 ## Objective
 
-Implement `handovergap detect --scenario S001 --role CS`.
+Implement `handovergap detect --scenario S001 --profile CS`.
 
 ## Input Files
 
@@ -25,7 +25,7 @@ Implement `handovergap detect --scenario S001 --role CS`.
 
 ```bash
 pytest tests/test_cli_detect.py
-handovergap detect --scenario S001 --role CS
+handovergap detect --scenario S001 --profile CS
 ```
 
 ## Stop Condition

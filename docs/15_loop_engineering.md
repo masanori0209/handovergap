@@ -71,7 +71,7 @@ Implement `handovergap detect`.
 
 ```bash
 pytest tests/test_cli_detect.py
-handovergap detect --scenario S001 --role CS
+handovergap detect --scenario S001 --profile CS
 ```
 
 ## Stop Condition

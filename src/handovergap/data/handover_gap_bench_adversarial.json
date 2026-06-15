@@ -8,9 +8,9 @@
       "evidence_events": [
         {"source_type": "doc", "content": "FAQ差し替えの対象範囲、顧客告知、回答権限、例外時のCSリード連絡、外部向け文面を記載。"}
       ],
-      "successor_role": "CS",
+      "profile": "CS",
       "memory_type": "task",
-      "handover_task": "FAQ差し替え後の問い合わせ対応",
+      "task_context": "FAQ差し替え後の問い合わせ対応",
       "provided_slots": ["communication_status", "scope", "authority", "escalation_path", "customer_facing_wording"],
       "evidence_slots": ["communication_status", "scope", "authority", "fallback_plan", "escalation_path", "customer_facing_wording"],
       "slot_fill_profiles": {
@@ -32,9 +32,9 @@
       "evidence_events": [
         {"source_type": "crm_note", "content": "旧単価で見積予定。法務確認は未完了。顧客には見積時期のみ共有。"}
       ],
-      "successor_role": "Sales",
+      "profile": "Sales",
       "memory_type": "decision",
-      "handover_task": "契約更新交渉",
+      "task_context": "契約更新交渉",
       "provided_slots": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence", "negotiation_status"],
       "evidence_slots": ["timeline_confidence", "customer_expectation"],
       "slot_fill_profiles": {
@@ -64,9 +64,9 @@
       "evidence_events": [
         {"source_type": "tech_note", "content": "Webhook検証は先行。失敗時はCSV継続。API化の判断条件と追跡issueは未記載。"}
       ],
-      "successor_role": "Engineer",
+      "profile": "Engineer",
       "memory_type": "decision",
-      "handover_task": "連携方式の検証引き継ぎ",
+      "task_context": "連携方式の検証引き継ぎ",
       "provided_slots": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "failure_modes"],
       "evidence_slots": ["implementation_scope", "failure_modes"],
       "slot_fill_profiles": {
@@ -94,9 +94,9 @@
       "evidence_events": [
         {"source_type": "incident_note", "content": "一次連絡は送付済み。恒久対応は未確定。顧客向けの追加回答権限は未承認。"}
       ],
-      "successor_role": "CS",
+      "profile": "CS",
       "memory_type": "risk",
-      "handover_task": "障害後の追加問い合わせ対応",
+      "task_context": "障害後の追加問い合わせ対応",
       "provided_slots": ["communication_status", "scope", "authority", "customer_facing_wording"],
       "evidence_slots": ["communication_status", "scope"],
       "slot_fill_profiles": {
@@ -114,7 +114,7 @@
         {"gap_type": "escalation_gap", "slot_name": "escalation_path", "description": "技術確認先が不明", "severity": "HIGH"}
       ],
       "gold_questions": [
-        {"slot_name": "authority", "question": "後任が回答または判断してよい範囲はどこまでですか？"},
+        {"slot_name": "authority", "question": "このプロファイルが回答または判断してよい範囲はどこまでですか？"},
         {"slot_name": "fallback_plan", "question": "想定外の場合の代替手段は何ですか？"},
         {"slot_name": "escalation_path", "question": "問題が起きた場合のエスカレーション先は誰ですか？"}
       ],
@@ -126,9 +126,9 @@
       "evidence_events": [
         {"source_type": "runbook", "content": "R-42には判断理由、制約、対象範囲、再検討条件、関連issue、失敗症状、SRE当番を記載。"}
       ],
-      "successor_role": "Engineer",
+      "profile": "Engineer",
       "memory_type": "procedure",
-      "handover_task": "夜間ジョブ障害対応",
+      "task_context": "夜間ジョブ障害対応",
       "provided_slots": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"],
       "evidence_slots": ["rationale", "technical_constraint", "implementation_scope", "trigger_for_reconsideration", "related_issue", "failure_modes"],
       "slot_fill_profiles": {
@@ -150,9 +150,9 @@
       "evidence_events": [
         {"source_type": "crm_note", "content": "契約影響なし、約束範囲、顧客期待、提示期限、交渉状況を記録。"}
       ],
-      "successor_role": "Sales",
+      "profile": "Sales",
       "memory_type": "task",
-      "handover_task": "提案条件の引き継ぎ",
+      "task_context": "提案条件の引き継ぎ",
       "provided_slots": ["contract_impact", "promise_boundary", "timeline_confidence", "negotiation_status"],
       "evidence_slots": ["contract_impact", "promise_boundary", "customer_expectation", "timeline_confidence", "negotiation_status"],
       "slot_fill_profiles": {

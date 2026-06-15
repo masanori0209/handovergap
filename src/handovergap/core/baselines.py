@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from handovergap.schemas import HandoverScenario
-from handovergap.slot_rules import HIGH_RISK_SLOTS, ROLE_REQUIRED_SLOTS
+from handovergap.slot_rules import HIGH_RISK_SLOTS, PROFILE_REQUIRED_SLOTS
 
 
 @dataclass(frozen=True)
@@ -57,7 +57,7 @@ BASELINES: dict[str, BaselineMethod] = {
 
 
 def _first_evidence_missing_required_slot(scenario: HandoverScenario) -> set[str]:
-    required_slots = ROLE_REQUIRED_SLOTS[scenario.successor_role]
+    required_slots = PROFILE_REQUIRED_SLOTS[scenario.profile]
     for slot in required_slots:
         if slot not in scenario.evidence_slots:
             return {slot}

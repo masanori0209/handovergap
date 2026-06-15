@@ -3,19 +3,19 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from handovergap.slot_rules import ROLE_REQUIRED_SLOTS
+from handovergap.slot_rules import PROFILE_REQUIRED_SLOTS
 
 SLOT_FILL_CRITERIA = {
     "communication_status": (
         "Filled only when the evidence states who has already been informed, what was communicated, "
-        "and whether the communication is complete enough for the successor's next action."
+        "and whether the communication is complete enough for the profile's next action."
     ),
     "scope": (
         "Filled only when the applicable objects, customers, releases, screens, jobs, or time window are explicit. "
         "A vague plan or task label is not enough."
     ),
     "authority": (
-        "Filled only when the successor's decision or response authority is explicit, including what they may "
+        "Filled only when the profile's decision or response authority is explicit, including what they may "
         "and may not say or decide."
     ),
     "fallback_plan": "Filled only when a concrete alternate action is given for failure, exception, or customer pushback.",
@@ -61,15 +61,15 @@ def default_prompt_profile(model: str) -> str:
 
 def build_slot_fill_prompt(scenario: Any, required_slots: list[str], prompt_profile: str) -> str:
     base = f"""
-You are a strict handover safety reviewer.
+You are a strict context readiness reviewer.
 
 Task:
-Decide which required slots are explicitly filled well enough for the successor to act safely.
+Decide which required slots are explicitly filled well enough for the requested profile to act safely.
 Do not infer missing authority, promise boundaries, escalation paths, or customer communication status from vague text.
 Return only slots that are directly supported by the memory or evidence.
 
-Successor role: {scenario.successor_role}
-Handover task: {scenario.handover_task}
+Profile: {scenario.profile}
+Task context: {scenario.task_context}
 Required slots: {required_slots}
 
 Memory:
@@ -85,7 +85,7 @@ Evidence events:
     return f"""{base}
 
 GPT-5 strict evidence profile:
-- Treat "filled" as a high bar: the successor can reuse the information without guessing, asking a teammate, opening an unspecified document, or inventing wording.
+- Treat "filled" as a high bar: the requested profile can reuse the information without guessing, asking a teammate, opening an unspecified document, or inventing wording.
 - Mark a slot false when the evidence only says that a decision is planned, pending, under investigation, in a runbook/issue/CRM note, or available somewhere else without giving the actual value needed for handover.
 - For this validation dataset, evidence event contents are summaries of available handover artifacts. If a summary explicitly says a required item itself is documented or recorded, treat that as direct support. Do not apply this when the summary says the item is pending, unconfirmed, not recorded, or merely planned.
 - Do not treat an internal plan as customer-safe wording.
@@ -106,7 +106,7 @@ def fill_slots_with_openai(
     prompt_profile: str | None = None,
 ) -> dict[str, Any]:
     prompt_profile = prompt_profile or default_prompt_profile(model)
-    required_slots = ROLE_REQUIRED_SLOTS[scenario.successor_role]
+    required_slots = PROFILE_REQUIRED_SLOTS[scenario.profile]
     response = client.responses.create(
         model=model,
         input=build_slot_fill_prompt(scenario, required_slots, prompt_profile),
