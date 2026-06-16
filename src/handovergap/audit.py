@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TypedDict
+from collections import defaultdict
+from typing import Any, TypedDict
 
 
 class AuditExampleRow(TypedDict):
@@ -64,6 +65,55 @@ TRANSFER_AUDIT_EXPLANATION = (
 
 def transfer_audit_sql() -> str:
     return TRANSFER_AUDIT_SQL
+
+
+def diverse_audit_sample_rows(rows: list[dict[str, Any]], limit: int = 8) -> list[dict[str, Any]]:
+    """Pick audit rows that show one blocked scenario fanning out across slots."""
+    if not rows or limit <= 0:
+        return []
+
+    severity_rank = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
+
+    def sort_key(row: dict[str, Any]) -> tuple[int, str, str]:
+        return (
+            severity_rank.get(str(row.get("severity", "")), 9),
+            str(row.get("slot_name", "")),
+            str(row.get("scenario_id", "")),
+        )
+
+    by_scenario: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        by_scenario[str(row.get("scenario_id", ""))].append(row)
+
+    anchor_scenario = max(by_scenario, key=lambda scenario_id: len(by_scenario[scenario_id]))
+    anchor_rows = sorted(by_scenario[anchor_scenario], key=sort_key)
+    sample = anchor_rows[: min(max(limit - 2, 1), len(anchor_rows))]
+
+    seen_profiles = {str(row.get("profile", "")) for row in sample}
+    for row in sorted(rows, key=sort_key):
+        if len(sample) >= limit:
+            break
+        profile = str(row.get("profile", ""))
+        if profile in seen_profiles:
+            continue
+        sample.append(row)
+        seen_profiles.add(profile)
+
+    if len(sample) < limit:
+        seen_keys = {
+            (str(row.get("scenario_id", "")), str(row.get("slot_name", "")))
+            for row in sample
+        }
+        for row in sorted(rows, key=sort_key):
+            if len(sample) >= limit:
+                break
+            key = (str(row.get("scenario_id", "")), str(row.get("slot_name", "")))
+            if key in seen_keys:
+                continue
+            sample.append(row)
+            seen_keys.add(key)
+
+    return sample[:limit]
 
 
 def transfer_audit_example_rows() -> list[AuditExampleRow]:

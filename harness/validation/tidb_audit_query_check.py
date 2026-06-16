@@ -9,6 +9,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
+from handovergap.audit import diverse_audit_sample_rows
 from handovergap import TiDBStore
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.retrieval import chunk_rows_for_scenario
@@ -60,7 +61,7 @@ def main() -> int:
             "min_ms": round(min(timings), 3),
             "max_ms": round(max(timings), 3),
         },
-        "sample_rows": rows[:8],
+        "sample_rows": diverse_audit_sample_rows(rows, limit=8),
         "explain_rows": explain_rows,
     }
 

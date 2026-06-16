@@ -1,5 +1,6 @@
 from typer.testing import CliRunner
 
+from handovergap.audit import diverse_audit_sample_rows
 from handovergap.cli import app
 
 
@@ -30,3 +31,20 @@ def test_cli_audit_benchmark_prints_materialization_summary() -> None:
     assert "dataset=holdout" in result.output
     assert "Context gap rows / run" in result.output
     assert "fallback_plan" in result.output
+
+
+def test_diverse_audit_sample_rows_prefers_one_scenario_with_many_gaps() -> None:
+    rows = [
+        {"scenario_id": "W0099", "profile": "Sales", "slot_name": "customer_expectation", "severity": "MEDIUM", "question": "q1"},
+        {"scenario_id": "W0099", "profile": "Sales", "slot_name": "timeline_confidence", "severity": "MEDIUM", "question": "q2"},
+        {"scenario_id": "W0100", "profile": "CS", "slot_name": "authority", "severity": "HIGH", "question": "q3"},
+        {"scenario_id": "W0100", "profile": "CS", "slot_name": "fallback_plan", "severity": "HIGH", "question": "q4"},
+        {"scenario_id": "W0100", "profile": "CS", "slot_name": "scope", "severity": "MEDIUM", "question": "q5"},
+        {"scenario_id": "W0095", "profile": "Engineer", "slot_name": "failure_modes", "severity": "MEDIUM", "question": "q6"},
+    ]
+
+    sample = diverse_audit_sample_rows(rows, limit=6)
+
+    assert len(sample) == 6
+    assert sum(1 for row in sample if row["scenario_id"] == "W0100") >= 3
+    assert {row["profile"] for row in sample} == {"CS", "Sales", "Engineer"}

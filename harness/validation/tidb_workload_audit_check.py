@@ -8,7 +8,7 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
-from handovergap.core.detector import HandoverGapDetector
+from handovergap.audit import diverse_audit_sample_rows
 from handovergap.retrieval import chunk_rows_for_scenario
 from handovergap.slot_rules import PROFILE_REQUIRED_SLOTS
 from handovergap.store import InMemoryStore
@@ -99,7 +99,7 @@ def main() -> int:
             "max_ms": round(max(timings), 3),
         },
         "local_scale": local_scale,
-        "sample_rows": rows[:10],
+        "sample_rows": diverse_audit_sample_rows(rows, limit=10),
         "explain_rows": explain_rows,
     }
 
