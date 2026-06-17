@@ -352,7 +352,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.10</code></pre>
+              <pre><code>pip install handovergap==0.1.11</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -841,6 +841,33 @@ result = TransferabilityGate().check(
             Place HandoverGap after retrieval and before answer generation. Let your normal retriever
             collect candidate memory and evidence, then let the gate decide whether to answer, ask,
             or block.
+          </p>
+          <div class="callout">
+            <strong>Start with the complete runnable path:</strong>
+            <code>python examples/end_to_end_integration.py</code> simulates retrieved memory,
+            retrieved evidence, evidence-to-slot mapping, <code>TransferabilityGate.check(...)</code>,
+            and final <code>answer</code>/<code>ask</code>/<code>block</code> routing.
+          </div>
+          <pre><code>== first retrieval ==
+provided_slots=scope
+evidence_slots=communication_status,authority,customer_facing_wording
+status=blocked action=block
+gaps=fallback_plan,escalation_path
+questions:
+- 想定外の場合の代替手段は何ですか？
+- 問題が起きた場合のエスカレーション先は誰ですか？
+safe_context=withheld
+
+== after retrieving runbook evidence ==
+provided_slots=scope
+evidence_slots=communication_status,authority,fallback_plan,escalation_path,customer_facing_wording
+status=transferable action=answer
+gaps=none
+questions=none
+safe_context=available</code></pre>
+          <p class="small" style="margin-top: 14px">
+            OpenAI slot filling can replace deterministic keyword mapping, and TiDB can persist the
+            route audit trail. Neither is required for the core runtime.
           </p>
           <div class="grid two">
             <article class="card">

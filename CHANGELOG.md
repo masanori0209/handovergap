@@ -6,6 +6,14 @@
 
 - No unreleased changes yet.
 
+## 0.1.11 - 2026-06-18
+
+### Added
+
+- `examples/end_to_end_integration.py`, a complete framework-neutral path from retrieved memory and evidence to slot mapping, gate checking, and product routing.
+- README, README.ja, and GitHub Pages documentation for the end-to-end integration path.
+- Example test coverage so the first practical integration path stays runnable.
+
 ## 0.1.10 - 2026-06-18
 
 ### Added

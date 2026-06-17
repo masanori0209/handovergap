@@ -5,7 +5,7 @@
 
 [English README](README.md)
 
-最新確認済みリリース: `handovergap==0.1.10`
+最新確認済みリリース: `handovergap==0.1.11`
 
 使い方ページ: https://masanori0209.github.io/handovergap/
 
@@ -48,6 +48,23 @@ handovergap evaluate --compare
 ```
 
 TiDBアカウント、OpenAI APIキー、外部データセットは不要です。
+
+## 実装例
+
+既存RAGに組み込む最初の導線として、フレームワーク非依存のend-to-end例を用意しています。
+
+```bash
+python examples/end_to_end_integration.py
+```
+
+この例では、既存のretrieverが返した記憶と証拠を、HandoverGapに渡すまでの流れを一通り確認できます。
+
+1. 候補となる記憶と証拠を取得する。
+2. 証拠が支えているスロットを明示する。
+3. `TransferabilityGate.check(...)` で不足文脈を検査する。
+4. `answer` / `ask` / `block` のプロダクト向けrouteに変換する。
+
+最初の検索結果では代替手段とエスカレーション先が足りないため `block` になり、runbook証拠を追加すると `answer` に変わります。OpenAIによるslot fillingやTiDBへの監査保存は任意で差し替えられます。
 
 ## デモ
 

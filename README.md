@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.10`
+Latest tested release: `handovergap==0.1.11`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -336,6 +336,47 @@ Stable outputs:
 | `gaps` | Missing profile-required context. |
 | `questions` | Clarification questions that turn missing context into next actions. |
 | `scenario_id`, `profile`, `memory`, `task_context` | Echoed context for routing and audit. |
+
+### End-To-End Integration Example
+
+Run the framework-neutral example when you want to see the full adoption path:
+
+```bash
+python examples/end_to_end_integration.py
+```
+
+It simulates an existing RAG pipeline:
+
+1. Retrieve a candidate memory and evidence snippets.
+2. Map retrieved evidence to supported slots.
+3. Call `TransferabilityGate.check(...)`.
+4. Convert the result into an `answer`, `ask`, or `block` product route.
+
+Expected shape:
+
+```text
+== first retrieval ==
+provided_slots=scope
+evidence_slots=communication_status,authority,customer_facing_wording
+status=blocked action=block
+gaps=fallback_plan,escalation_path
+questions:
+- 想定外の場合の代替手段は何ですか？
+- 問題が起きた場合のエスカレーション先は誰ですか？
+safe_context=withheld
+
+== after retrieving runbook evidence ==
+provided_slots=scope
+evidence_slots=communication_status,authority,fallback_plan,escalation_path,customer_facing_wording
+status=transferable action=answer
+gaps=none
+questions=none
+safe_context=available
+```
+
+Use this example as the day-one integration pattern. OpenAI slot filling can replace
+the deterministic keyword mapper, and TiDB can persist the resulting audit trail,
+but neither is required by the core runtime.
 
 ### Evidence-To-Slot Mapping
 

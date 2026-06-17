@@ -51,3 +51,20 @@ def test_product_routing_example_runs() -> None:
     assert "support: action=block status=blocked" in result.stdout
     assert "incident: action=ask status=needs_clarification" in result.stdout
     assert "agent: action=answer status=transferable" in result.stdout
+
+
+def test_end_to_end_integration_example_runs() -> None:
+    result = subprocess.run(
+        [sys.executable, "examples/end_to_end_integration.py"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "== first retrieval ==" in result.stdout
+    assert "status=blocked action=block" in result.stdout
+    assert "gaps=fallback_plan,escalation_path" in result.stdout
+    assert "== after retrieving runbook evidence ==" in result.stdout
+    assert "status=transferable action=answer" in result.stdout
+    assert "safe_context=available" in result.stdout
