@@ -352,7 +352,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.16</code></pre>
+              <pre><code>pip install handovergap==0.1.17</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -1099,6 +1099,20 @@ return {
               </tr>
             </tbody>
           </table>
+        </section>
+
+        <section>
+          <h2>Privacy Defaults</h2>
+          <p>
+            Core commands run locally by default and do not call OpenAI, TiDB, Slack, GitHub, or other
+            external services. Live OpenAI slot filling, TiDB persistence, and Streamlit live mode require
+            explicit optional dependencies and credentials.
+          </p>
+          <pre><code>handovergap privacy-check</code></pre>
+          <p class="small" style="margin-top: 14px">
+            Keep user datasets, reviewed labels, generated reports, and <code>.env</code> files out of git.
+            Remove real names, direct IDs, URLs, email addresses, payment details, and secrets before publishing examples.
+          </p>
         </section>
 
         <section>

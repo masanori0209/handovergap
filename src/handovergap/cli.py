@@ -16,6 +16,7 @@ from handovergap.audit import TRANSFER_AUDIT_EXPLANATION, transfer_audit_example
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.ingest import scenario_from_jsonl
+from handovergap.privacy import DEFAULT_PRIVACY_CHECK_PATHS, scan_privacy
 from handovergap.profiles import ProfileCatalog, validate_profile_file
 from handovergap.reporting import generate_evaluation_report
 from handovergap.retrieval import (
@@ -301,6 +302,31 @@ def datasets_import_labels(
     console.print(f"Wrote reviewed dataset: {output}")
     console.print(f"Scenarios: {count}")
     console.print(f"Next: handovergap evaluate --dataset-file {output} --compare")
+
+
+@app.command("privacy-check")
+def privacy_check(
+    paths: list[str] | None = typer.Argument(
+        None,
+        help="Files or directories to scan. Defaults to public docs, examples, and packaged data.",
+    ),
+) -> None:
+    """Scan public docs/examples/data for obvious secrets or direct identifiers."""
+    scan_paths = paths or DEFAULT_PRIVACY_CHECK_PATHS
+    findings = scan_privacy(scan_paths)
+    if not findings:
+        console.print(f"No obvious privacy findings in {len(scan_paths)} path(s).")
+        return
+
+    table = Table(title="Privacy findings")
+    table.add_column("Path")
+    table.add_column("Line", justify="right")
+    table.add_column("Kind")
+    table.add_column("Excerpt")
+    for finding in findings:
+        table.add_row(finding.path, str(finding.line), finding.kind, finding.excerpt)
+    console.print(table)
+    raise typer.Exit(code=1)
 
 
 @app.command()

@@ -1,10 +1,11 @@
 """HandoverGap RAG public API."""
 
-__version__ = "0.1.16"
+__version__ = "0.1.17"
 
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.core.gate import ContextReadinessGate, TransferabilityGate
+from handovergap.privacy import PrivacyFinding, scan_privacy
 from handovergap.profiles import (
     ProfileCatalog,
     ProfileDefinition,
@@ -28,6 +29,7 @@ __all__ = [
     "ProfileDefinition",
     "ProfileValidationResult",
     "ProductRoute",
+    "PrivacyFinding",
     "SlotPolicy",
     "SlotFillMode",
     "SLOT_FILL_MODE_DESCRIPTIONS",
@@ -39,5 +41,6 @@ __all__ = [
     "import_reviewed_labels",
     "load_user_dataset",
     "route_transferability_result",
+    "scan_privacy",
     "validate_profile_file",
 ]

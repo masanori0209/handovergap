@@ -5,7 +5,7 @@
 
 [English README](README.md)
 
-最新確認済みリリース: `handovergap==0.1.16`
+最新確認済みリリース: `handovergap==0.1.17`
 
 使い方ページ: https://masanori0209.github.io/handovergap/
 
@@ -316,6 +316,18 @@ handovergap report --dataset-file ./local/reviewed_scenarios.jsonl --output ./lo
 ```
 
 `--dataset-file` のreportはuser-provided local evaluation artifactとして明示され、同梱の合成benchmark結果とは区別されます。
+
+## Privacy defaults
+
+core packageはデフォルトでローカル実行です。`demo`、`detect`、`evaluate`、`report`、`ingest`、`profiles validate`、`privacy-check` はOpenAI、TiDB、Slack、GitHubなどの外部サービスを呼びません。OpenAIスロット抽出、TiDB保存、Streamlit live modeは、明示的なextraと認証情報がある場合だけ使う任意経路です。
+
+docs、examples、packaged dataを公開する前に次を実行できます。
+
+```bash
+handovergap privacy-check
+```
+
+ユーザーデータは `local/` などgit管理外に置き、会社名、顧客名、従業員名、チャンネル名、直接的なユーザーID、URL、メールアドレス、決済情報、秘密値を取り除いてください。
 
 ## 制約
 

@@ -6,6 +6,19 @@
 
 - No unreleased changes yet.
 
+## 0.1.17 - 2026-06-18
+
+### Added
+
+- `handovergap privacy-check` for scanning public docs, examples, and packaged data for obvious secrets and direct identifiers.
+- Public `scan_privacy(...)` and `PrivacyFinding` helpers.
+- Tests for privacy scanning and redacted findings.
+
+### Changed
+
+- Expanded `.gitignore` for local user-dataset evaluation artifacts.
+- Security and documentation now describe default offline data flow and optional OpenAI/TiDB/Streamlit paths.
+
 ## 0.1.16 - 2026-06-18
 
 ### Added

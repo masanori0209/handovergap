@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.16`
+Latest tested release: `handovergap==0.1.17`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -458,6 +458,18 @@ handovergap report --dataset-file ./local/reviewed_scenarios.jsonl --output ./lo
 ```
 
 Reports generated with `--dataset-file` are labeled as user-provided local evaluation artifacts so they are not confused with bundled synthetic benchmark results.
+
+### Privacy Defaults
+
+The core package runs locally by default. `demo`, `detect`, `evaluate`, `report`, `ingest`, `profiles validate`, and `privacy-check` do not call OpenAI, TiDB, Slack, GitHub, or other external services. OpenAI slot filling, TiDB persistence, and Streamlit live mode are optional paths that require explicit extras and credentials.
+
+Before publishing docs, examples, or packaged data, run:
+
+```bash
+handovergap privacy-check
+```
+
+For user datasets, keep raw files and reviewed labels outside git, for example under `local/`, and remove real company names, customer names, employee names, channel names, direct user IDs, URLs, email addresses, payment details, and secrets.
 
 ### Product Routing
 
