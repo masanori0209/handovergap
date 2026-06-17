@@ -3,7 +3,13 @@ from __future__ import annotations
 import inspect
 from typing import get_args
 
-from handovergap import ContextReadinessGate, TransferabilityGate, map_evidence_slots_by_keywords
+from handovergap import (
+    ContextReadinessGate,
+    ProductRoute,
+    TransferabilityGate,
+    map_evidence_slots_by_keywords,
+    route_transferability_result,
+)
 from handovergap.schemas import DetectionResult
 
 
@@ -71,3 +77,8 @@ def test_context_readiness_gate_alias_is_stable() -> None:
 
 def test_evidence_slot_mapping_helper_is_public() -> None:
     assert callable(map_evidence_slots_by_keywords)
+
+
+def test_product_routing_helper_is_public() -> None:
+    assert callable(route_transferability_result)
+    assert set(ProductRoute.model_fields) == {"status", "action", "reason", "questions", "safe_context"}

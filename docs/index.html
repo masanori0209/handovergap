@@ -352,7 +352,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.9</code></pre>
+              <pre><code>pip install handovergap==0.1.10</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -904,6 +904,55 @@ return llm.answer(user_question, context=retrieved_memory.text)</code></pre>
               </p>
             </article>
           </div>
+          <h3 style="margin-top: 24px">Product Routing Semantics</h3>
+          <table class="text-table">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Action</th>
+                <th>Product behavior</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>transferable</code></td>
+                <td><code>answer</code></td>
+                <td>Continue to answer or action generation.</td>
+              </tr>
+              <tr>
+                <td><code>needs_clarification</code></td>
+                <td><code>ask</code></td>
+                <td>Ask the returned questions before finalizing the answer.</td>
+              </tr>
+              <tr>
+                <td><code>blocked</code></td>
+                <td><code>block</code></td>
+                <td>Withhold the answer or action and show missing context questions to the responsible user.</td>
+              </tr>
+            </tbody>
+          </table>
+          <pre><code>from handovergap import TransferabilityGate, route_transferability_result
+
+result = TransferabilityGate().check(
+    memory="Use CSV for this release; API support is deferred.",
+    profile="CS",
+    task_context="Answer customer questions without overpromising.",
+    provided_slots=["scope"],
+)
+
+route = route_transferability_result(result, safe_context=result.memory)
+
+return {
+    "status": route.status,
+    "action": route.action,
+    "reason": route.reason,
+    "questions": route.questions,
+    "safe_context": route.safe_context,
+}</code></pre>
+          <p class="small" style="margin-top: 14px">
+            <code>safe_context</code> is only returned for <code>transferable</code> results. Ask and
+            block routes omit it so applications do not expose context that is not ready to use.
+          </p>
         </section>
 
         <section>

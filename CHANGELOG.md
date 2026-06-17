@@ -6,6 +6,15 @@
 
 - No unreleased changes yet.
 
+## 0.1.10 - 2026-06-18
+
+### Added
+
+- `ProductRoute` and `route_transferability_result(...)` for answer / ask / block product routing.
+- A runnable `examples/product_routing.py` example covering support reply, incident response, and agent action routing.
+- Tests for `transferable`, `needs_clarification`, and `blocked` route semantics.
+- README and GitHub Pages documentation for product routing behavior and `safe_context`.
+
 ## 0.1.9 - 2026-06-17
 
 ### Added

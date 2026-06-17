@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.9`
+Latest tested release: `handovergap==0.1.10`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -375,6 +375,39 @@ result = TransferabilityGate().check(
 ```
 
 Manual mapping, deterministic rules, and optional LLM slot filling can all feed the same `evidence_slots` contract. The core API does not require an LLM.
+
+### Product Routing
+
+Use `route_transferability_result(...)` when your application needs a structured answer/ask/block response.
+
+| `transferability_status` | `action` | Product behavior |
+| --- | --- | --- |
+| `transferable` | `answer` | Continue to answer or action generation. |
+| `needs_clarification` | `ask` | Ask the returned questions before finalizing the answer. |
+| `blocked` | `block` | Withhold the answer/action and show the missing context questions to the responsible user. |
+
+```python
+from handovergap import TransferabilityGate, route_transferability_result
+
+result = TransferabilityGate().check(
+    memory="Use CSV for this release; API support is deferred.",
+    profile="CS",
+    task_context="Answer customer questions without overpromising.",
+    provided_slots=["scope"],
+)
+
+route = route_transferability_result(result, safe_context=result.memory)
+
+return {
+    "status": route.status,
+    "action": route.action,
+    "reason": route.reason,
+    "questions": route.questions,
+    "safe_context": route.safe_context,
+}
+```
+
+`safe_context` is only returned for `transferable` results. Clarification and blocked routes omit it so applications do not accidentally expose context that is not ready to use.
 
 ### Custom Profiles
 

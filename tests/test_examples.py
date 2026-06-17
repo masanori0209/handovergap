@@ -37,3 +37,17 @@ def test_evidence_to_slot_mapping_example_runs() -> None:
     assert result.returncode == 0
     assert "without_evidence_slots=blocked" in result.stdout
     assert "with_evidence_slots=transferable" in result.stdout
+
+
+def test_product_routing_example_runs() -> None:
+    result = subprocess.run(
+        [sys.executable, "examples/product_routing.py"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    assert "support: action=block status=blocked" in result.stdout
+    assert "incident: action=ask status=needs_clarification" in result.stdout
+    assert "agent: action=answer status=transferable" in result.stdout
