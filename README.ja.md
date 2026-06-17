@@ -5,7 +5,7 @@
 
 [English README](README.md)
 
-最新確認済みリリース: `handovergap==0.1.11`
+最新確認済みリリース: `handovergap==0.1.12`
 
 使い方ページ: https://masanori0209.github.io/handovergap/
 
@@ -56,6 +56,8 @@ TiDBアカウント、OpenAI APIキー、外部データセットは不要です
 ```bash
 python examples/end_to_end_integration.py
 ```
+
+LangChain / LlamaIndex を含む組み込みパターンは [RAG Integration Recipes](docs/30_rag_integration_recipes.md) にまとめています。
 
 この例では、既存のretrieverが返した記憶と証拠を、HandoverGapに渡すまでの流れを一通り確認できます。
 

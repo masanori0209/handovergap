@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.11`
+Latest tested release: `handovergap==0.1.12`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -488,9 +488,12 @@ Each line is a source event with `source_type`, `content`, and optional `title`,
 
 ### RAG Framework Examples
 
-Dry-run examples show where to place the gate before final answer generation:
+Copyable recipes are in [RAG Integration Recipes](docs/30_rag_integration_recipes.md).
+
+Runnable examples show where to place the gate before final answer generation:
 
 ```bash
+python examples/end_to_end_integration.py
 python examples/langchain_gate.py
 python examples/llamaindex_gate.py
 ```

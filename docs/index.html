@@ -352,7 +352,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.11</code></pre>
+              <pre><code>pip install handovergap==0.1.12</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -868,6 +868,26 @@ safe_context=available</code></pre>
           <p class="small" style="margin-top: 14px">
             OpenAI slot filling can replace deterministic keyword mapping, and TiDB can persist the
             route audit trail. Neither is required for the core runtime.
+          </p>
+          <div class="grid three" style="margin-top: 20px">
+            <article class="card">
+              <h3>Framework-neutral</h3>
+              <p>Use when your retriever already returns memory text and evidence snippets.</p>
+              <pre><code>python examples/end_to_end_integration.py</code></pre>
+            </article>
+            <article class="card">
+              <h3>LangChain</h3>
+              <p>Convert <code>Document.page_content</code> and <code>metadata</code> into evidence events before the final chain.</p>
+              <pre><code>python examples/langchain_gate.py</code></pre>
+            </article>
+            <article class="card">
+              <h3>LlamaIndex</h3>
+              <p>Convert source nodes into evidence events before calling the final synthesizer.</p>
+              <pre><code>python examples/llamaindex_gate.py</code></pre>
+            </article>
+          </div>
+          <p class="small" style="margin-top: 14px">
+            Full copyable recipes are in <code>docs/30_rag_integration_recipes.md</code>.
           </p>
           <div class="grid two">
             <article class="card">

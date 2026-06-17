@@ -11,6 +11,7 @@ def test_langchain_gate_example_runs() -> None:
     )
 
     assert result.returncode == 0
+    assert "route=blocked action=block" in result.stdout
     assert "clarification questions" in result.stdout
 
 
@@ -23,6 +24,7 @@ def test_llamaindex_gate_example_runs() -> None:
     )
 
     assert result.returncode == 0
+    assert "route=blocked action=block" in result.stdout
     assert "final synthesizer" in result.stdout
 
 

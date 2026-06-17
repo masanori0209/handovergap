@@ -6,6 +6,18 @@
 
 - No unreleased changes yet.
 
+## 0.1.12 - 2026-06-18
+
+### Added
+
+- `docs/30_rag_integration_recipes.md` with framework-neutral, LangChain, and LlamaIndex integration recipes.
+- README, README.ja, and GitHub Pages links to the RAG integration recipes.
+
+### Changed
+
+- Expanded `examples/langchain_gate.py` and `examples/llamaindex_gate.py` to map framework outputs into evidence events and product routes.
+- Strengthened example tests to assert answer/ask/block route output.
+
 ## 0.1.11 - 2026-06-18
 
 ### Added
