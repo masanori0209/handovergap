@@ -352,7 +352,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.14</code></pre>
+              <pre><code>pip install handovergap==0.1.15</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -836,6 +836,46 @@ result = TransferabilityGate().check(
             Manual review, deterministic rules, and optional LLM slot filling can all feed the same
             <code>evidence_slots</code> contract. The core API does not require an LLM.
           </p>
+        </section>
+
+        <section>
+          <h2>Slot Filling Modes</h2>
+          <p>
+            HandoverGap is a slot-based readiness gate, not an LLM-only extractor. Use reviewed slots,
+            deterministic rules, or optional LLM extraction depending on the trust boundary of your workflow.
+          </p>
+          <table class="text-table">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Use when</th>
+                <th>Runtime dependency</th>
+                <th>Report</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>user_provided</code></td>
+                <td>Your app already has reviewed slots from a form, annotation workflow, or upstream system.</td>
+                <td>None</td>
+                <td>Caller-owned evidence</td>
+              </tr>
+              <tr>
+                <td><code>deterministic_rules</code></td>
+                <td>You derive slots with keyword, parser, schema, or ETL rules.</td>
+                <td>None</td>
+                <td>Rule set version</td>
+              </tr>
+              <tr>
+                <td><code>optional_llm</code></td>
+                <td>You use model-assisted semantic extraction from messy notes or retrieved evidence.</td>
+                <td>Optional model client</td>
+                <td>Model and prompt profile</td>
+              </tr>
+            </tbody>
+          </table>
+          <pre><code>handovergap evaluate --compare --slot-fill-mode user_provided
+handovergap evaluate --slot-fill-mode optional_llm --model gpt-example --prompt-profile strict</code></pre>
         </section>
 
         <section id="integration">

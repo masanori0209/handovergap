@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.14`
+Latest tested release: `handovergap==0.1.15`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -416,6 +416,23 @@ result = TransferabilityGate().check(
 ```
 
 Manual mapping, deterministic rules, and optional LLM slot filling can all feed the same `evidence_slots` contract. The core API does not require an LLM.
+
+### Slot Filling Modes
+
+HandoverGap is a gate over slots, not an LLM-only extractor. Integrations can choose one of three slot input modes:
+
+| Mode | Best for | Runtime dependency | Reporting expectation |
+| --- | --- | --- | --- |
+| `user_provided` | Reviewed slots from your own workflow, annotations, forms, or upstream tools | None | Treat as caller-owned evidence |
+| `deterministic_rules` | Keyword, parser, schema, or ETL-derived slots | None | Version the rule set in your app |
+| `optional_llm` | Semantic extraction from messy notes or retrieved evidence | Optional model client | Report model and prompt profile |
+
+The benchmark CLI labels the selected mode so results do not look more certain than they are:
+
+```bash
+handovergap evaluate --compare --slot-fill-mode user_provided
+handovergap evaluate --slot-fill-mode optional_llm --model gpt-example --prompt-profile strict
+```
 
 ### Product Routing
 

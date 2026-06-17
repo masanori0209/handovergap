@@ -21,6 +21,9 @@ def test_evaluate_cli_outputs_required_metrics() -> None:
 
     assert result.exit_code == 0
     assert "HandoverGapBench mini" in result.output
+    assert "slot-fill-mode=user_provided" in result.output
+    assert "Slot fill summary" in result.output
+    assert "scenario.provided_slots" in result.output
     assert "Tacit Gap" in result.output
     assert "Unsafe Transfer" in result.output
     assert "Question Cover" in result.output
@@ -50,6 +53,25 @@ def test_evaluate_cli_outputs_slot_filling_stress() -> None:
     assert result.exit_code == 0
     assert "slot filling stress" in result.output
     assert "handovergap/optimist" in result.output
+    assert "optional_llm" in result.output
+    assert "simulated" in result.output
+
+
+def test_evaluate_cli_requires_model_for_optional_llm_mode() -> None:
+    result = CliRunner().invoke(app, ["evaluate", "--slot-fill-mode", "optional_llm"])
+
+    assert result.exit_code == 2
+
+
+def test_evaluate_cli_labels_optional_llm_mode() -> None:
+    result = CliRunner().invoke(
+        app,
+        ["evaluate", "--slot-fill-mode", "optional_llm", "--model", "gpt-example", "--prompt-profile", "strict"],
+    )
+
+    assert result.exit_code == 0
+    assert "optional_llm" in result.output
+    assert "gpt-example" in result.output
 
 
 def test_adversarial_dataset_exposes_false_clarifications_and_recall_drop() -> None:

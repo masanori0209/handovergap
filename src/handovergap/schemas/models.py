@@ -69,6 +69,10 @@ HandoverGapResult = DetectionResult
 class EvalMetrics(BaseModel):
     method: str
     scenarios: int
+    slot_fill_mode: Literal["user_provided", "deterministic_rules", "optional_llm"] = "user_provided"
+    slot_fill_source: str = "scenario.provided_slots"
+    model_name: str | None = None
+    prompt_profile: str | None = None
     tacit_gap_recall: float = Field(ge=0.0, le=1.0)
     unsafe_transfer_prevention: float = Field(ge=0.0, le=1.0)
     question_coverage: float = Field(ge=0.0, le=1.0)

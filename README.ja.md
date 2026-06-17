@@ -5,7 +5,7 @@
 
 [English README](README.md)
 
-最新確認済みリリース: `handovergap==0.1.14`
+最新確認済みリリース: `handovergap==0.1.15`
 
 使い方ページ: https://masanori0209.github.io/handovergap/
 
@@ -276,6 +276,21 @@ python harness/validation/tidb_audit_query_check.py --reset-schema --dataset san
 ```
 
 この検証はschemaを作り直し、合成memoryと証拠、スロット抽出試行、context gap、transfer assessment、評価結果を保存して、件数をJSONで出力します。`--reset-schema` は同梱HandoverGapテーブルを削除して作り直すため、ユーザーデータの無いα版検証DBでのみ使ってください。`.env`やTiDB認証情報はコミットしないでください。
+
+## スロット入力モード
+
+HandoverGapはLLM専用の抽出器ではなく、slotを受け取って「そのprofileが使ってよいか」を判定するgateです。
+
+| Mode | 主な用途 | 実行時依存 | レポートで明示すべきこと |
+| --- | --- | --- | --- |
+| `user_provided` | レビュー済みslot、フォーム、annotation、上流システムの結果 | なし | 呼び出し側で確認済みのslotであること |
+| `deterministic_rules` | キーワード、parser、schema、ETLで抽出したslot | なし | ルールセットのバージョン |
+| `optional_llm` | 雑多なメモや検索証拠からの意味的抽出 | 任意のモデルクライアント | model名とprompt profile |
+
+```bash
+handovergap evaluate --compare --slot-fill-mode user_provided
+handovergap evaluate --slot-fill-mode optional_llm --model gpt-example --prompt-profile strict
+```
 
 ## 制約
 

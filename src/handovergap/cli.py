@@ -23,6 +23,7 @@ from handovergap.retrieval import (
     retrieve_slot_evidence_hybrid_local,
     retrieve_slot_evidence_local,
 )
+from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS, validate_slot_fill_mode
 from handovergap.store import InMemoryStore
 from handovergap.stores import TiDBStore
 from handovergap.workload import benchmark_generated_workload
@@ -54,6 +55,16 @@ def main(
 
 def _build_detector() -> HandoverGapDetector:
     return HandoverGapDetector(store=InMemoryStore.from_builtin_dataset())
+
+
+def _slot_fill_source_label(slot_fill_mode: str, slot_profile: str) -> str:
+    if slot_fill_mode == "user_provided":
+        return "scenario.provided_slots" if slot_profile == "provided" else f"user supplied profile: {slot_profile}"
+    if slot_fill_mode == "deterministic_rules":
+        return f"caller deterministic rules via slot-profile={slot_profile}"
+    if slot_fill_mode == "optional_llm":
+        return f"caller/model supplied slots via slot-profile={slot_profile}"
+    return f"slot-profile={slot_profile}"
 
 
 def _print_detection(result) -> None:
@@ -131,6 +142,21 @@ def evaluate(
         "--slot-profile",
         help="Slot filling profile: provided, conservative, or optimistic.",
     ),
+    slot_fill_mode: str = typer.Option(
+        "user_provided",
+        "--slot-fill-mode",
+        help="Slot input mode: user_provided, deterministic_rules, or optional_llm.",
+    ),
+    model_name: str | None = typer.Option(
+        None,
+        "--model",
+        help="Model name to label optional LLM slot filling results.",
+    ),
+    prompt_profile: str | None = typer.Option(
+        None,
+        "--prompt-profile",
+        help="Prompt profile to label optional LLM slot filling results.",
+    ),
     stress_filling: bool = typer.Option(
         False,
         "--stress-filling",
@@ -138,20 +164,42 @@ def evaluate(
     ),
 ) -> None:
     """Evaluate on HandoverGapBench mini."""
+    try:
+        selected_mode = validate_slot_fill_mode(slot_fill_mode)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    if selected_mode == "optional_llm" and not model_name:
+        raise typer.BadParameter("--model is required when --slot-fill-mode optional_llm is used.")
+
     if stress_filling:
         rows = []
         for profile in ["provided", "conservative", "optimistic"]:
-            evaluator = HandoverGapEvaluator(store=InMemoryStore.from_builtin_dataset(dataset), slot_profile=profile)
+            evaluator = HandoverGapEvaluator(
+                store=InMemoryStore.from_builtin_dataset(dataset),
+                slot_profile=profile,
+                model_name="simulated" if profile != "provided" else None,
+                prompt_profile=profile if profile != "provided" else None,
+            )
             metrics = evaluator.evaluate_method("handovergap")
             rows.append(metrics.model_copy(update={"method": f"handovergap/{profile}"}))
         title = f"HandoverGapBench {dataset} / slot filling stress"
     else:
-        evaluator = HandoverGapEvaluator(store=InMemoryStore.from_builtin_dataset(dataset), slot_profile=slot_profile)
+        evaluator = HandoverGapEvaluator(
+            store=InMemoryStore.from_builtin_dataset(dataset),
+            slot_profile=slot_profile,
+            slot_fill_mode=selected_mode,
+            slot_fill_source=_slot_fill_source_label(selected_mode, slot_profile),
+            model_name=model_name,
+            prompt_profile=prompt_profile,
+        )
         rows = evaluator.compare() if compare else [evaluator.evaluate_method("handovergap")]
-        title = f"HandoverGapBench {dataset} / slot-profile={slot_profile}"
+        title = f"HandoverGapBench {dataset} / slot-profile={slot_profile} / slot-fill-mode={selected_mode}"
 
     table = Table(title=title)
     table.add_column("Method", no_wrap=True)
+    table.add_column("Slot Mode", no_wrap=True)
+    table.add_column("Slot Source", no_wrap=True)
+    table.add_column("Model", no_wrap=True)
     table.add_column("Scenarios", justify="right", no_wrap=True)
     table.add_column("Tacit Gap Recall", justify="right", no_wrap=True)
     table.add_column("Unsafe Transfer Prevention", justify="right", no_wrap=True)
@@ -159,9 +207,29 @@ def evaluate(
     table.add_column("Safe Transfer Allowance", justify="right", no_wrap=True)
     table.add_column("Blocked Precision", justify="right", no_wrap=True)
     table.add_column("False Clarification Rate", justify="right", no_wrap=True)
+    console.print(
+        "Slot fill summary: "
+        + "; ".join(
+            sorted(
+                {
+                    f"mode={metrics.slot_fill_mode}, source={metrics.slot_fill_source}, "
+                    f"model={metrics.model_name or '-'}, prompt={metrics.prompt_profile or '-'}"
+                    for metrics in rows
+                }
+            )
+        )
+    )
+    console.print("Evaluation rows: " + ", ".join(metrics.method for metrics in rows))
+    console.print(
+        "Metrics: Tacit Gap Recall, Unsafe Transfer Prevention, Question Coverage, "
+        "Safe Transfer Allowance, Blocked Precision, False Clarification Rate"
+    )
     for metrics in rows:
         table.add_row(
             metrics.method,
+            metrics.slot_fill_mode,
+            metrics.slot_fill_source,
+            metrics.model_name or "-",
             str(metrics.scenarios),
             f"{metrics.tacit_gap_recall:.2f}",
             f"{metrics.unsafe_transfer_prevention:.2f}",
@@ -171,6 +239,10 @@ def evaluate(
             f"{metrics.false_clarification_rate:.2f}",
         )
     console.print(table)
+    console.print(
+        "Slot fill modes: "
+        + "; ".join(f"{mode}={description}" for mode, description in SLOT_FILL_MODE_DESCRIPTIONS.items())
+    )
 
 
 @app.command()

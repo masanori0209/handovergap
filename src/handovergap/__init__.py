@@ -1,6 +1,6 @@
 """HandoverGap RAG public API."""
 
-__version__ = "0.1.14"
+__version__ = "0.1.15"
 
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
@@ -13,6 +13,7 @@ from handovergap.profiles import (
     validate_profile_file,
 )
 from handovergap.routing import ProductRoute, route_transferability_result
+from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS, SlotFillMode
 from handovergap.slot_mapping import map_evidence_slots_by_keywords
 from handovergap.store import InMemoryStore
 from handovergap.stores import TiDBStore
@@ -27,6 +28,8 @@ __all__ = [
     "ProfileValidationResult",
     "ProductRoute",
     "SlotPolicy",
+    "SlotFillMode",
+    "SLOT_FILL_MODE_DESCRIPTIONS",
     "TiDBStore",
     "TransferabilityGate",
     "__version__",

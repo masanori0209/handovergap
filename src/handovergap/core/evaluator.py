@@ -3,13 +3,26 @@ from __future__ import annotations
 from handovergap.core.baselines import BASELINES, BaselinePrediction
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.schemas import EvalMetrics
+from handovergap.slot_filling_modes import SlotFillMode, mode_for_slot_profile, source_for_slot_profile
 from handovergap.store import InMemoryStore
 
 
 class HandoverGapEvaluator:
-    def __init__(self, store: InMemoryStore, slot_profile: str = "provided"):
+    def __init__(
+        self,
+        store: InMemoryStore,
+        slot_profile: str = "provided",
+        slot_fill_mode: SlotFillMode | None = None,
+        slot_fill_source: str | None = None,
+        model_name: str | None = None,
+        prompt_profile: str | None = None,
+    ):
         self.store = store
         self.slot_profile = slot_profile
+        self.slot_fill_mode = slot_fill_mode or mode_for_slot_profile(slot_profile)
+        self.slot_fill_source = slot_fill_source or source_for_slot_profile(slot_profile)
+        self.model_name = model_name
+        self.prompt_profile = prompt_profile
 
     def compare(self) -> list[EvalMetrics]:
         return [
@@ -61,6 +74,10 @@ class HandoverGapEvaluator:
         return EvalMetrics(
             method=method,
             scenarios=len(scenarios),
+            slot_fill_mode=self.slot_fill_mode,
+            slot_fill_source=self.slot_fill_source,
+            model_name=self.model_name,
+            prompt_profile=self.prompt_profile,
             tacit_gap_recall=_ratio(detected_gold_gaps, total_gold_gaps),
             unsafe_transfer_prevention=_ratio(unsafe_blocked, unsafe_total),
             question_coverage=_ratio(covered_gold_questions, total_gold_questions),

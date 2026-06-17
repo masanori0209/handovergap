@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.question_quality import evaluate_question_quality
+from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS
 from handovergap.store import InMemoryStore
 
 REPORT_DATASETS = ["mini", "holdout", "adversarial", "sanitized"]
@@ -23,8 +24,8 @@ def generate_evaluation_report(dataset: str = "all") -> str:
         "",
         "## Metrics",
         "",
-        "| Dataset | Method | Scenarios | TGR | UTP | Question Coverage | Safe Allowance | Blocked Precision | False Clarification |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Dataset | Method | Slot Fill Mode | Slot Source | Model | Prompt | Scenarios | TGR | UTP | Question Coverage | Safe Allowance | Blocked Precision | False Clarification |",
+        "|---|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     quality_rows = [
         "",
@@ -38,7 +39,8 @@ def generate_evaluation_report(dataset: str = "all") -> str:
         evaluator = HandoverGapEvaluator(store=store)
         for metrics in evaluator.compare():
             lines.append(
-                f"| {dataset_name} | {metrics.method} | {metrics.scenarios} | "
+                f"| {dataset_name} | {metrics.method} | {metrics.slot_fill_mode} | {metrics.slot_fill_source} | "
+                f"{metrics.model_name or '-'} | {metrics.prompt_profile or '-'} | {metrics.scenarios} | "
                 f"{metrics.tacit_gap_recall:.2f} | {metrics.unsafe_transfer_prevention:.2f} | "
                 f"{metrics.question_coverage:.2f} | {metrics.safe_transfer_allowance:.2f} | "
                 f"{metrics.blocked_precision:.2f} | {metrics.false_clarification_rate:.2f} |"
@@ -63,8 +65,16 @@ def generate_evaluation_report(dataset: str = "all") -> str:
             "",
             "- Predictors must not read `gold_gaps`, `gold_questions`, or `unsafe_transfer_label`.",
             "- No scenario-specific or expected-string matching should be used to improve benchmark scores.",
+            "- Core runtime accepts reviewed slots and deterministic slot rules without requiring OpenAI or another LLM.",
+            "- Optional LLM slot filling must be labeled with model and prompt profile when results are reported.",
             "- Mini and holdout scores are consistency checks when required slots and labels are structurally aligned.",
             "- Adversarial and sanitized splits are stronger signals for failure analysis, but still synthetic.",
+            "",
+            "## Slot Fill Modes",
+            "",
+            "| Mode | Meaning |",
+            "|---|---|",
+            *[f"| `{mode}` | {description} |" for mode, description in SLOT_FILL_MODE_DESCRIPTIONS.items()],
             "",
             "## Reproduce",
             "",

@@ -11,6 +11,9 @@ def test_generate_evaluation_report_contains_metrics_and_integrity() -> None:
 
     assert "# HandoverGap Evaluation Report" in report
     assert "| mini | handovergap |" in report
+    assert "Slot Fill Mode" in report
+    assert "scenario.provided_slots" in report
+    assert "Optional LLM slot filling must be labeled" in report
     assert "Question Quality" in report
     assert "Evaluation Integrity" in report
     assert "gold_gaps" in report

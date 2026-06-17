@@ -6,6 +6,19 @@
 
 - No unreleased changes yet.
 
+## 0.1.15 - 2026-06-18
+
+### Added
+
+- Public slot filling mode metadata for `user_provided`, `deterministic_rules`, and `optional_llm`.
+- Evaluation output now labels slot fill mode, slot source, model, and prompt profile.
+- Evaluation reports now document slot fill modes and LLM reporting expectations.
+
+### Changed
+
+- CLI evaluation rejects `--slot-fill-mode optional_llm` unless a `--model` label is supplied.
+- README, Japanese README, and GitHub Pages now clarify that core runtime does not require OpenAI.
+
 ## 0.1.14 - 2026-06-18
 
 ### Changed
