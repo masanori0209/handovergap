@@ -6,6 +6,15 @@
 
 - No unreleased changes yet.
 
+## 0.1.9 - 2026-06-17
+
+### Added
+
+- `map_evidence_slots_by_keywords(...)` for deterministic first-pass evidence-to-slot mapping.
+- A runnable `examples/evidence_to_slot_mapping.py` integration example.
+- Tests showing evidence-backed slot reconciliation can change a blocked transfer into a transferable one when evidence supports the missing slots.
+- README and GitHub Pages documentation for `provided_slots` versus `evidence_slots`.
+
 ## 0.1.8 - 2026-06-17
 
 ### Added

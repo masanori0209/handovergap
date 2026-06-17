@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 from typing import get_args
 
-from handovergap import ContextReadinessGate, TransferabilityGate
+from handovergap import ContextReadinessGate, TransferabilityGate, map_evidence_slots_by_keywords
 from handovergap.schemas import DetectionResult
 
 
@@ -67,3 +67,7 @@ def test_transferability_gate_contract_output_shape() -> None:
 
 def test_context_readiness_gate_alias_is_stable() -> None:
     assert ContextReadinessGate is TransferabilityGate
+
+
+def test_evidence_slot_mapping_helper_is_public() -> None:
+    assert callable(map_evidence_slots_by_keywords)

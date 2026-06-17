@@ -352,7 +352,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.8</code></pre>
+              <pre><code>pip install handovergap==0.1.9</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -799,6 +799,39 @@ handovergap schema --dialect tidb</code></pre>
           <p class="small" style="margin-top: 14px">
             The core API does not require OpenAI or TiDB. Those integrations are optional paths for
             semantic slot filling and audit persistence.
+          </p>
+          <h3 style="margin-top: 24px">Evidence-To-Slot Mapping</h3>
+          <p>
+            Raw retrieved evidence is not automatically treated as complete context. Integrations
+            should pass <code>provided_slots</code> for context explicit in the memory and
+            <code>evidence_slots</code> for context supported by retrieved evidence.
+          </p>
+          <pre><code>from handovergap import TransferabilityGate, map_evidence_slots_by_keywords
+
+evidence = [
+    "Customer notice was sent on Monday with approved wording.",
+    "Support can answer standard questions, but must not promise API dates.",
+    "If CSV import fails, use the manual upload fallback and escalate in the support channel.",
+]
+slot_keywords = {
+    "communication_status": ["notice was sent", "customer notice"],
+    "authority": ["can answer", "must not promise"],
+    "fallback_plan": ["fallback", "manual upload"],
+    "escalation_path": ["escalate", "support channel"],
+    "customer_facing_wording": ["approved wording"],
+}
+
+result = TransferabilityGate().check(
+    memory="Use CSV for this release; API support is deferred.",
+    profile="CS",
+    task_context="Answer customer questions without overpromising.",
+    evidence=evidence,
+    provided_slots=["scope"],
+    evidence_slots=map_evidence_slots_by_keywords(evidence, slot_keywords),
+)</code></pre>
+          <p class="small" style="margin-top: 14px">
+            Manual review, deterministic rules, and optional LLM slot filling can all feed the same
+            <code>evidence_slots</code> contract. The core API does not require an LLM.
           </p>
         </section>
 

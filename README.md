@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.8`
+Latest tested release: `handovergap==0.1.9`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -336,6 +336,45 @@ Stable outputs:
 | `gaps` | Missing profile-required context. |
 | `questions` | Clarification questions that turn missing context into next actions. |
 | `scenario_id`, `profile`, `memory`, `task_context` | Echoed context for routing and audit. |
+
+### Evidence-To-Slot Mapping
+
+The gate does not treat raw evidence text as automatically true. Integrations should pass slot support explicitly:
+
+- `provided_slots`: required context already explicit in the retrieved memory.
+- `evidence_slots`: required context supported by retrieved evidence.
+
+For a first deterministic integration, map raw snippets to slots with keyword rules:
+
+```python
+from handovergap import TransferabilityGate, map_evidence_slots_by_keywords
+
+evidence = [
+    "Customer notice was sent on Monday with approved wording.",
+    "Support can answer standard questions, but must not promise API dates.",
+    "If CSV import fails, use the manual upload fallback and escalate in the support channel.",
+]
+slot_keywords = {
+    "communication_status": ["notice was sent", "customer notice"],
+    "authority": ["can answer", "must not promise"],
+    "fallback_plan": ["fallback", "manual upload"],
+    "escalation_path": ["escalate", "support channel"],
+    "customer_facing_wording": ["approved wording"],
+}
+
+evidence_slots = map_evidence_slots_by_keywords(evidence, slot_keywords)
+
+result = TransferabilityGate().check(
+    memory="Use CSV for this release; API support is deferred.",
+    profile="CS",
+    task_context="Answer customer questions without overpromising.",
+    evidence=evidence,
+    provided_slots=["scope"],
+    evidence_slots=evidence_slots,
+)
+```
+
+Manual mapping, deterministic rules, and optional LLM slot filling can all feed the same `evidence_slots` contract. The core API does not require an LLM.
 
 ### Custom Profiles
 
