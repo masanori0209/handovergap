@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from handovergap.schemas import EvidenceEvent, HandoverScenario
 
@@ -44,8 +44,16 @@ def load_source_events_jsonl(path: str | Path) -> list[SourceEventRecord]:
             raise ValueError(f"Invalid JSONL at line {line_number}: {exc}") from exc
         try:
             records.append(SourceEventRecord.model_validate(payload))
-        except Exception as exc:
-            raise ValueError(f"Invalid source event at line {line_number}: {exc}") from exc
+        except ValidationError as exc:
+            missing = sorted(
+                ".".join(str(part) for part in error["loc"])
+                for error in exc.errors()
+                if error["type"] == "missing"
+            )
+            detail = f" Missing required fields: {', '.join(missing)}." if missing else ""
+            raise ValueError(
+                f"Invalid source event at line {line_number}: expected fields include 'source_type' and 'content'.{detail}"
+            ) from exc
     return records
 
 

@@ -1,3 +1,5 @@
+import pytest
+
 from handovergap import ContextReadinessGate, TransferabilityGate
 from handovergap.schemas import EvidenceEvent
 
@@ -43,3 +45,22 @@ def test_transferability_gate_checks_builtin_dataset() -> None:
     result = gate.check_builtin("S001", profile="CS")
 
     assert result.transferability_status == "blocked"
+
+
+def test_transferability_gate_reports_malformed_evidence_without_leaking_payload() -> None:
+    gate = TransferabilityGate()
+
+    with pytest.raises(ValueError) as exc_info:
+        gate.check(
+            memory="Use CSV for this release; API support is deferred.",
+            profile="CS",
+            task_context="Answer customer questions about the workaround.",
+            evidence=[{"source_type": "crm_note", "content": "secret-token-123"}, {"source_type": "issue"}],
+            provided_slots=["scope"],
+        )
+
+    message = str(exc_info.value)
+    assert "Invalid evidence item at index 2" in message
+    assert "source_type" in message
+    assert "content" in message
+    assert "secret-token-123" not in message

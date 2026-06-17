@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.13`
+Latest tested release: `handovergap==0.1.14`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -476,6 +476,18 @@ handovergap detect \
 ```
 
 `profiles validate` checks required keys, duplicate slots, severity values, and missing questions before you use the profile in a gate.
+
+### Actionable Errors
+
+Common configuration mistakes are reported without echoing raw evidence payloads:
+
+| Mistake | Message includes |
+| --- | --- |
+| Unknown profile | The requested profile and available profile names. |
+| Unknown slot | The requested slot and available slots for that profile. |
+| Malformed evidence | The evidence item index and required field names such as `source_type` and `content`. |
+| Invalid profile YAML | The file path, profile name, slot name, and validation rule to fix. |
+| Invalid route status | The accepted status values: `transferable`, `needs_clarification`, `blocked`. |
 
 ### JSONL Source Events
 

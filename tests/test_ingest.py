@@ -32,10 +32,15 @@ def test_scenario_from_jsonl_maps_records_to_evidence_events() -> None:
 
 def test_load_source_events_jsonl_reports_line_errors(tmp_path: Path) -> None:
     path = tmp_path / "bad.jsonl"
-    path.write_text(json.dumps({"source_type": "issue"}) + "\n")
+    path.write_text(json.dumps({"source_type": "issue", "metadata": {"api_key": "secret-token-123"}}) + "\n")
 
-    with pytest.raises(ValueError, match="line 1"):
+    with pytest.raises(ValueError) as exc_info:
         load_source_events_jsonl(path)
+
+    message = str(exc_info.value)
+    assert "line 1" in message
+    assert "content" in message
+    assert "secret-token-123" not in message
 
 
 def test_ingest_cli_runs_detection_from_jsonl() -> None:

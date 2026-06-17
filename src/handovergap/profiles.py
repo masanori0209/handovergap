@@ -87,16 +87,21 @@ class ProfileCatalog:
             return self._profiles[profile]
         except KeyError as exc:
             available = ", ".join(self.names())
-            raise ValueError(f"Unknown profile: {profile}. Available: {available}") from exc
+            raise ValueError(
+                f"Unknown profile '{profile}'. Available profiles: {available}. "
+                "Use `handovergap profiles validate <path>` before passing a custom profile file."
+            ) from exc
 
     def required_slots(self, profile: str) -> list[str]:
         return [slot.slot_name for slot in self.get(profile).required_slots]
 
     def slot_policy(self, profile: str, slot_name: str) -> SlotPolicy:
-        for slot in self.get(profile).required_slots:
+        definition = self.get(profile)
+        for slot in definition.required_slots:
             if slot.slot_name == slot_name:
                 return slot
-        raise ValueError(f"Unknown slot '{slot_name}' for profile '{profile}'.")
+        available = ", ".join(slot.slot_name for slot in definition.required_slots)
+        raise ValueError(f"Unknown slot '{slot_name}' for profile '{profile}'. Available slots: {available}.")
 
 
 def _profile_from_mapping(profile_name: str, payload: object) -> ProfileDefinition:

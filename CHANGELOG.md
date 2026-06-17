@@ -6,6 +6,18 @@
 
 - No unreleased changes yet.
 
+## 0.1.14 - 2026-06-18
+
+### Changed
+
+- Improved unknown profile, unknown slot, malformed evidence, invalid JSONL source event, and invalid route status errors.
+- Avoided echoing raw evidence or source-event payloads in malformed input errors.
+- Documented common actionable errors in README and GitHub Pages.
+
+### Added
+
+- Tests for representative invalid inputs and payload non-disclosure.
+
 ## 0.1.13 - 2026-06-18
 
 ### Added

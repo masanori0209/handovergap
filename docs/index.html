@@ -352,7 +352,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.13</code></pre>
+              <pre><code>pip install handovergap==0.1.14</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -1003,6 +1003,44 @@ return {
             <code>safe_context</code> is only returned for <code>transferable</code> results. Ask and
             block routes omit it so applications do not expose context that is not ready to use.
           </p>
+        </section>
+
+        <section>
+          <h2>Actionable Errors</h2>
+          <p>
+            HandoverGap reports common configuration mistakes with fix-oriented messages while avoiding
+            raw evidence payloads in exception text.
+          </p>
+          <table class="text-table">
+            <thead>
+              <tr>
+                <th>Mistake</th>
+                <th>Message includes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Unknown profile</td>
+                <td>The requested profile and available profile names.</td>
+              </tr>
+              <tr>
+                <td>Unknown slot</td>
+                <td>The requested slot and available slots for that profile.</td>
+              </tr>
+              <tr>
+                <td>Malformed evidence</td>
+                <td>The evidence item index and required field names such as <code>source_type</code> and <code>content</code>.</td>
+              </tr>
+              <tr>
+                <td>Invalid profile YAML</td>
+                <td>The file path, profile name, slot name, and validation rule to fix.</td>
+              </tr>
+              <tr>
+                <td>Invalid route status</td>
+                <td>Accepted status values: <code>transferable</code>, <code>needs_clarification</code>, <code>blocked</code>.</td>
+              </tr>
+            </tbody>
+          </table>
         </section>
 
         <section>

@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import Any, Literal
 
+from pydantic import ValidationError
+
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.profiles import ProfileCatalog
 from handovergap.schemas import DetectionResult, EvidenceEvent, HandoverScenario
@@ -39,7 +41,7 @@ class TransferabilityGate:
         scenario = HandoverScenario(
             scenario_id=scenario_id,
             memory=memory,
-            evidence_events=[_coerce_evidence_event(item) for item in evidence],
+            evidence_events=[_coerce_evidence_event(item, index=index) for index, item in enumerate(evidence, start=1)],
             profile=profile,
             memory_type=memory_type,
             task_context=task_context,
@@ -64,9 +66,25 @@ class TransferabilityGate:
 ContextReadinessGate = TransferabilityGate
 
 
-def _coerce_evidence_event(item: str | dict[str, Any] | EvidenceEvent) -> EvidenceEvent:
+def _coerce_evidence_event(item: str | dict[str, Any] | EvidenceEvent, *, index: int) -> EvidenceEvent:
     if isinstance(item, EvidenceEvent):
         return item
     if isinstance(item, str):
         return EvidenceEvent(source_type="text", content=item)
-    return EvidenceEvent.model_validate(item)
+    if not isinstance(item, dict):
+        raise ValueError(
+            f"Invalid evidence item at index {index}: expected a string, dict, or EvidenceEvent; "
+            f"got {type(item).__name__}."
+        )
+    try:
+        return EvidenceEvent.model_validate(item)
+    except ValidationError as exc:
+        missing = sorted(
+            ".".join(str(part) for part in error["loc"])
+            for error in exc.errors()
+            if error["type"] == "missing"
+        )
+        detail = f" Missing required fields: {', '.join(missing)}." if missing else ""
+        raise ValueError(
+            f"Invalid evidence item at index {index}: expected fields include 'source_type' and 'content'.{detail}"
+        ) from exc

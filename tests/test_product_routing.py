@@ -1,3 +1,5 @@
+import pytest
+
 from handovergap import TransferabilityGate, route_transferability_result
 
 
@@ -57,3 +59,19 @@ def test_route_blocked_result_blocks_without_exposing_safe_context() -> None:
     assert any("説明済み" in reason for reason in route.reason)
     assert route.questions
     assert route.safe_context is None
+
+
+def test_route_invalid_status_reports_expected_values() -> None:
+    result = TransferabilityGate().check(
+        memory="Use CSV for this release; API support is deferred.",
+        profile="CS",
+        task_context="Answer customer questions about the workaround.",
+        provided_slots=["scope"],
+    ).model_copy(update={"transferability_status": "paused"})
+
+    with pytest.raises(ValueError) as exc_info:
+        route_transferability_result(result)
+
+    message = str(exc_info.value)
+    assert "Invalid transferability_status 'paused'" in message
+    assert "transferable, needs_clarification, blocked" in message

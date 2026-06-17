@@ -28,9 +28,14 @@ def route_transferability_result(
     elif result.transferability_status == "needs_clarification":
         action = "ask"
         routed_safe_context = None
-    else:
+    elif result.transferability_status == "blocked":
         action = "block"
         routed_safe_context = None
+    else:
+        raise ValueError(
+            "Invalid transferability_status "
+            f"'{result.transferability_status}'. Expected one of: transferable, needs_clarification, blocked."
+        )
 
     return ProductRoute(
         status=result.transferability_status,

@@ -45,14 +45,16 @@ class InMemoryStore:
             return self._by_key[(scenario_id, profile)]
         except KeyError as exc:
             available = ", ".join(f"{scenario.scenario_id}/{scenario.profile}" for scenario in self._scenarios)
-            raise ValueError(f"Unknown scenario/profile: {scenario_id}/{profile}. Available: {available}") from exc
+            raise ValueError(
+                f"Unknown scenario/profile '{scenario_id}/{profile}'. Available scenario/profile pairs: {available}."
+            ) from exc
 
     def get_scenario_by_id(self, scenario_id: str) -> HandoverScenario:
         for scenario in self._scenarios:
             if scenario.scenario_id == scenario_id:
                 return scenario
         available = ", ".join(scenario.scenario_id for scenario in self._scenarios)
-        raise ValueError(f"Unknown scenario: {scenario_id}. Available: {available}") 
+        raise ValueError(f"Unknown scenario '{scenario_id}'. Available scenarios: {available}.")
 
     def list_scenarios(self) -> list[HandoverScenario]:
         return list(self._scenarios)
