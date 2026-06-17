@@ -2,7 +2,7 @@ from typer.testing import CliRunner
 
 from handovergap import TransferabilityGate
 from handovergap.cli import app
-from handovergap.profiles import ProfileCatalog
+from handovergap.profiles import ProfileCatalog, validate_profile_file
 
 
 def test_profile_catalog_loads_yaml_profile() -> None:
@@ -48,3 +48,50 @@ def test_detect_cli_accepts_profile_file() -> None:
 
     assert result.exit_code == 0
     assert "blast_radius_gap" in result.output
+
+
+def test_validate_profile_file_accepts_valid_yaml() -> None:
+    result = validate_profile_file("examples/profiles/incident_readiness.yml")
+
+    assert result.is_valid
+    assert result.profiles == ["IncidentCommander"]
+    assert result.errors == []
+
+
+def test_profiles_validate_cli_accepts_valid_yaml() -> None:
+    result = CliRunner().invoke(app, ["profiles", "validate", "examples/profiles/incident_readiness.yml"])
+
+    assert result.exit_code == 0
+    assert "Valid profile file" in result.output
+    assert "IncidentCommander" in result.output
+
+
+def test_profiles_validate_cli_reports_actionable_errors(tmp_path) -> None:
+    profile_path = tmp_path / "broken.yml"
+    profile_path.write_text(
+        """
+profiles:
+  IncidentCommander:
+    required_slots:
+      - slot_name: blast_radius
+        severity: CRITICAL
+      - slot_name: blast_radius
+        question: Who owns the blast radius check?
+        high_risk: maybe
+  EmptyProfile:
+    required_slots: []
+""".strip()
+    )
+
+    result = CliRunner().invoke(app, ["profiles", "validate", str(profile_path)])
+    normalized_output = " ".join(result.output.split())
+
+    assert result.exit_code == 1
+    assert "Invalid profile file" in normalized_output
+    assert "IncidentCommander" in normalized_output
+    assert "slot 'blast_radius'" in normalized_output
+    assert "missing required key 'question'" in normalized_output
+    assert "severity must be one of LOW, MEDIUM, HIGH" in normalized_output
+    assert "duplicate slot_name 'blast_radius'" in normalized_output
+    assert "EmptyProfile" in normalized_output
+    assert "required_slots must be a non-empty list" in normalized_output

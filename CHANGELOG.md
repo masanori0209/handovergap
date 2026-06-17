@@ -6,6 +6,15 @@
 
 - No unreleased changes yet.
 
+## 0.1.13 - 2026-06-18
+
+### Added
+
+- `handovergap profiles validate <path>` to validate custom profile YAML before use.
+- Public `validate_profile_file(...)` and `ProfileValidationResult` helpers.
+- Tests for valid profile files and actionable validation errors.
+- README and GitHub Pages documentation for validating custom profiles.
+
 ## 0.1.12 - 2026-06-18
 
 ### Added

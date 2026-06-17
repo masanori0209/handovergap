@@ -352,7 +352,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.12</code></pre>
+              <pre><code>pip install handovergap==0.1.13</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -495,14 +495,17 @@
         severity: MEDIUM</code></pre>
             </article>
             <article class="card">
-              <h3>Use the profile from CLI</h3>
-              <pre><code>handovergap detect \
+              <h3>Validate before use</h3>
+              <pre><code>handovergap profiles validate \
+  examples/profiles/incident_readiness.yml
+
+handovergap detect \
   --scenario S001 \
   --profile IncidentCommander \
   --profile-file examples/profiles/incident_readiness.yml</code></pre>
               <p class="small" style="margin-top: 14px">
-                The same profile can be used in Python with
-                <code>TransferabilityGate.from_profile_file(...)</code>.
+                Validation checks required keys, duplicate slots, severity values, and missing questions.
+                The same profile can be used in Python with <code>TransferabilityGate.from_profile_file(...)</code>.
               </p>
             </article>
           </div>

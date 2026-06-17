@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.12`
+Latest tested release: `handovergap==0.1.13`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -467,11 +467,15 @@ result = gate.check(
 The same profile file can be used from the CLI:
 
 ```bash
+handovergap profiles validate examples/profiles/incident_readiness.yml
+
 handovergap detect \
   --scenario S001 \
   --profile IncidentCommander \
   --profile-file examples/profiles/incident_readiness.yml
 ```
+
+`profiles validate` checks required keys, duplicate slots, severity values, and missing questions before you use the profile in a gate.
 
 ### JSONL Source Events
 

@@ -16,7 +16,7 @@ from handovergap.audit import TRANSFER_AUDIT_EXPLANATION, transfer_audit_example
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.ingest import scenario_from_jsonl
-from handovergap.profiles import ProfileCatalog
+from handovergap.profiles import ProfileCatalog, validate_profile_file
 from handovergap.reporting import generate_evaluation_report
 from handovergap.retrieval import (
     retrieve_slot_evidence_full_text_local,
@@ -28,6 +28,8 @@ from handovergap.stores import TiDBStore
 from handovergap.workload import benchmark_generated_workload
 
 app = typer.Typer(help="Detect profile-conditioned context gaps in RAG memories.")
+profiles_app = typer.Typer(help="Inspect and validate custom profile files.")
+app.add_typer(profiles_app, name="profiles")
 console = Console(width=160)
 
 
@@ -97,6 +99,23 @@ def detect(
     else:
         result = HandoverGapDetector(store=store, profiles=profiles).detect(scenario_id=scenario, profile=profile)
     _print_detection(result)
+
+
+@profiles_app.command("validate")
+def validate_profiles(
+    path: str = typer.Argument(..., help="YAML file with custom profile requirements."),
+) -> None:
+    """Validate a custom profile YAML file before using it."""
+    result = validate_profile_file(path)
+    if result.is_valid:
+        console.print(f"Valid profile file: {result.path}")
+        console.print(f"Profiles: {', '.join(result.profiles)}")
+        return
+
+    console.print(f"Invalid profile file: {result.path}")
+    for error in result.errors:
+        console.print(f"- {error}")
+    raise typer.Exit(code=1)
 
 
 @app.command()

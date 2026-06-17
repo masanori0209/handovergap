@@ -11,6 +11,7 @@ def test_cli_help() -> None:
     assert "demo" in result.output
     assert "detect" in result.output
     assert "evaluate" in result.output
+    assert "profiles" in result.output
     assert "ingest" in result.output
     assert "report" in result.output
     assert "schema" in result.output
@@ -26,4 +27,4 @@ def test_cli_version() -> None:
     result = CliRunner().invoke(app, ["--version"])
 
     assert result.exit_code == 0
-    assert result.output.strip() == "0.1.12"
+    assert result.output.strip() == "0.1.13"

@@ -4,8 +4,11 @@ from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, Field
+from yaml import YAMLError
 
 from handovergap.slot_rules import GAP_TYPE_BY_SLOT, HIGH_RISK_SLOTS, PROFILE_REQUIRED_SLOTS, QUESTION_BY_SLOT
+
+VALID_SEVERITIES = {"LOW", "MEDIUM", "HIGH"}
 
 
 class SlotPolicy(BaseModel):
@@ -20,6 +23,16 @@ class SlotPolicy(BaseModel):
 class ProfileDefinition(BaseModel):
     profile: str
     required_slots: list[SlotPolicy] = Field(min_length=1)
+
+
+class ProfileValidationResult(BaseModel):
+    path: str
+    profiles: list[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+
+    @property
+    def is_valid(self) -> bool:
+        return not self.errors
 
 
 class ProfileCatalog:
@@ -91,6 +104,117 @@ def _profile_from_mapping(profile_name: str, payload: object) -> ProfileDefiniti
         raise ValueError(f"Profile '{profile_name}' must be an object.")
     data = {"profile": profile_name, **payload}
     return ProfileDefinition.model_validate(data)
+
+
+def validate_profile_file(path: str | Path) -> ProfileValidationResult:
+    profile_path = Path(path)
+    errors: list[str] = []
+    profiles: list[str] = []
+
+    try:
+        import yaml
+    except ImportError as exc:
+        return ProfileValidationResult(
+            path=str(profile_path),
+            errors=[f"{profile_path}: YAML profile validation requires PyYAML: {exc}"],
+        )
+
+    try:
+        raw_text = profile_path.read_text()
+    except OSError as exc:
+        return ProfileValidationResult(path=str(profile_path), errors=[f"{profile_path}: cannot read file: {exc}"])
+
+    try:
+        payload = yaml.safe_load(raw_text)
+    except YAMLError as exc:
+        return ProfileValidationResult(path=str(profile_path), errors=[f"{profile_path}: invalid YAML: {exc}"])
+
+    if payload is None:
+        return ProfileValidationResult(path=str(profile_path), errors=[f"{profile_path}: file is empty"])
+    if not isinstance(payload, dict):
+        return ProfileValidationResult(path=str(profile_path), errors=[f"{profile_path}: top-level YAML must be an object"])
+
+    raw_profiles = payload.get("profiles", payload)
+    normalized_profiles = _normalize_profiles(raw_profiles, errors)
+    for profile_name, profile_payload in normalized_profiles:
+        profiles.append(profile_name)
+        _validate_profile_payload(profile_path, profile_name, profile_payload, errors)
+
+    if len(profiles) != len(set(profiles)):
+        duplicates = sorted({profile for profile in profiles if profiles.count(profile) > 1})
+        errors.append(f"{profile_path}: duplicate profile names: {', '.join(duplicates)}")
+
+    if not errors:
+        try:
+            ProfileCatalog.from_yaml(profile_path)
+        except Exception as exc:
+            errors.append(f"{profile_path}: profile catalog failed to load: {exc}")
+
+    return ProfileValidationResult(path=str(profile_path), profiles=profiles, errors=errors)
+
+
+def _normalize_profiles(raw_profiles: object, errors: list[str]) -> list[tuple[str, object]]:
+    if isinstance(raw_profiles, dict):
+        return [(str(profile_name), profile_payload) for profile_name, profile_payload in raw_profiles.items()]
+    if isinstance(raw_profiles, list):
+        normalized = []
+        for index, item in enumerate(raw_profiles):
+            if not isinstance(item, dict):
+                errors.append(f"profiles[{index}]: profile entry must be an object")
+                continue
+            profile_name = item.get("profile")
+            if not isinstance(profile_name, str) or not profile_name.strip():
+                errors.append(f"profiles[{index}]: missing required key 'profile'")
+                continue
+            normalized.append((profile_name, item))
+        return normalized
+    errors.append("profiles: must be an object or a list")
+    return []
+
+
+def _validate_profile_payload(path: Path, profile_name: str, payload: object, errors: list[str]) -> None:
+    context = f"{path}: profile '{profile_name}'"
+    if not isinstance(payload, dict):
+        errors.append(f"{context}: profile payload must be an object")
+        return
+
+    required_slots = payload.get("required_slots")
+    if "required_slots" not in payload:
+        errors.append(f"{context}: missing required key 'required_slots'")
+        return
+    if not isinstance(required_slots, list) or not required_slots:
+        errors.append(f"{context}: required_slots must be a non-empty list")
+        return
+
+    slot_names: list[str] = []
+    for index, slot_payload in enumerate(required_slots):
+        slot_context = f"{context}: required_slots[{index}]"
+        if not isinstance(slot_payload, dict):
+            errors.append(f"{slot_context}: slot must be an object")
+            continue
+
+        slot_name = slot_payload.get("slot_name")
+        if not isinstance(slot_name, str) or not slot_name.strip():
+            errors.append(f"{slot_context}: missing required key 'slot_name'")
+        else:
+            slot_names.append(slot_name)
+            slot_context = f"{context}: slot '{slot_name}'"
+
+        question = slot_payload.get("question")
+        if not isinstance(question, str) or not question.strip():
+            errors.append(f"{slot_context}: missing required key 'question'")
+
+        severity = slot_payload.get("severity", "MEDIUM")
+        if severity not in VALID_SEVERITIES:
+            errors.append(f"{slot_context}: severity must be one of LOW, MEDIUM, HIGH")
+
+        high_risk = slot_payload.get("high_risk", False)
+        if not isinstance(high_risk, bool):
+            errors.append(f"{slot_context}: high_risk must be true or false")
+
+    duplicates = sorted({slot_name for slot_name in slot_names if slot_names.count(slot_name) > 1})
+    for slot_name in duplicates:
+        errors.append(f"{context}: duplicate slot_name '{slot_name}'")
 
 
 def _default_description(slot: str) -> str:

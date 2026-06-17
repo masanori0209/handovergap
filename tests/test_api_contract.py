@@ -6,9 +6,11 @@ from typing import get_args
 from handovergap import (
     ContextReadinessGate,
     ProductRoute,
+    ProfileValidationResult,
     TransferabilityGate,
     map_evidence_slots_by_keywords,
     route_transferability_result,
+    validate_profile_file,
 )
 from handovergap.schemas import DetectionResult
 
@@ -82,3 +84,8 @@ def test_evidence_slot_mapping_helper_is_public() -> None:
 def test_product_routing_helper_is_public() -> None:
     assert callable(route_transferability_result)
     assert set(ProductRoute.model_fields) == {"status", "action", "reason", "questions", "safe_context"}
+
+
+def test_profile_validation_helper_is_public() -> None:
+    assert callable(validate_profile_file)
+    assert set(ProfileValidationResult.model_fields) == {"path", "profiles", "errors"}
