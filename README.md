@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.15`
+Latest tested release: `handovergap==0.1.16`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -433,6 +433,31 @@ The benchmark CLI labels the selected mode so results do not look more certain t
 handovergap evaluate --compare --slot-fill-mode user_provided
 handovergap evaluate --slot-fill-mode optional_llm --model gpt-example --prompt-profile strict
 ```
+
+### User Dataset Annotation Workflow
+
+Bundled datasets are fictional and useful for reproducibility, but production adoption needs local evaluation on your own anonymized data. HandoverGap supports a local `annotate -> import labels -> evaluate -> report` loop without committing private data to the repository.
+
+Prepare a JSONL, JSON, or CSV file with anonymized scenarios. Each scenario should include `scenario_id`, `memory`, `profile`, `memory_type`, `task_context`, `provided_slots`, and `evidence_slots`. Then export a review template:
+
+```bash
+handovergap datasets export-template ./local/anonymized_scenarios.jsonl --output ./local/labels.csv
+```
+
+The template includes scenario id, profile, task context, required slots, and slot columns, but it does not copy raw memory or evidence text. Reviewers fill `gold_gap_slots`, `gold_question_slots`, `unsafe_transfer_label`, and `annotation_notes` locally.
+
+Merge reviewed labels and evaluate:
+
+```bash
+handovergap datasets import-labels ./local/anonymized_scenarios.jsonl \
+  --labels ./local/labels.csv \
+  --output ./local/reviewed_scenarios.jsonl
+
+handovergap evaluate --dataset-file ./local/reviewed_scenarios.jsonl --compare
+handovergap report --dataset-file ./local/reviewed_scenarios.jsonl --output ./local/evaluation.md
+```
+
+Reports generated with `--dataset-file` are labeled as user-provided local evaluation artifacts so they are not confused with bundled synthetic benchmark results.
 
 ### Product Routing
 

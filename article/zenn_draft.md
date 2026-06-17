@@ -423,7 +423,7 @@ handovergap serve
 3. HandoverGap detectorで不足スロット、確認質問、transferabilityを判定
 4. slot_fill_attempts、context_gaps、transfer_assessmentsをTiDBへ保存
 
-この実LLM + TiDBデモは `gpt-5-mini` とTiDB Cloud Developer Tierで疎通確認済みです。画面は日本語をデフォルトにし、英語へ切り替えられます。ローカルサンプルでは「サポート対応」「技術運用」「商談レビュー」として表示し、コード上の `CS` / `Engineer` / `Sales` は同梱プリセットIDとして扱います。最新のPyPI版では `handovergap==0.1.15` として公開します。
+この実LLM + TiDBデモは `gpt-5-mini` とTiDB Cloud Developer Tierで疎通確認済みです。画面は日本語をデフォルトにし、英語へ切り替えられます。ローカルサンプルでは「サポート対応」「技術運用」「商談レビュー」として表示し、コード上の `CS` / `Engineer` / `Sales` は同梱プリセットIDとして扱います。最新のPyPI版では `handovergap==0.1.16` として公開します。
 
 ## 実装して分かったこと
 

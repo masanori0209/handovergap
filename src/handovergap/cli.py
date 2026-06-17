@@ -26,11 +26,14 @@ from handovergap.retrieval import (
 from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS, validate_slot_fill_mode
 from handovergap.store import InMemoryStore
 from handovergap.stores import TiDBStore
+from handovergap.user_dataset import export_annotation_template, import_reviewed_labels, load_user_dataset
 from handovergap.workload import benchmark_generated_workload
 
 app = typer.Typer(help="Detect profile-conditioned context gaps in RAG memories.")
 profiles_app = typer.Typer(help="Inspect and validate custom profile files.")
+datasets_app = typer.Typer(help="Prepare and evaluate local user datasets.")
 app.add_typer(profiles_app, name="profiles")
+app.add_typer(datasets_app, name="datasets")
 console = Console(width=160)
 
 
@@ -137,6 +140,11 @@ def evaluate(
         "--dataset",
         help="Built-in dataset: mini, holdout, adversarial, sanitized, or all.",
     ),
+    dataset_file: str | None = typer.Option(
+        None,
+        "--dataset-file",
+        help="User-provided local dataset file (.json, .jsonl, or .csv).",
+    ),
     slot_profile: str = typer.Option(
         "provided",
         "--slot-profile",
@@ -172,6 +180,8 @@ def evaluate(
         raise typer.BadParameter("--model is required when --slot-fill-mode optional_llm is used.")
 
     if stress_filling:
+        if dataset_file:
+            raise typer.BadParameter("--stress-filling is only available for bundled datasets.")
         rows = []
         for profile in ["provided", "conservative", "optimistic"]:
             evaluator = HandoverGapEvaluator(
@@ -184,8 +194,9 @@ def evaluate(
             rows.append(metrics.model_copy(update={"method": f"handovergap/{profile}"}))
         title = f"HandoverGapBench {dataset} / slot filling stress"
     else:
+        store = load_user_dataset(dataset_file) if dataset_file else InMemoryStore.from_builtin_dataset(dataset)
         evaluator = HandoverGapEvaluator(
-            store=InMemoryStore.from_builtin_dataset(dataset),
+            store=store,
             slot_profile=slot_profile,
             slot_fill_mode=selected_mode,
             slot_fill_source=_slot_fill_source_label(selected_mode, slot_profile),
@@ -193,7 +204,8 @@ def evaluate(
             prompt_profile=prompt_profile,
         )
         rows = evaluator.compare() if compare else [evaluator.evaluate_method("handovergap")]
-        title = f"HandoverGapBench {dataset} / slot-profile={slot_profile} / slot-fill-mode={selected_mode}"
+        dataset_label = f"user dataset {dataset_file}" if dataset_file else f"HandoverGapBench {dataset}"
+        title = f"{dataset_label} / slot-profile={slot_profile} / slot-fill-mode={selected_mode}"
 
     table = Table(title=title)
     table.add_column("Method", no_wrap=True)
@@ -248,10 +260,15 @@ def evaluate(
 @app.command()
 def report(
     dataset: str = typer.Option("all", "--dataset", help="Dataset: mini, holdout, adversarial, sanitized, or all."),
+    dataset_file: str | None = typer.Option(
+        None,
+        "--dataset-file",
+        help="User-provided local dataset file (.json, .jsonl, or .csv).",
+    ),
     output: str | None = typer.Option(None, "--output", "-o", help="Write markdown report to this path."),
 ) -> None:
     """Generate a reproducible markdown evaluation report."""
-    markdown = generate_evaluation_report(dataset)
+    markdown = generate_evaluation_report(dataset, dataset_file=dataset_file)
     if output:
         output_path = Path(output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -259,6 +276,31 @@ def report(
         console.print(f"Wrote evaluation report: {output_path}")
     else:
         console.print(markdown)
+
+
+@datasets_app.command("export-template")
+def datasets_export_template(
+    input_path: str = typer.Argument(..., help="Local anonymized scenario dataset (.json, .jsonl, or .csv)."),
+    output: str = typer.Option(..., "--output", "-o", help="Annotation CSV to write."),
+) -> None:
+    """Export a review template without copying raw memory/evidence text."""
+    count = export_annotation_template(input_path, output)
+    console.print(f"Wrote annotation template: {output}")
+    console.print(f"Scenarios: {count}")
+    console.print("Review gold_gap_slots, gold_question_slots, unsafe_transfer_label, and annotation_notes locally.")
+
+
+@datasets_app.command("import-labels")
+def datasets_import_labels(
+    input_path: str = typer.Argument(..., help="Original local anonymized scenario dataset."),
+    labels: str = typer.Option(..., "--labels", help="Reviewed annotation CSV."),
+    output: str = typer.Option(..., "--output", "-o", help="Reviewed JSONL dataset to write."),
+) -> None:
+    """Merge reviewed labels into a local dataset for evaluation."""
+    count = import_reviewed_labels(input_path, labels, output)
+    console.print(f"Wrote reviewed dataset: {output}")
+    console.print(f"Scenarios: {count}")
+    console.print(f"Next: handovergap evaluate --dataset-file {output} --compare")
 
 
 @app.command()

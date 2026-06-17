@@ -7,12 +7,13 @@ from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.question_quality import evaluate_question_quality
 from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS
 from handovergap.store import InMemoryStore
+from handovergap.user_dataset import load_user_dataset
 
 REPORT_DATASETS = ["mini", "holdout", "adversarial", "sanitized"]
 
 
-def generate_evaluation_report(dataset: str = "all") -> str:
-    datasets = REPORT_DATASETS if dataset == "all" else [dataset]
+def generate_evaluation_report(dataset: str = "all", dataset_file: str | None = None) -> str:
+    datasets = ["user"] if dataset_file else (REPORT_DATASETS if dataset == "all" else [dataset])
     lines = [
         "# HandoverGap Evaluation Report",
         "",
@@ -20,7 +21,7 @@ def generate_evaluation_report(dataset: str = "all") -> str:
         "",
         "## Scope",
         "",
-        "This report is generated from bundled fictional/synthetic datasets. It is a reproducibility artifact, not a production accuracy claim.",
+        _scope_text(dataset_file),
         "",
         "## Metrics",
         "",
@@ -35,7 +36,7 @@ def generate_evaluation_report(dataset: str = "all") -> str:
         "|---|---:|---:|---:|---:|",
     ]
     for dataset_name in datasets:
-        store = InMemoryStore.from_builtin_dataset(dataset_name)
+        store = load_user_dataset(dataset_file) if dataset_file else InMemoryStore.from_builtin_dataset(dataset_name)
         evaluator = HandoverGapEvaluator(store=store)
         for metrics in evaluator.compare():
             lines.append(
@@ -67,6 +68,7 @@ def generate_evaluation_report(dataset: str = "all") -> str:
             "- No scenario-specific or expected-string matching should be used to improve benchmark scores.",
             "- Core runtime accepts reviewed slots and deterministic slot rules without requiring OpenAI or another LLM.",
             "- Optional LLM slot filling must be labeled with model and prompt profile when results are reported.",
+            "- User-provided reports are local evaluation artifacts; do not commit raw operational data or reviewed labels unless they are anonymized and approved.",
             "- Mini and holdout scores are consistency checks when required slots and labels are structurally aligned.",
             "- Adversarial and sanitized splits are stronger signals for failure analysis, but still synthetic.",
             "",
@@ -79,10 +81,19 @@ def generate_evaluation_report(dataset: str = "all") -> str:
             "## Reproduce",
             "",
             "```bash",
-            f"handovergap report --dataset {dataset}",
+            f"handovergap report --dataset-file {dataset_file}" if dataset_file else f"handovergap report --dataset {dataset}",
             "handovergap evaluate --compare",
             "pytest",
             "```",
         ]
     )
     return "\n".join(lines) + "\n"
+
+
+def _scope_text(dataset_file: str | None) -> str:
+    if dataset_file:
+        return (
+            "This report is generated from a user-provided local dataset. HandoverGap does not bundle this data; "
+            "keep raw operational data and reviewed labels private unless they are anonymized and approved."
+        )
+    return "This report is generated from bundled fictional/synthetic datasets. It is a reproducibility artifact, not a production accuracy claim."

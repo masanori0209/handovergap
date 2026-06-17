@@ -6,6 +6,20 @@
 
 - No unreleased changes yet.
 
+## 0.1.16 - 2026-06-18
+
+### Added
+
+- `handovergap datasets export-template` for creating local annotation CSVs from anonymized user datasets.
+- `handovergap datasets import-labels` for merging reviewed labels back into a local JSONL dataset.
+- `handovergap evaluate --dataset-file` and `handovergap report --dataset-file` for local user-provided evaluation.
+- Public `load_user_dataset(...)`, `export_annotation_template(...)`, and `import_reviewed_labels(...)` helpers.
+
+### Changed
+
+- Evaluation reports now distinguish bundled synthetic datasets from user-provided local datasets.
+- Annotation templates omit raw memory and evidence text by default.
+
 ## 0.1.15 - 2026-06-18
 
 ### Added

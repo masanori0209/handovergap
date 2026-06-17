@@ -352,7 +352,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.15</code></pre>
+              <pre><code>pip install handovergap==0.1.16</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -876,6 +876,24 @@ result = TransferabilityGate().check(
           </table>
           <pre><code>handovergap evaluate --compare --slot-fill-mode user_provided
 handovergap evaluate --slot-fill-mode optional_llm --model gpt-example --prompt-profile strict</code></pre>
+        </section>
+
+        <section>
+          <h2>User Dataset Evaluation</h2>
+          <p>
+            Bundled datasets are fictional. For adoption work, keep your anonymized operational data local,
+            export an annotation template, import reviewed labels, then evaluate and report from that local file.
+          </p>
+          <pre><code>handovergap datasets export-template ./local/anonymized_scenarios.jsonl --output ./local/labels.csv
+handovergap datasets import-labels ./local/anonymized_scenarios.jsonl \
+  --labels ./local/labels.csv \
+  --output ./local/reviewed_scenarios.jsonl
+handovergap evaluate --dataset-file ./local/reviewed_scenarios.jsonl --compare
+handovergap report --dataset-file ./local/reviewed_scenarios.jsonl --output ./local/evaluation.md</code></pre>
+          <p class="small" style="margin-top: 14px">
+            The annotation template includes ids, profile, task context, required slots, and label columns.
+            It does not copy raw memory or evidence text into the CSV.
+          </p>
         </section>
 
         <section id="integration">
