@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.7`
+Latest tested release: `handovergap==0.1.8`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -309,6 +309,33 @@ print(result.questions)
 ```
 
 Use `TransferabilityGate.from_builtin_dataset().check_builtin("S001", profile="CS")` to inspect the packaged scenarios. The current built-in presets use `CS`, `Engineer`, and `Sales`, but the public data model is intentionally named around `profile` and `task_context` so custom domains can define their own readiness checks.
+
+### API Contract
+
+The stable integration surface is `TransferabilityGate.check(...)`. The core API works without OpenAI or TiDB.
+
+Stable inputs:
+
+| Input | Meaning |
+| --- | --- |
+| `memory` | Retrieved memory, note, decision, runbook line, or agent memory to check. |
+| `profile` | Role or operating mode that wants to use the memory. |
+| `task_context` | What the profile is trying to do with the memory. |
+| `evidence` | Optional supporting snippets as strings, dictionaries, or `EvidenceEvent` objects. |
+| `provided_slots` | Required slots already explicit in the memory. |
+| `evidence_slots` | Required slots supported by retrieved evidence. |
+| `scenario_id` | Optional caller-provided identifier, defaulting to `inline`. |
+| `memory_type` | One of `decision`, `procedure`, `risk`, or `task`. |
+
+Stable outputs:
+
+| Output | Meaning |
+| --- | --- |
+| `transferability_status` | One of `transferable`, `needs_clarification`, or `blocked`. |
+| `transferability_score` | Readiness score between 0 and 1. |
+| `gaps` | Missing profile-required context. |
+| `questions` | Clarification questions that turn missing context into next actions. |
+| `scenario_id`, `profile`, `memory`, `task_context` | Echoed context for routing and audit. |
 
 ### Custom Profiles
 

@@ -352,7 +352,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.7</code></pre>
+              <pre><code>pip install handovergap==0.1.8</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -763,6 +763,43 @@ for question in result.questions:
 handovergap schema --dialect tidb</code></pre>
             </article>
           </div>
+          <h3 style="margin-top: 24px">Stable API Contract</h3>
+          <table class="text-table">
+            <thead>
+              <tr>
+                <th>Surface</th>
+                <th>Stable fields</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>TransferabilityGate.check(...)</code> inputs</td>
+                <td>
+                  <code>memory</code>, <code>profile</code>, <code>task_context</code>,
+                  <code>evidence</code>, <code>provided_slots</code>, <code>evidence_slots</code>,
+                  <code>scenario_id</code>, and <code>memory_type</code>.
+                </td>
+              </tr>
+              <tr>
+                <td><code>DetectionResult</code> outputs</td>
+                <td>
+                  <code>transferability_status</code>, <code>transferability_score</code>,
+                  <code>gaps</code>, <code>questions</code>, <code>scenario_id</code>,
+                  <code>profile</code>, <code>memory</code>, and <code>task_context</code>.
+                </td>
+              </tr>
+              <tr>
+                <td>Status values</td>
+                <td>
+                  <code>transferable</code>, <code>needs_clarification</code>, and <code>blocked</code>.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="small" style="margin-top: 14px">
+            The core API does not require OpenAI or TiDB. Those integrations are optional paths for
+            semantic slot filling and audit persistence.
+          </p>
         </section>
 
         <section id="integration">

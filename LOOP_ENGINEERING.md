@@ -76,15 +76,14 @@ Purpose: Verify positioning and novelty.
 Hypothesis
 → Related work / competitor check
 → Difference statement
-→ Article thesis update
+→ Product positioning update
 → Risk note
 ```
 
 Output:
 
 - `docs/13_competitor_analysis.md`
-- `article/key_phrases.md`
-- `article/zenn_outline.md`
+- product positioning notes
 
 ### Product Loop
 
@@ -169,21 +168,21 @@ Output:
 - small diff
 - loop report
 
-### Article Loop
+### Documentation Loop
 
-Purpose: Turn implementation results into article content.
+Purpose: Turn implementation results into user-facing documentation.
 
 ```text
-Draft claim
+Draft usage claim
 → Link to implementation result
 → Add table/screenshot
 → Remove unsupported claim
-→ Update article
+→ Update docs
 ```
 
 Output:
 
-- article section
+- documentation section
 - result table
 - screenshot checklist
 
@@ -237,12 +236,12 @@ Do not add new features.
 3. Add a quick validation check.
 4. Do not add a new command unless necessary.
 
-### If novelty claim is unsupported
+### If a product or evaluation claim is unsupported
 
 1. Downgrade the claim.
 2. Add limitation.
 3. Add evaluation or evidence.
-4. Update article wording.
+4. Update documentation wording.
 
 ### If evaluation improvement looks too good
 
@@ -250,7 +249,7 @@ Do not add new features.
 2. Add or update a leakage regression test.
 3. Re-run an adversarial or holdout split.
 4. Add an LLM-as-a-judge or human-rubric check if the improvement is semantic.
-5. Downgrade the article claim if the improvement only holds on structurally aligned data.
+5. Downgrade the public claim if the improvement only holds on structurally aligned data.
 
 ### If TiDB integration blocks progress
 

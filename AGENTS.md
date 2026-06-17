@@ -1,6 +1,6 @@
 # AGENTS.md
 
-All agents must optimize for contest-winning evidence, not feature volume.
+All agents must optimize for v1 product readiness, not feature volume.
 
 ## Core Thesis
 
@@ -12,17 +12,17 @@ Plan -> Act -> Observe -> Validate -> Reflect -> Update Context -> Handoff
 
 Work one loop at a time.
 
-## Winning Filter
+## Product Readiness Filter
 
 Before implementing any feature, answer:
 
 ```text
-Which article claim, evaluation metric, TiDB-specific learning, PyPI first-run experience, or demo clarity does this improve?
+Which user-facing integration path, API contract, evaluation trust signal, privacy guarantee, or operational adoption problem does this improve?
 ```
 
 If the answer is unclear, do not implement it.
 
-## Forbidden in P0
+## Forbidden in Core Runtime
 
 - real company data
 - employee scoring

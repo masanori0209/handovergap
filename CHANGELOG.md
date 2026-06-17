@@ -6,6 +6,19 @@
 
 - No unreleased changes yet.
 
+## 0.1.8 - 2026-06-17
+
+### Added
+
+- API contract tests for `TransferabilityGate.check(...)` and `DetectionResult`.
+- GitHub Pages documentation for stable API inputs, outputs, and status values.
+
+### Changed
+
+- Reframed public documentation and agent instructions around v1 product readiness instead of legacy launch planning.
+- Moved legacy strategy documents out of user-facing `docs/` and into `project/archive/legacy_docs/`.
+- Rewrote the product roadmap around real RAG integration, evidence-to-slot mapping, product routing semantics, custom profiles, evaluation honesty, and privacy-safe defaults.
+
 ## 0.1.7 - 2026-06-16
 
 ### Added

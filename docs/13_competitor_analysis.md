@@ -52,11 +52,11 @@ HandoverGap Position:
 
 > Sayane focuses on accepting and reusing context. HandoverGap focuses on profile-conditioned missing tacit context for handover.
 
-## Winning Angle
+## Product Differentiation
 
-Do not compete on "I built a RAG app."
+Do not position HandoverGap as a generic RAG app.
 
-Compete on:
+Focus on:
 
 - valid-but-non-transferable memory
 - successor-profile-conditioned tacit context gaps
@@ -72,4 +72,4 @@ Compete on:
 - mini benchmark
 - Streamlit demo
 - TiDB schema and implementation
-- article-ready comparison table
+- reproducible comparison table

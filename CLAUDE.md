@@ -2,7 +2,7 @@
 
 ## Mission
 
-Build HandoverGap RAG as a contest-grade, PyPI-installable toolkit and mini benchmark.
+Build HandoverGap RAG as a PyPI-installable readiness gate for RAG and agent memory systems.
 
 ## Core Thesis
 
@@ -20,15 +20,16 @@ For every task:
 6. Produce loop report.
 7. Stop.
 
-## Winning Mode
+## Product Readiness Mode
 
 Optimize for:
 
-- article claim
-- evaluation metric
-- TiDB-specific learning
+- stable API contract
+- real RAG integration usefulness
+- profile validation and adoption
+- evaluation honesty
+- privacy-safe defaults
 - PyPI first-run experience
-- demo clarity
 
 Do not optimize for feature count.
 
@@ -56,7 +57,8 @@ P1:
 - TiDB schema and optional store
 - Streamlit demo
 - PyPI package
-- article assets
+- integration examples
+- profile validation
 
 ## Loop Report Format
 
@@ -72,7 +74,7 @@ P1:
 ### Validation
 ...
 
-### What This Improves for the Article
+### What This Improves for Users
 ...
 
 ### Next Recommended Loop

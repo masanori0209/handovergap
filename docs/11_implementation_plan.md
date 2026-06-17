@@ -30,13 +30,12 @@
 - [ ] Implement hybrid_rag baseline
 - [ ] Add compare option
 - [ ] Export evaluation CSV
-- [ ] Add article-ready result table
+- [ ] Add reproducible result table
 
-## P3: Demo and Article
+## P3: Demo and Documentation
 
 - [ ] Add Streamlit demo
 - [ ] Add screenshots
-- [ ] Add Zenn article draft
 - [ ] Add demo video script
 - [ ] Add GitHub README polish
 
