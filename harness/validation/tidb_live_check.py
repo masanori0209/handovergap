@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from handovergap import TiDBStore
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.store import InMemoryStore
+from handovergap.stores.tidb import RESET_CONFIRMATION
 
 
 def main() -> int:
@@ -23,7 +24,7 @@ def main() -> int:
     _load_dotenv_if_available()
 
     try:
-        from sqlalchemy import URL, text
+        from sqlalchemy import URL
     except ImportError as exc:
         raise SystemExit('Missing TiDB dependencies. Run: pip install -e ".[tidb]"') from exc
 
@@ -46,40 +47,25 @@ def main() -> int:
     engine = store.create_engine(pool_recycle=300, connect_args=connect_args)
 
     if args.reset_schema:
-        store.reset_schema(engine)
+        store.destructive_reset_schema(engine, confirm=RESET_CONFIRMATION)
         args.create_schema = True
     if args.create_schema:
         store.create_schema(engine)
 
     scenario_id = "LIVE-TIDB-" + datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    with engine.begin() as connection:
-        connection.execute(
-            text(
-                """
-                INSERT INTO memory_items (
-                  scenario_id, subject, memory_type, content,
-                  source_person_name, project_name, status, confidence
-                ) VALUES (
-                  :scenario_id, :subject, :memory_type, :content,
-                  :source_person_name, :project_name, :status, :confidence
-                )
-                """
-            ),
-            {
-                "scenario_id": scenario_id,
-                "subject": "Synthetic TiDB live validation",
-                "memory_type": "customer_release_decision",
-                "content": "Synthetic memory: use CSV for this release; API is next phase.",
-                "source_person_name": "synthetic",
-                "project_name": "handovergap-live-check",
-                "status": "active",
-                "confidence": 0.99,
-            },
-        )
-        memory_item_id = connection.execute(
-            text("SELECT id FROM memory_items WHERE scenario_id = :scenario_id"),
-            {"scenario_id": scenario_id},
-        ).scalar_one()
+    memory_item_id = store.persist_memory_item(
+        {
+            "scenario_id": scenario_id,
+            "subject": "Synthetic TiDB live validation",
+            "memory_type": "customer_release_decision",
+            "content": "Synthetic memory: use CSV for this release; API is next phase.",
+            "source_person_name": "synthetic",
+            "project_name": "handovergap-live-check",
+            "status": "active",
+            "confidence": 0.99,
+        },
+        engine,
+    )
 
     slot_rows = [
         {

@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 
 import handovergap.stores.tidb as tidb_module
-from handovergap import TiDBStore
+from handovergap import TiDBStore, TiDBStoreOperationError
 
 
 class FakeSQLAlchemy:
@@ -16,10 +16,13 @@ class FakeConnection:
 
     def execute(self, statement, payload=None) -> None:
         self.calls.append((statement, payload))
-        return FakeResult()
+        return FakeResult(statement)
 
 
 class FakeResult:
+    def __init__(self, statement: str = "") -> None:
+        self.statement = statement
+
     def mappings(self):
         return self
 
@@ -35,6 +38,14 @@ class FakeResult:
                 "score": 0.88,
             }
         ]
+
+    def first(self):
+        if "handovergap_schema_metadata" in self.statement:
+            return {"schema_name": "handovergap", "schema_version": "1"}
+        return None
+
+    def scalar_one(self):
+        return 42
 
 
 class FakeEngine:
@@ -70,6 +81,31 @@ def test_persist_gap_workflow_batches(monkeypatch) -> None:
 
     assert inserted == 1
     assert "INSERT INTO context_gaps" in engine.connection.calls[0][0]
+
+
+def test_create_schema_writes_schema_metadata(monkeypatch) -> None:
+    monkeypatch.setattr(tidb_module, "_load_sqlalchemy", lambda: FakeSQLAlchemy())
+    store = TiDBStore("mysql+pymysql://unused")
+    engine = FakeEngine()
+
+    store.create_schema(engine=engine)
+
+    statements = [call[0] for call in engine.connection.calls]
+    assert any("CREATE TABLE IF NOT EXISTS handovergap_schema_metadata" in statement for statement in statements)
+    assert any("INSERT INTO handovergap_schema_metadata" in statement for statement in statements)
+
+
+def test_schema_state_reads_packaged_schema_metadata(monkeypatch) -> None:
+    monkeypatch.setattr(tidb_module, "_load_sqlalchemy", lambda: FakeSQLAlchemy())
+    store = TiDBStore("mysql+pymysql://unused")
+    engine = FakeEngine()
+
+    state = store.schema_state(engine=engine)
+
+    assert state.schema_name == "handovergap"
+    assert state.schema_version == "1"
+    assert state.expected_schema_version == "1"
+    assert state.is_current is True
 
 
 def test_empty_persistence_batch_does_not_connect() -> None:
@@ -110,7 +146,79 @@ def test_reset_schema_drops_packaged_tables_in_reverse_order(monkeypatch) -> Non
 
     statements = [call[0] for call in engine.connection.calls]
     assert statements[0] == "DROP TABLE IF EXISTS evaluation_runs"
-    assert statements[-1] == "DROP TABLE IF EXISTS source_events"
+    assert statements[-1] == "DROP TABLE IF EXISTS handovergap_schema_metadata"
+
+
+def test_destructive_reset_schema_requires_confirmation(monkeypatch) -> None:
+    monkeypatch.setattr(tidb_module, "_load_sqlalchemy", lambda: FakeSQLAlchemy())
+
+    try:
+        TiDBStore("mysql://example").destructive_reset_schema(FakeEngine(), confirm="yes")
+    except ValueError as exc:
+        assert 'confirm="drop-handovergap-tables"' in str(exc)
+    else:
+        raise AssertionError("destructive_reset_schema should require an explicit confirmation token")
+
+
+def test_persist_memory_item_upserts_duplicate_scenario_ids(monkeypatch) -> None:
+    monkeypatch.setattr(tidb_module, "_load_sqlalchemy", lambda: FakeSQLAlchemy())
+    store = TiDBStore("mysql+pymysql://unused")
+    engine = FakeEngine()
+
+    memory_item_id = store.persist_memory_item(
+        {
+            "scenario_id": "S001",
+            "subject": "Synthetic validation",
+            "memory_type": "decision",
+            "content": "Use CSV for this release.",
+            "source_person_name": "synthetic",
+            "project_name": "handovergap-test",
+            "status": "active",
+            "confidence": 0.9,
+        },
+        engine=engine,
+    )
+
+    statement = engine.connection.calls[0][0]
+    assert memory_item_id == 42
+    assert "ON DUPLICATE KEY UPDATE" in statement
+    assert "SELECT id FROM memory_items WHERE scenario_id = :scenario_id" in engine.connection.calls[1][0]
+
+
+def test_tidb_operation_error_redacts_database_url(monkeypatch) -> None:
+    class BrokenEngine:
+        @contextmanager
+        def begin(self):
+            raise RuntimeError("access denied for password=secret")
+            yield
+
+    monkeypatch.setattr(tidb_module, "_load_sqlalchemy", lambda: FakeSQLAlchemy())
+    store = TiDBStore("mysql+pymysql://user:super-secret@example.com:4000/handovergap")
+
+    try:
+        store.persist_context_gaps(
+            [
+                {
+                    "memory_item_id": 1,
+                    "profile": "CS",
+                    "task_context": "customer support",
+                    "gap_type": "authority_gap",
+                    "slot_name": "authority",
+                    "description": "answer boundary is missing",
+                    "severity": "HIGH",
+                    "required_evidence_type": "approval",
+                    "status": "open",
+                }
+            ],
+            engine=BrokenEngine(),
+        )
+    except TiDBStoreOperationError as exc:
+        message = str(exc)
+        assert "user:***@example.com:4000/handovergap" in message
+        assert "super-secret" not in message
+        assert "password=secret" not in message
+    else:
+        raise AssertionError("expected TiDBStoreOperationError")
 
 
 def test_retrieve_memory_chunks_by_vector_uses_tidb_cosine_distance(monkeypatch) -> None:

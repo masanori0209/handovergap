@@ -50,4 +50,4 @@ TiDB is useful when you need one auditable store for:
 
 Use `handovergap schema --dialect tidb`, `handovergap audit-sql`, and live validation scripts after credentials are configured.
 
-For alpha validation databases that may contain an older HandoverGap schema, the validation scripts support `--reset-schema`. This drops and recreates the packaged HandoverGap tables, so do not use it against a database that contains user data.
+For alpha validation databases that may contain an older HandoverGap schema, the validation scripts support `--reset-schema`. This calls `destructive_reset_schema(..., confirm=RESET_CONFIRMATION)`, drops the packaged HandoverGap tables, and recreates them, so do not use it against a database that contains user data.

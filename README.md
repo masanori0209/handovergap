@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.19`
+Latest tested release: `handovergap==0.1.20`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -186,9 +186,20 @@ from handovergap import TiDBStore
 
 store = TiDBStore("mysql+pymysql://user:password@host:4000/handovergap")
 store.create_schema()
+print(store.schema_state())
 ```
 
 The packaged schema models source evidence, memories, profile requirements, vectorized memory chunks, slot-fill attempts, context gaps, clarification questions, transfer assessments, and evaluation runs. Live persistence methods are available for memory chunks, slot-fill attempts, context gaps, transfer assessments, and evaluation runs.
+
+`create_schema()` is idempotent and writes `handovergap_schema_metadata` with the packaged schema version. Use `persist_memory_item(...)` when repeated validation runs may reuse the same `scenario_id`; it upserts the memory item and returns the stable id. Destructive resets are alpha-only and intentionally explicit:
+
+```python
+from handovergap.stores.tidb import RESET_CONFIRMATION
+
+store.destructive_reset_schema(engine, confirm=RESET_CONFIRMATION)
+```
+
+The older `reset_schema(...)` method remains as an alpha compatibility alias, but validation scripts use the explicit destructive method.
 
 Slot-level evidence retrieval can be inspected without a live database:
 
@@ -298,7 +309,7 @@ python harness/validation/tidb_live_check.py --reset-schema
 python harness/validation/tidb_audit_query_check.py --reset-schema --dataset sanitized --iterations 10
 ```
 
-The check recreates the packaged schema, writes synthetic memory and evidence rows, persists slot-fill attempts, context gaps, transfer assessments, and evaluation runs, then prints row counts as JSON. `--reset-schema` drops packaged HandoverGap tables first, so use it only for alpha validation databases without user data. Do not commit `.env` files or TiDB credentials.
+The check recreates the packaged schema, writes synthetic memory and evidence rows, persists slot-fill attempts, context gaps, transfer assessments, and evaluation runs, then prints row counts as JSON. `--reset-schema` calls `destructive_reset_schema(..., confirm=RESET_CONFIRMATION)` and drops packaged HandoverGap tables first, so use it only for alpha validation databases without user data. Do not commit `.env` files or TiDB credentials.
 
 ## Python API
 

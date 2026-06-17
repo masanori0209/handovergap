@@ -34,6 +34,21 @@
 
 - No unreleased changes yet.
 
+## 0.1.20 - 2026-06-18
+
+### Added
+
+- TiDB packaged schema metadata table, `TiDBStore.schema_state()`, and public `TiDBSchemaState`.
+- `TiDBStore.destructive_reset_schema(..., confirm="drop-handovergap-tables")` for explicit alpha-only destructive resets.
+- `TiDBStore.persist_memory_item(...)` for repeated validation runs with duplicate `scenario_id` values.
+- `TiDBStoreOperationError` with credential-redacted operation failure messages.
+
+### Changed
+
+- `create_schema()` now writes packaged schema metadata after idempotent table creation.
+- Live TiDB validation scripts now call the explicitly destructive reset API.
+- README and GitHub Pages document TiDB lifecycle behavior and alpha-only reset safety.
+
 ## 0.1.19 - 2026-06-18
 
 ### Added

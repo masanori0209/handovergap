@@ -12,6 +12,7 @@ def test_tidb_schema_models_slot_evidence_gap_workflow() -> None:
     schema = TiDBStore.schema_sql()
 
     required_tables = {
+        "handovergap_schema_metadata",
         "source_events",
         "memory_items",
         "memory_chunks",
@@ -47,7 +48,7 @@ def test_tidb_transfer_audit_sql_joins_decision_to_evidence() -> None:
 def test_tidb_schema_can_be_split_for_transactional_install() -> None:
     statements = _split_sql_statements(TiDBStore.schema_sql())
 
-    assert len(statements) == 11
+    assert len(statements) == 12
     assert all(statement.startswith("CREATE TABLE") for statement in statements)
 
 

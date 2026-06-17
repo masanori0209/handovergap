@@ -5,7 +5,7 @@
 
 [English README](README.md)
 
-最新確認済みリリース: `handovergap==0.1.19`
+最新確認済みリリース: `handovergap==0.1.20`
 
 使い方ページ: https://masanori0209.github.io/handovergap/
 

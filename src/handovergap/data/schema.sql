@@ -1,6 +1,14 @@
 -- HandoverGap RAG TiDB schema.
 -- TiDB is the auditable slot/evidence/gap store, not only a vector store.
 
+CREATE TABLE handovergap_schema_metadata (
+  schema_name VARCHAR(100) PRIMARY KEY,
+  schema_version VARCHAR(20) NOT NULL,
+  package_name VARCHAR(100) NOT NULL,
+  applied_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  metadata JSON
+);
+
 CREATE TABLE source_events (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   source_type VARCHAR(50) NOT NULL,

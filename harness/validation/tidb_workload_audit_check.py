@@ -13,6 +13,7 @@ from handovergap.core.detector import HandoverGapDetector
 from handovergap.retrieval import chunk_rows_for_scenario
 from handovergap.slot_rules import PROFILE_REQUIRED_SLOTS
 from handovergap.store import InMemoryStore
+from handovergap.stores.tidb import RESET_CONFIRMATION
 from handovergap.workload import benchmark_generated_workload, generate_workload_scenarios
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -58,7 +59,7 @@ def main() -> int:
     store = _store_from_env(URL)
     engine = store.create_engine(pool_recycle=300, connect_args=_connect_args())
     if args.reset_schema:
-        store.reset_schema(engine)
+        store.destructive_reset_schema(engine, confirm=RESET_CONFIRMATION)
         args.create_schema = True
     if args.create_schema:
         store.create_schema(engine)

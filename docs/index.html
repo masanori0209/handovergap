@@ -413,7 +413,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.19</code></pre>
+              <pre><code>pip install handovergap==0.1.20</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -704,6 +704,15 @@ handovergap serve</code></pre>
             and <code>clarification_questions</code>. It answers: which required slot was missing,
             what evidence was checked, and what should be asked before the answer is used.
           </p>
+          <div class="callout" style="margin-top: 16px; margin-bottom: 16px">
+            <p>
+              <code>create_schema()</code> is idempotent and records packaged schema metadata in
+              <code>handovergap_schema_metadata</code>. Repeated validation runs can use
+              <code>persist_memory_item(...)</code> to upsert by <code>scenario_id</code>. Destructive
+              resets are alpha-only and require
+              <code>destructive_reset_schema(..., confirm=RESET_CONFIRMATION)</code>.
+            </p>
+          </div>
           <table>
             <thead>
               <tr>
