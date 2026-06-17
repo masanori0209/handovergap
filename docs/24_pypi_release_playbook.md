@@ -35,8 +35,19 @@ Use `--reset-schema` only for alpha validation databases with no user data.
 - [ ] LICENSE present
 - [ ] CLI entrypoint works
 - [ ] package data included
-- [ ] version is 0.1.0
+- [ ] version in `pyproject.toml`, `src/handovergap/__init__.py`, README, docs, and tests is aligned
 - [ ] optional dependencies separated
+
+### Compatibility
+
+- [ ] Public Python API changes reviewed against `docs/31_versioning_policy.md`
+- [ ] CLI command and option changes reviewed against the MVP command contract
+- [ ] Profile YAML field changes reviewed against the v1 stable schema target
+- [ ] Result model fields and answer/ask/block routing semantics reviewed
+- [ ] TiDB audit-store schema and audit SQL expectations reviewed
+- [ ] Dataset shape, metric definition, and report output changes reviewed
+- [ ] Breaking changes are listed under `Breaking Changes` in `CHANGELOG.md`
+- [ ] Migration notes name the old pattern, new pattern, and safest migration path
 
 ### Validation
 
@@ -45,6 +56,7 @@ pip install -e ".[dev]"
 pytest
 handovergap demo
 handovergap evaluate
+handovergap privacy-check
 python -m build
 twine check dist/*
 ```

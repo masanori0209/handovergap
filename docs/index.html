@@ -317,6 +317,7 @@
           <a href="#tidb-audit-store">TiDB</a>
           <a href="#evaluation-guide">Evaluation</a>
           <a href="#security-privacy">Security</a>
+          <a href="#versioning-policy">Versioning</a>
           <a href="https://github.com/masanori0209/handovergap">GitHub</a>
         </nav>
       </div>
@@ -393,6 +394,11 @@
               <p>Keep user datasets local, avoid real identifiers in examples, and scan public docs before publishing.</p>
             </article>
             <article class="card">
+              <span class="kicker">Adopt</span>
+              <h3><a href="#versioning-policy">Versioning Policy</a></h3>
+              <p>Know which API, CLI, profile, result, evaluation, and TiDB contracts become stable at v1.</p>
+            </article>
+            <article class="card">
               <span class="kicker">日本語</span>
               <h3><a href="https://github.com/masanori0209/handovergap/blob/main/README.ja.md">Japanese README</a></h3>
               <p>Use the Japanese README for a compact overview and demo guidance.</p>
@@ -407,7 +413,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.18</code></pre>
+              <pre><code>pip install handovergap==0.1.19</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -1222,6 +1228,38 @@ return {
           <p class="small" style="margin-top: 14px">
             Keep user datasets, reviewed labels, generated reports, and <code>.env</code> files out of git.
             Remove real names, direct IDs, URLs, email addresses, payment details, and secrets before publishing examples.
+          </p>
+        </section>
+
+        <section id="versioning-policy">
+          <h2>Versioning Policy</h2>
+          <p>
+            HandoverGap is alpha software until <code>1.0.0</code>. Pre-v1 releases may still clean up
+            API names, CLI names, profile schema, result fields, and TiDB schema details when the
+            change improves product readiness. Breaking changes must still be called out in the
+            changelog and release notes.
+          </p>
+          <div class="grid two">
+            <article class="card">
+              <h3>Stable At v1</h3>
+              <p>
+                Python gate API, MVP CLI commands, profile YAML schema, result model fields,
+                answer/ask/block routing, local evaluation dataset contract, and TiDB audit-store
+                expectations.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Major Version After v1</h3>
+              <p>
+                Use a major version for incompatible changes to public API, CLI automation, profile YAML,
+                result fields, routing semantics, dataset shape, metric definitions, or TiDB audit schema
+                expectations.
+              </p>
+            </article>
+          </div>
+          <p class="small" style="margin-top: 14px">
+            Full policy and release checklist:
+            <a href="https://github.com/masanori0209/handovergap/blob/main/docs/31_versioning_policy.md">docs/31_versioning_policy.md</a>.
           </p>
         </section>
 

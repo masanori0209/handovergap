@@ -11,7 +11,7 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.18`
+Latest tested release: `handovergap==0.1.19`
 
 Usage guide: https://masanori0209.github.io/handovergap/
 
@@ -25,6 +25,7 @@ Documentation shortcuts:
 - [TiDB Audit Store](https://masanori0209.github.io/handovergap/#tidb-audit-store)
 - [Evaluation Guide](https://masanori0209.github.io/handovergap/#evaluation-guide)
 - [Security And Privacy](https://masanori0209.github.io/handovergap/#security-privacy)
+- [Versioning Policy](https://masanori0209.github.io/handovergap/#versioning-policy)
 
 A normal RAG system may retrieve:
 
@@ -481,6 +482,14 @@ handovergap privacy-check
 ```
 
 For user datasets, keep raw files and reviewed labels outside git, for example under `local/`, and remove real company names, customer names, employee names, channel names, direct user IDs, URLs, email addresses, payment details, and secrets.
+
+### Versioning Policy
+
+HandoverGap is alpha software until `1.0.0`. Pre-v1 releases may still clean up API names, CLI names, profile schema, result fields, and TiDB schema details when the change improves product readiness.
+
+At `1.0.0`, the stable integration surfaces are the Python gate API, MVP CLI commands, profile YAML schema, result model fields, answer/ask/block routing semantics, local evaluation dataset contract, and TiDB audit-store expectations. After v1, incompatible changes to those surfaces require a major version.
+
+See [docs/31_versioning_policy.md](docs/31_versioning_policy.md) for the full policy and release checklist.
 
 ### Product Routing
 

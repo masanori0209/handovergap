@@ -2,9 +2,49 @@
 
 ## Unreleased
 
+### Breaking Changes
+
+- None.
+
+### Added
+
+- None.
+
+### Changed
+
+- None.
+
+### Deprecated
+
+- None.
+
+### Removed
+
+- None.
+
+### Fixed
+
+- None.
+
+### Security
+
+- None.
+
 ### Notes
 
 - No unreleased changes yet.
+
+## 0.1.19 - 2026-06-18
+
+### Added
+
+- `docs/31_versioning_policy.md` defining pre-v1 flexibility, v1 stable surfaces, post-v1 major-version triggers, and release checklist additions.
+- GitHub Pages and README links for the versioning policy.
+
+### Changed
+
+- Release playbook now includes API, CLI, profile YAML, result model, routing, dataset, metric, and TiDB audit compatibility checks.
+- Changelog now keeps a v1-ready `Unreleased` structure for breaking changes, additions, changes, deprecations, removals, fixes, and security notes.
 
 ## 0.1.18 - 2026-06-18
 
