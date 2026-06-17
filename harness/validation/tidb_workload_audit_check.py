@@ -9,6 +9,7 @@ from time import perf_counter
 from typing import Any
 
 from handovergap.audit import diverse_audit_sample_rows
+from handovergap.core.detector import HandoverGapDetector
 from handovergap.retrieval import chunk_rows_for_scenario
 from handovergap.slot_rules import PROFILE_REQUIRED_SLOTS
 from handovergap.store import InMemoryStore

@@ -257,6 +257,11 @@
         text-align: right;
       }
 
+      .text-table td:last-child,
+      .text-table th:last-child {
+        text-align: left;
+      }
+
       tr:last-child td {
         border-bottom: 0;
       }
@@ -304,8 +309,11 @@
         <div class="brand">HandoverGap RAG</div>
         <nav class="nav-links" aria-label="Primary">
           <a href="#install">Install</a>
+          <a href="#concepts">Concepts</a>
           <a href="#cli">CLI</a>
+          <a href="#profiles">Profiles</a>
           <a href="#demo">Demo</a>
+          <a href="#integration">RAG Integration</a>
           <a href="#audit">TiDB Audit</a>
           <a href="#evaluation">Evaluation</a>
           <a href="#api">Python API</a>
@@ -361,6 +369,56 @@
           </div>
         </section>
 
+        <section id="concepts">
+          <h2>Core Concepts</h2>
+          <p>
+            HandoverGap is a gate that runs before a RAG answer, agent action, or operational decision.
+            It checks whether the selected profile has enough context to safely use a retrieved memory.
+          </p>
+          <table class="text-table">
+            <thead>
+              <tr>
+                <th>Concept</th>
+                <th>Meaning</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>memory</code></td>
+                <td>The retrieved note, decision, runbook line, CRM note, or agent memory.</td>
+                <td>Use CSV for this release; API support is deferred.</td>
+              </tr>
+              <tr>
+                <td><code>profile</code></td>
+                <td>The role or operating mode that wants to use the memory.</td>
+                <td>CS, Engineer, Sales, IncidentCommander, LegalReviewer, AI Agent.</td>
+              </tr>
+              <tr>
+                <td><code>slot</code></td>
+                <td>A required piece of context for that profile.</td>
+                <td>authority, fallback_plan, escalation_path, customer_message.</td>
+              </tr>
+              <tr>
+                <td><code>gap</code></td>
+                <td>A missing or weak slot that makes transfer unsafe or incomplete.</td>
+                <td>Customer-safe wording is not available.</td>
+              </tr>
+              <tr>
+                <td><code>question</code></td>
+                <td>The follow-up question that turns a blocked answer into an actionable next step.</td>
+                <td>What customer-facing message should be used?</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="callout" style="margin-top: 16px">
+            <p>
+              The built-in handover examples are only presets. The reusable mechanism is profile-conditioned
+              readiness: define what a role must know, then block or ask when those requirements are missing.
+            </p>
+          </div>
+        </section>
+
         <section id="cli">
           <h2>CLI Usage</h2>
           <div class="grid two">
@@ -400,6 +458,52 @@
               </p>
               <pre><code>handovergap report --dataset all \
   --output reports/evaluation-latest.md</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section id="profiles">
+          <h2>Custom Profiles</h2>
+          <p>
+            Built-in profiles include <code>CS</code>, <code>Engineer</code>, and <code>Sales</code>.
+            They are examples, not a fixed industry taxonomy. Use a YAML profile file when your team
+            needs a different gate, such as incident response, legal review, renewal handoff, or an
+            autonomous agent action check.
+          </p>
+          <div class="grid two">
+            <article class="card">
+              <h3>Define required slots</h3>
+              <pre><code>profiles:
+  IncidentCommander:
+    required_slots:
+      - slot_name: blast_radius
+        gap_type: blast_radius_gap
+        description: Impacted users, systems, and time window are not explicit.
+        question: Which users, systems, and time window are impacted?
+        severity: HIGH
+        high_risk: true
+      - slot_name: rollback_owner
+        gap_type: rollback_owner_gap
+        description: The person or team authorized to trigger rollback is not explicit.
+        question: Who is authorized to trigger rollback?
+        severity: HIGH
+        high_risk: true
+      - slot_name: customer_message
+        gap_type: customer_message_gap
+        description: Customer-safe incident wording is not available.
+        question: What customer-facing message should be used?
+        severity: MEDIUM</code></pre>
+            </article>
+            <article class="card">
+              <h3>Use the profile from CLI</h3>
+              <pre><code>handovergap detect \
+  --scenario S001 \
+  --profile IncidentCommander \
+  --profile-file examples/profiles/incident_readiness.yml</code></pre>
+              <p class="small" style="margin-top: 14px">
+                The same profile can be used in Python with
+                <code>TransferabilityGate.from_profile_file(...)</code>.
+              </p>
             </article>
           </div>
         </section>
@@ -634,10 +738,100 @@ print(result.gaps)
 print(result.questions)</code></pre>
             </article>
             <article class="card">
+              <h3>Run with a custom profile</h3>
+              <pre><code>from handovergap import TransferabilityGate
+
+gate = TransferabilityGate.from_profile_file(
+    "examples/profiles/incident_readiness.yml"
+)
+result = gate.check(
+    memory="The checkout incident is mitigated by disabling the new queue worker.",
+    profile="IncidentCommander",
+    task_context="Decide whether customer-facing mitigation is complete.",
+    evidence=["Rollback owner is on-call SRE. Blast radius is checkout only."],
+    provided_slots=["rollback_owner"],
+    evidence_slots=["blast_radius"],
+)
+
+for question in result.questions:
+    print(question.question)</code></pre>
+            </article>
+            <article class="card">
               <h3>Prepare TiDB schema</h3>
               <p>Print the bundled schema locally or create it through the optional TiDB store.</p>
               <pre><code>pip install "handovergap[tidb]"
 handovergap schema --dialect tidb</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section id="integration">
+          <h2>RAG Integration Pattern</h2>
+          <p>
+            Place HandoverGap after retrieval and before answer generation. Let your normal retriever
+            collect candidate memory and evidence, then let the gate decide whether to answer, ask,
+            or block.
+          </p>
+          <div class="grid two">
+            <article class="card">
+              <h3>Before answering</h3>
+              <pre><code>from handovergap import TransferabilityGate
+
+gate = TransferabilityGate()
+
+retrieved_memory = retriever.search(user_question)
+evidence = retriever.search_evidence(user_question)
+
+result = gate.check(
+    memory=retrieved_memory.text,
+    profile="CS",
+    task_context="Answer the customer's question without overpromising.",
+    evidence=[item.text for item in evidence],
+    provided_slots=retrieved_memory.slots,
+    evidence_slots=[slot for item in evidence for slot in item.slots],
+)
+
+if result.transferability_status != "transferable":
+    return {
+        "status": result.transferability_status,
+        "reason": [gap.description for gap in result.gaps],
+        "questions": [q.question for q in result.questions],
+    }
+
+return llm.answer(user_question, context=retrieved_memory.text)</code></pre>
+            </article>
+            <article class="card">
+              <h3>What the gate returns</h3>
+              <table class="text-table">
+                <thead>
+                  <tr>
+                    <th>Field</th>
+                    <th>Use it for</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>transferability_status</code></td>
+                    <td>Route the flow: answer, ask for clarification, or block.</td>
+                  </tr>
+                  <tr>
+                    <td><code>transferability_score</code></td>
+                    <td>Show a readiness score or monitor profile tuning.</td>
+                  </tr>
+                  <tr>
+                    <td><code>gaps</code></td>
+                    <td>Explain which profile-required context is missing.</td>
+                  </tr>
+                  <tr>
+                    <td><code>questions</code></td>
+                    <td>Create the next action instead of hallucinating missing context.</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="small" style="margin-top: 14px">
+                This pattern works for human handoff, support replies, incident response, sales renewal
+                notes, and agent memory checks. The domain changes; the gate contract stays the same.
+              </p>
             </article>
           </div>
         </section>
