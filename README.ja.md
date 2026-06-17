@@ -5,9 +5,20 @@
 
 [English README](README.md)
 
-最新確認済みリリース: `handovergap==0.1.17`
+最新確認済みリリース: `handovergap==0.1.18`
 
 使い方ページ: https://masanori0209.github.io/handovergap/
+
+主要ドキュメント:
+
+- [Quickstart](https://masanori0209.github.io/handovergap/#quickstart)
+- [CLI Reference](https://masanori0209.github.io/handovergap/#cli-reference)
+- [Python API](https://masanori0209.github.io/handovergap/#python-api)
+- [Profile YAML Reference](https://masanori0209.github.io/handovergap/#profile-yaml-reference)
+- [RAG Integration](https://masanori0209.github.io/handovergap/#rag-integration)
+- [TiDB Audit Store](https://masanori0209.github.io/handovergap/#tidb-audit-store)
+- [Evaluation Guide](https://masanori0209.github.io/handovergap/#evaluation-guide)
+- [Security And Privacy](https://masanori0209.github.io/handovergap/#security-privacy)
 
 HandoverGap RAG は、RAGで取得された正しい業務記憶に不足している暗黙前提を、プロファイルと作業文脈ごとに検出します。
 

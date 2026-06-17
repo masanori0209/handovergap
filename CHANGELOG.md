@@ -6,6 +6,18 @@
 
 - No unreleased changes yet.
 
+## 0.1.18 - 2026-06-18
+
+### Changed
+
+- Reworked GitHub Pages into task-oriented library documentation sections for quickstart, CLI, Python API, profile YAML, RAG integration, TiDB audit, evaluation, and security/privacy.
+- Added README and Japanese README shortcuts to the main documentation sections.
+- Strengthened public docs language so bundled synthetic scores are not presented as production accuracy claims.
+
+### Added
+
+- Documentation regression tests for required GitHub Pages sections and production-accuracy caveats.
+
 ## 0.1.17 - 2026-06-18
 
 ### Added

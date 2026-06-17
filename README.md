@@ -11,9 +11,20 @@ HandoverGap RAG detects tacit context that is missing from otherwise correct org
 
 PyPI: https://pypi.org/project/handovergap/
 
-Latest tested release: `handovergap==0.1.17`
+Latest tested release: `handovergap==0.1.18`
 
 Usage guide: https://masanori0209.github.io/handovergap/
+
+Documentation shortcuts:
+
+- [Quickstart](https://masanori0209.github.io/handovergap/#quickstart)
+- [CLI Reference](https://masanori0209.github.io/handovergap/#cli-reference)
+- [Python API](https://masanori0209.github.io/handovergap/#python-api)
+- [Profile YAML Reference](https://masanori0209.github.io/handovergap/#profile-yaml-reference)
+- [RAG Integration](https://masanori0209.github.io/handovergap/#rag-integration)
+- [TiDB Audit Store](https://masanori0209.github.io/handovergap/#tidb-audit-store)
+- [Evaluation Guide](https://masanori0209.github.io/handovergap/#evaluation-guide)
+- [Security And Privacy](https://masanori0209.github.io/handovergap/#security-privacy)
 
 A normal RAG system may retrieve:
 

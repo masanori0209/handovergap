@@ -1,6 +1,6 @@
 """HandoverGap RAG public API."""
 
-__version__ = "0.1.17"
+__version__ = "0.1.18"
 
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator

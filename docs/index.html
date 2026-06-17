@@ -308,15 +308,15 @@
       <div class="wrap nav">
         <div class="brand">HandoverGap RAG</div>
         <nav class="nav-links" aria-label="Primary">
-          <a href="#install">Install</a>
+          <a href="#quickstart">Quickstart</a>
           <a href="#concepts">Concepts</a>
-          <a href="#cli">CLI</a>
-          <a href="#profiles">Profiles</a>
-          <a href="#demo">Demo</a>
-          <a href="#integration">RAG Integration</a>
-          <a href="#audit">TiDB Audit</a>
-          <a href="#evaluation">Evaluation</a>
-          <a href="#api">Python API</a>
+          <a href="#cli-reference">CLI</a>
+          <a href="#python-api">API</a>
+          <a href="#profile-yaml-reference">Profiles</a>
+          <a href="#rag-integration">RAG</a>
+          <a href="#tidb-audit-store">TiDB</a>
+          <a href="#evaluation-guide">Evaluation</a>
+          <a href="#security-privacy">Security</a>
           <a href="https://github.com/masanori0209/handovergap">GitHub</a>
         </nav>
       </div>
@@ -332,7 +332,7 @@
             checks the requested profile and task context, and blocks unsafe transfer with clarification questions.
           </p>
           <div class="actions">
-            <a class="button primary" href="#install">Start using it</a>
+            <a class="button primary" href="#quickstart">Start using it</a>
             <a class="button" href="https://pypi.org/project/handovergap/">PyPI package</a>
             <a class="button" href="https://github.com/masanori0209/handovergap/blob/main/README.ja.md">日本語README</a>
           </div>
@@ -345,14 +345,69 @@
       </div>
 
       <div class="wrap">
-        <section id="install">
-          <h2>Install And First Run</h2>
+        <section id="documentation-map">
+          <h2>Documentation Map</h2>
+          <p>
+            Use this page as task-oriented library documentation. The default path is local and
+            dependency-light; optional OpenAI and TiDB paths are called out where they apply.
+          </p>
+          <div class="grid">
+            <article class="card">
+              <span class="kicker">Start</span>
+              <h3><a href="#quickstart">Quickstart</a></h3>
+              <p>Install the package, run the demo, and compare the built-in baselines without credentials.</p>
+            </article>
+            <article class="card">
+              <span class="kicker">Use</span>
+              <h3><a href="#cli-reference">CLI Reference</a></h3>
+              <p>Run detection, evaluation, reporting, profile validation, privacy checks, and audit helpers.</p>
+            </article>
+            <article class="card">
+              <span class="kicker">Integrate</span>
+              <h3><a href="#python-api">Python API</a></h3>
+              <p>Call the gate from your RAG stack and route results to answer, ask, or block.</p>
+            </article>
+            <article class="card">
+              <span class="kicker">Configure</span>
+              <h3><a href="#profile-yaml-reference">Profile YAML Reference</a></h3>
+              <p>Define custom profiles and required slots beyond the built-in CS, Engineer, and Sales examples.</p>
+            </article>
+            <article class="card">
+              <span class="kicker">Adopt</span>
+              <h3><a href="#rag-integration">RAG Integration</a></h3>
+              <p>Place HandoverGap after retrieval and before generation in framework-neutral, LangChain, or LlamaIndex flows.</p>
+            </article>
+            <article class="card">
+              <span class="kicker">Audit</span>
+              <h3><a href="#tidb-audit-store">TiDB Audit Store</a></h3>
+              <p>Persist transfer decisions, slot attempts, gaps, and clarification questions for SQL review.</p>
+            </article>
+            <article class="card">
+              <span class="kicker">Evaluate</span>
+              <h3><a href="#evaluation-guide">Evaluation Guide</a></h3>
+              <p>Read bundled synthetic metrics correctly and run local evaluation on anonymized user datasets.</p>
+            </article>
+            <article class="card">
+              <span class="kicker">Operate</span>
+              <h3><a href="#security-privacy">Security And Privacy</a></h3>
+              <p>Keep user datasets local, avoid real identifiers in examples, and scan public docs before publishing.</p>
+            </article>
+            <article class="card">
+              <span class="kicker">日本語</span>
+              <h3><a href="https://github.com/masanori0209/handovergap/blob/main/README.ja.md">Japanese README</a></h3>
+              <p>Use the Japanese README for a compact overview and demo guidance.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="quickstart">
+          <h2>Quickstart</h2>
           <div class="grid">
             <article class="card">
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.17</code></pre>
+              <pre><code>pip install handovergap==0.1.18</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -419,8 +474,8 @@
           </div>
         </section>
 
-        <section id="cli">
-          <h2>CLI Usage</h2>
+        <section id="cli-reference">
+          <h2>CLI Reference</h2>
           <div class="grid two">
             <article class="card">
               <h3>Detect gaps for a profile</h3>
@@ -460,10 +515,57 @@
   --output reports/evaluation-latest.md</code></pre>
             </article>
           </div>
+          <h3 style="margin-top: 24px">Command Index</h3>
+          <table class="text-table">
+            <thead>
+              <tr>
+                <th>Command</th>
+                <th>Use it for</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>handovergap demo</code></td>
+                <td>Inspect one built-in fictional case from the terminal.</td>
+              </tr>
+              <tr>
+                <td><code>handovergap detect</code></td>
+                <td>Check one scenario and profile for missing required slots.</td>
+              </tr>
+              <tr>
+                <td><code>handovergap evaluate</code></td>
+                <td>Compare methods on bundled datasets or a local reviewed dataset file.</td>
+              </tr>
+              <tr>
+                <td><code>handovergap report</code></td>
+                <td>Write a reproducible Markdown evaluation report.</td>
+              </tr>
+              <tr>
+                <td><code>handovergap profiles validate</code></td>
+                <td>Validate custom profile YAML before using it in detection or the API.</td>
+              </tr>
+              <tr>
+                <td><code>handovergap datasets export-template</code></td>
+                <td>Create a local annotation CSV without copying raw memory or evidence text.</td>
+              </tr>
+              <tr>
+                <td><code>handovergap audit-sql</code></td>
+                <td>Print the SQL that traces blocked decisions across audit tables.</td>
+              </tr>
+              <tr>
+                <td><code>handovergap privacy-check</code></td>
+                <td>Scan public docs, examples, and packaged data for obvious secrets or direct identifiers.</td>
+              </tr>
+              <tr>
+                <td><code>handovergap serve</code></td>
+                <td>Run the optional bilingual Streamlit demo.</td>
+              </tr>
+            </tbody>
+          </table>
         </section>
 
-        <section id="profiles">
-          <h2>Custom Profiles</h2>
+        <section id="profile-yaml-reference">
+          <h2>Profile YAML Reference</h2>
           <p>
             Built-in profiles include <code>CS</code>, <code>Engineer</code>, and <code>Sales</code>.
             They are examples, not a fixed industry taxonomy. Use a YAML profile file when your team
@@ -582,8 +684,8 @@ handovergap serve</code></pre>
           </div>
         </section>
 
-        <section id="audit">
-          <h2>TiDB Audit Query</h2>
+        <section id="tidb-audit-store">
+          <h2>TiDB Audit Store</h2>
           <p>
             TiDB is used as more than a vector store. HandoverGap stores the decision path so a
             blocked answer can be explained across SQL rows, vector-backed evidence, JSON retrieval
@@ -662,12 +764,19 @@ handovergap serve</code></pre>
           </table>
         </section>
 
-        <section id="evaluation">
-          <h2>Evaluation Snapshot</h2>
+        <section id="evaluation-guide">
+          <h2>Evaluation Guide</h2>
           <p>
             These are deterministic results from the bundled synthetic 20-scenario mini dataset.
             They demonstrate reproducible behavior, not production accuracy.
           </p>
+          <div class="callout" style="margin-bottom: 16px">
+            <p>
+              Do not read the bundled scores as a production-quality claim. Use them to verify
+              the API contract, routing behavior, and evaluation method, then run
+              <code>handovergap datasets export-template</code> on your own anonymized local data.
+            </p>
+          </div>
           <table>
             <thead>
               <tr>
@@ -709,7 +818,8 @@ handovergap serve</code></pre>
           <p class="small" style="margin-top: 14px">
             Live gpt-5-mini with the tuned <code>gpt5_strict</code> prompt reached tacit gap recall
             1.00, unsafe transfer prevention 1.00, safe transfer allowance 1.00, and blocked
-            precision 1.00 on the holdout protocol. See
+            precision 1.00 on the synthetic holdout protocol. This is model- and prompt-specific
+            evidence, not a general accuracy guarantee. See
             <a href="https://github.com/masanori0209/handovergap/blob/main/article/results.md">results notes</a>.
           </p>
           <p class="small">
@@ -719,7 +829,7 @@ handovergap serve</code></pre>
           </p>
         </section>
 
-        <section id="api">
+        <section id="python-api">
           <h2>Python API</h2>
           <div class="grid two">
             <article class="card">
@@ -896,7 +1006,7 @@ handovergap report --dataset-file ./local/reviewed_scenarios.jsonl --output ./lo
           </p>
         </section>
 
-        <section id="integration">
+        <section id="rag-integration">
           <h2>RAG Integration Pattern</h2>
           <p>
             Place HandoverGap after retrieval and before answer generation. Let your normal retriever
@@ -1101,7 +1211,7 @@ return {
           </table>
         </section>
 
-        <section>
+        <section id="security-privacy">
           <h2>Privacy Defaults</h2>
           <p>
             Core commands run locally by default and do not call OpenAI, TiDB, Slack, GitHub, or other
