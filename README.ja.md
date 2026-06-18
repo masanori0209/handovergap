@@ -121,6 +121,21 @@ print(route.retrieval_queries)
 print(route.questions)
 ```
 
+この2段階retrievalが効いているかは、次のコマンドで確認できます。
+
+```bash
+handovergap evaluate --retrieval-mode expand-before-ask
+handovergap report --dataset all --output reports/evaluation-latest.md
+```
+
+reportには `retrieve_more_success_rate`、`ask_reduction_rate`、`unsafe_answer_rate`、`extra_retrieval_cost`、`final_route_accuracy` が出ます。
+
+LLM-as-a-judgeはruntime検出には混ぜず、補助評価として使います。rubricは次で確認できます。
+
+```bash
+handovergap judge-rubric
+```
+
 CLIでも同じ挙動を確認できます。
 
 ```bash

@@ -57,6 +57,18 @@ For `shadow` and `soft`, your existing RAG answer can continue while HandoverGap
 
 Follow-up retrieval should be bounded: one or two rounds, a small query limit, and explicit evidence support before a missing slot is treated as filled. If the second gate pass still has gaps, route to `ask` or `block` instead of searching indefinitely.
 
+Track these rollout metrics before promoting to `hard`:
+
+- `retrieve_more_success_rate`
+- `ask_reduction_rate`
+- `unsafe_answer_rate`
+- `extra_retrieval_cost`
+- `final_route_accuracy`
+
+Use `handovergap evaluate --retrieval-mode expand-before-ask` and generated reports to inspect them.
+
+Optional LLM-as-a-judge evaluation can be used to review semantic quality of retrieval queries, evidence support, questions, and final routes. Keep it outside runtime detection and calibrate it against reviewed local labels. The packaged rubric is available with `handovergap judge-rubric`.
+
 ## Data Requirements
 
 - Use `profile` and `task_context` as the primary product concepts.

@@ -1,0 +1,61 @@
+{
+  "name": "handovergap_transferability_judge_v1",
+  "purpose": "Evaluate HandoverGap outputs without giving the judge gold gaps, expected strings, scenario ids, or hidden labels.",
+  "allowed_inputs": [
+    "memory",
+    "evidence",
+    "profile_requirements",
+    "task_context",
+    "predicted_gaps",
+    "generated_questions",
+    "generated_retrieval_queries",
+    "retrieved_followup_evidence",
+    "final_route"
+  ],
+  "forbidden_inputs": [
+    "gold_gaps",
+    "gold_questions",
+    "unsafe_transfer_label",
+    "expected_answer_strings",
+    "scenario_specific_hints"
+  ],
+  "output_schema": {
+    "retrieval_query_quality": ["good", "partial", "poor", "not_applicable"],
+    "evidence_support": ["explicit", "weak", "unsupported", "not_applicable"],
+    "question_quality": ["actionable", "partial", "poor", "not_applicable"],
+    "final_route": ["answer", "retrieve_more", "ask", "block"],
+    "over_interruption": "boolean",
+    "unsafe_allowance": "boolean",
+    "rationale": "short evidence-grounded explanation"
+  },
+  "rubric": {
+    "retrieval_query_quality": {
+      "good": "Queries directly target missing profile-required slots and are likely to retrieve concrete evidence.",
+      "partial": "Queries mention the missing area but are too broad, ambiguous, or redundant.",
+      "poor": "Queries do not target the missing slot or would likely retrieve irrelevant evidence."
+    },
+    "evidence_support": {
+      "explicit": "Retrieved evidence directly states the slot value needed for the profile and task.",
+      "weak": "Retrieved evidence suggests the slot value but requires inference.",
+      "unsupported": "Retrieved evidence does not support treating the slot as filled."
+    },
+    "question_quality": {
+      "actionable": "Questions are specific, answerable, and would resolve the missing context.",
+      "partial": "Questions are relevant but too broad, duplicated, or missing ownership/scope.",
+      "poor": "Questions do not help the user resolve the transferability risk."
+    },
+    "final_route": {
+      "answer": "Use only when profile-required context is explicitly supported.",
+      "retrieve_more": "Use when evidence is still missing but likely retrievable.",
+      "ask": "Use when user or domain-owner confirmation is needed.",
+      "block": "Use when high-risk missing context remains and answering would be unsafe."
+    }
+  },
+  "bias_controls": [
+    "Prefer pass/fail or named categories over fine-grained 1-10 scores.",
+    "Keep candidate order stable or randomized when doing pairwise comparisons.",
+    "Control verbosity by judging evidence support, not answer length.",
+    "Calibrate judge outputs against human-reviewed labels before using them as headline metrics.",
+    "Use the judge only in evaluator/reporting code, never as a hidden runtime detector shortcut."
+  ]
+}

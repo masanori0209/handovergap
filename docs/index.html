@@ -842,6 +842,48 @@ handovergap serve</code></pre>
             after evidence-backed slot reconciliation. The sanitized split uses field-realistic
             anonymized CRM, incident, runbook, and deal-review style notes without real company data.
           </p>
+          <h3>Follow-up Retrieval Metrics</h3>
+          <p>
+            <code>handovergap evaluate --retrieval-mode expand-before-ask</code> measures whether
+            a bounded second retrieval pass reduces missing slots or user-facing questions before
+            asking a person.
+          </p>
+          <table class="text-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>retrieve_more_success_rate</code></td>
+                <td>Share of retrieve-more cases where follow-up evidence reduces missing slots.</td>
+              </tr>
+              <tr>
+                <td><code>ask_reduction_rate</code></td>
+                <td>Share of initially interrupted cases with fewer clarification questions after follow-up.</td>
+              </tr>
+              <tr>
+                <td><code>unsafe_answer_rate</code></td>
+                <td>Share of unsafe cases that are incorrectly allowed to answer after follow-up.</td>
+              </tr>
+              <tr>
+                <td><code>extra_retrieval_cost</code></td>
+                <td>Average generated follow-up retrieval queries per scenario.</td>
+              </tr>
+              <tr>
+                <td><code>final_route_accuracy</code></td>
+                <td>Share of final routes that match reviewed safe or unsafe transfer labels.</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>LLM Judge Rubric</h3>
+          <p>
+            LLM-as-a-judge is supported as an evaluation aid, not as runtime detection. Inspect the
+            packaged rubric with <code>handovergap judge-rubric</code>; it forbids gold gaps,
+            unsafe labels, expected strings, and scenario-specific hints as judge inputs.
+          </p>
         </section>
 
         <section id="python-api">
@@ -1251,6 +1293,8 @@ return {
 handovergap detect --scenario S001 --profile CS --deployment-mode soft
 handovergap detect --scenario S001 --profile CS --deployment-mode hard
 handovergap detect --scenario S001 --profile CS --retrieval-mode expand-before-ask</code></pre>
+          <pre><code>handovergap evaluate --retrieval-mode expand-before-ask
+handovergap judge-rubric</code></pre>
         </section>
 
         <section>

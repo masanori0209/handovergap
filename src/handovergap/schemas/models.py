@@ -79,3 +79,14 @@ class EvalMetrics(BaseModel):
     safe_transfer_allowance: float = Field(ge=0.0, le=1.0)
     blocked_precision: float = Field(ge=0.0, le=1.0)
     false_clarification_rate: float = Field(ge=0.0, le=1.0)
+
+
+class FollowupRetrievalMetrics(BaseModel):
+    method: str = "handovergap/followup_retrieval"
+    scenarios: int
+    retrieve_more_cases: int
+    retrieve_more_success_rate: float = Field(ge=0.0, le=1.0)
+    ask_reduction_rate: float = Field(ge=0.0, le=1.0)
+    unsafe_answer_rate: float = Field(ge=0.0, le=1.0)
+    extra_retrieval_cost: float = Field(ge=0.0)
+    final_route_accuracy: float = Field(ge=0.0, le=1.0)

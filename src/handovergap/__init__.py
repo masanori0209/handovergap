@@ -5,6 +5,7 @@ __version__ = "1.0.0"
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.core.gate import ContextReadinessGate, TransferabilityGate
+from handovergap.judge import load_llm_judge_rubric
 from handovergap.planning import FollowupRetrievalQuery, build_followup_retrieval_queries
 from handovergap.privacy import PrivacyFinding, scan_privacy
 from handovergap.profiles import (
@@ -15,6 +16,7 @@ from handovergap.profiles import (
     validate_profile_file,
 )
 from handovergap.routing import DeploymentMode, ProductRoute, RetrievalMode, RouteAction, route_transferability_result
+from handovergap.schemas import FollowupRetrievalMetrics
 from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS, SlotFillMode
 from handovergap.slot_mapping import map_evidence_slots_by_keywords
 from handovergap.store import InMemoryStore
@@ -26,6 +28,7 @@ __all__ = [
     "HandoverGapDetector",
     "HandoverGapEvaluator",
     "FollowupRetrievalQuery",
+    "FollowupRetrievalMetrics",
     "InMemoryStore",
     "ProfileCatalog",
     "ProfileDefinition",
@@ -48,6 +51,7 @@ __all__ = [
     "export_annotation_template",
     "import_reviewed_labels",
     "load_user_dataset",
+    "load_llm_judge_rubric",
     "route_transferability_result",
     "scan_privacy",
     "validate_profile_file",

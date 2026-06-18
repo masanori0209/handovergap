@@ -31,6 +31,28 @@ def test_evaluate_cli_outputs_required_metrics() -> None:
     assert "False Clarification" in result.output
 
 
+def test_followup_retrieval_metrics_are_bounded() -> None:
+    metrics = HandoverGapEvaluator(store=InMemoryStore.from_builtin_dataset()).evaluate_followup_retrieval()
+
+    assert metrics.scenarios >= 20
+    assert metrics.retrieve_more_cases > 0
+    assert 0.0 <= metrics.retrieve_more_success_rate <= 1.0
+    assert 0.0 <= metrics.ask_reduction_rate <= 1.0
+    assert 0.0 <= metrics.unsafe_answer_rate <= 1.0
+    assert metrics.extra_retrieval_cost >= 0.0
+    assert 0.0 <= metrics.final_route_accuracy <= 1.0
+
+
+def test_evaluate_cli_outputs_followup_retrieval_metrics() -> None:
+    result = CliRunner().invoke(app, ["evaluate", "--retrieval-mode", "expand-before-ask"])
+
+    assert result.exit_code == 0
+    assert "follow-up retrieval" in result.output
+    assert "Retrieve More Success" in result.output
+    assert "Unsafe Answer Rate" in result.output
+    assert "Final Route Accuracy" in result.output
+
+
 def test_holdout_optimistic_slot_filling_exposes_recall_drop() -> None:
     provided = HandoverGapEvaluator(
         store=InMemoryStore.from_builtin_dataset("holdout"),

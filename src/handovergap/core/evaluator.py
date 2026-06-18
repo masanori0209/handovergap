@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from handovergap.core.baselines import BASELINES, BaselinePrediction
 from handovergap.core.detector import HandoverGapDetector
-from handovergap.schemas import EvalMetrics
+from handovergap.routing import route_transferability_result
+from handovergap.schemas import EvalMetrics, FollowupRetrievalMetrics
 from handovergap.slot_filling_modes import SlotFillMode, mode_for_slot_profile, source_for_slot_profile
 from handovergap.store import InMemoryStore
 
@@ -30,6 +31,61 @@ class HandoverGapEvaluator:
             self.evaluate_method("hybrid_rag"),
             self.evaluate_method("handovergap"),
         ]
+
+    def evaluate_followup_retrieval(self, *, max_retrieval_queries: int = 3) -> FollowupRetrievalMetrics:
+        scenarios = self.store.list_scenarios()
+        detector = HandoverGapDetector(store=self.store)
+        retrieve_more_cases = 0
+        successful_retrievals = 0
+        ask_reduction_cases = 0
+        initially_interrupted_cases = 0
+        unsafe_total = 0
+        unsafe_answered = 0
+        accurate_final_routes = 0
+        generated_queries = 0
+
+        for scenario in scenarios:
+            initial_scenario = scenario.model_copy(update={"evidence_slots": []})
+            initial_result = detector.detect_scenario(initial_scenario)
+            initial_route = route_transferability_result(
+                initial_result,
+                retrieval_mode="expand_before_ask",
+                max_retrieval_queries=max_retrieval_queries,
+            )
+            initial_ask_first_route = route_transferability_result(initial_result)
+
+            final_result = detector.detect_scenario(scenario)
+            final_route = route_transferability_result(final_result)
+
+            if initial_route.recommended_action == "retrieve_more":
+                retrieve_more_cases += 1
+                generated_queries += len(initial_route.retrieval_queries)
+                if len(final_result.gaps) < len(initial_result.gaps):
+                    successful_retrievals += 1
+
+            if initial_ask_first_route.action != "answer":
+                initially_interrupted_cases += 1
+                if len(final_route.questions) < len(initial_ask_first_route.questions):
+                    ask_reduction_cases += 1
+
+            if scenario.unsafe_transfer_label:
+                unsafe_total += 1
+                if final_route.action == "answer":
+                    unsafe_answered += 1
+
+            final_answered = final_route.action == "answer"
+            if (scenario.unsafe_transfer_label and not final_answered) or (not scenario.unsafe_transfer_label and final_answered):
+                accurate_final_routes += 1
+
+        return FollowupRetrievalMetrics(
+            scenarios=len(scenarios),
+            retrieve_more_cases=retrieve_more_cases,
+            retrieve_more_success_rate=_ratio(successful_retrievals, retrieve_more_cases),
+            ask_reduction_rate=_ratio(ask_reduction_cases, initially_interrupted_cases),
+            unsafe_answer_rate=_ratio(unsafe_answered, unsafe_total),
+            extra_retrieval_cost=_ratio(generated_queries, len(scenarios)),
+            final_route_accuracy=_ratio(accurate_final_routes, len(scenarios)),
+        )
 
     def evaluate_method(self, method: str = "handovergap") -> EvalMetrics:
         scenarios = self.store.list_scenarios()

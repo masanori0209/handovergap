@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from collections import Counter
@@ -17,6 +18,7 @@ from handovergap.audit import TRANSFER_AUDIT_EXPLANATION, transfer_audit_example
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.ingest import scenario_from_jsonl
+from handovergap.judge import load_llm_judge_rubric
 from handovergap.privacy import DEFAULT_PRIVACY_CHECK_PATHS, scan_privacy
 from handovergap.profiles import ProfileCatalog, validate_profile_file
 from handovergap.reporting import generate_evaluation_report
@@ -223,6 +225,11 @@ def evaluate(
         "--stress-filling",
         help="Evaluate HandoverGap across provided, conservative, and optimistic slot filling profiles.",
     ),
+    retrieval_mode: str = typer.Option(
+        "ask-first",
+        "--retrieval-mode",
+        help="Follow-up retrieval evaluation mode: ask-first or expand-before-ask.",
+    ),
 ) -> None:
     """Evaluate on HandoverGapBench mini."""
     try:
@@ -231,6 +238,7 @@ def evaluate(
         raise typer.BadParameter(str(exc)) from exc
     if selected_mode == "optional_llm" and not model_name:
         raise typer.BadParameter("--model is required when --slot-fill-mode optional_llm is used.")
+    selected_retrieval_mode = _validate_retrieval_mode(retrieval_mode)
 
     if stress_filling:
         if dataset_file:
@@ -308,6 +316,28 @@ def evaluate(
         "Slot fill modes: "
         + "; ".join(f"{mode}={description}" for mode, description in SLOT_FILL_MODE_DESCRIPTIONS.items())
     )
+    if selected_retrieval_mode == "expand_before_ask":
+        if stress_filling:
+            followup_store = InMemoryStore.from_builtin_dataset(dataset)
+        else:
+            followup_store = load_user_dataset(dataset_file) if dataset_file else InMemoryStore.from_builtin_dataset(dataset)
+        followup = HandoverGapEvaluator(store=followup_store).evaluate_followup_retrieval()
+        followup_table = Table(title=f"{title} / follow-up retrieval")
+        followup_table.add_column("Retrieve More Cases", justify="right", no_wrap=True)
+        followup_table.add_column("Retrieve More Success", justify="right", no_wrap=True)
+        followup_table.add_column("Ask Reduction", justify="right", no_wrap=True)
+        followup_table.add_column("Unsafe Answer Rate", justify="right", no_wrap=True)
+        followup_table.add_column("Extra Retrieval Cost", justify="right", no_wrap=True)
+        followup_table.add_column("Final Route Accuracy", justify="right", no_wrap=True)
+        followup_table.add_row(
+            str(followup.retrieve_more_cases),
+            f"{followup.retrieve_more_success_rate:.2f}",
+            f"{followup.ask_reduction_rate:.2f}",
+            f"{followup.unsafe_answer_rate:.2f}",
+            f"{followup.extra_retrieval_cost:.2f}",
+            f"{followup.final_route_accuracy:.2f}",
+        )
+        console.print(followup_table)
 
 
 @app.command()
@@ -329,6 +359,12 @@ def report(
         console.print(f"Wrote evaluation report: {output_path}")
     else:
         console.print(markdown)
+
+
+@app.command("judge-rubric")
+def judge_rubric() -> None:
+    """Print the optional LLM-as-a-judge rubric JSON."""
+    console.print_json(json.dumps(load_llm_judge_rubric(), ensure_ascii=False))
 
 
 @datasets_app.command("export-template")

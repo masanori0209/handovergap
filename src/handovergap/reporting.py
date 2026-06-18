@@ -35,6 +35,13 @@ def generate_evaluation_report(dataset: str = "all", dataset_file: str | None = 
         "| Dataset | Questions | Slot Coverage | Actionability | Redundancy Rate |",
         "|---|---:|---:|---:|---:|",
     ]
+    followup_rows = [
+        "",
+        "## Follow-up Retrieval Metrics",
+        "",
+        "| Dataset | Retrieve More Cases | Retrieve More Success | Ask Reduction | Unsafe Answer Rate | Extra Retrieval Cost | Final Route Accuracy |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
     for dataset_name in datasets:
         store = load_user_dataset(dataset_file) if dataset_file else InMemoryStore.from_builtin_dataset(dataset_name)
         evaluator = HandoverGapEvaluator(store=store)
@@ -58,7 +65,14 @@ def generate_evaluation_report(dataset: str = "all", dataset_file: str | None = 
             f"| {dataset_name} | {quality.questions} | {quality.slot_coverage:.2f} | "
             f"{quality.actionability:.2f} | {quality.redundancy_rate:.2f} |"
         )
+        followup = evaluator.evaluate_followup_retrieval()
+        followup_rows.append(
+            f"| {dataset_name} | {followup.retrieve_more_cases} | {followup.retrieve_more_success_rate:.2f} | "
+            f"{followup.ask_reduction_rate:.2f} | {followup.unsafe_answer_rate:.2f} | "
+            f"{followup.extra_retrieval_cost:.2f} | {followup.final_route_accuracy:.2f} |"
+        )
     lines.extend(quality_rows)
+    lines.extend(followup_rows)
     lines.extend(
         [
             "",

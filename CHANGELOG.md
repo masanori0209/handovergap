@@ -14,6 +14,8 @@
 - Follow-up retrieval planning for missing slots via `retrieval_mode="expand_before_ask"`.
 - `FollowupRetrievalQuery` and `build_followup_retrieval_queries(...)` for bounded RAG expansion before asking a user.
 - `handovergap detect --retrieval-mode expand-before-ask` for inspecting generated follow-up retrieval queries.
+- Follow-up retrieval effectiveness metrics in `evaluate --retrieval-mode expand-before-ask` and generated reports.
+- Packaged LLM-as-a-judge rubric plus `handovergap judge-rubric` for optional evaluator calibration.
 
 ### Changed
 

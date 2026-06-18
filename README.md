@@ -564,6 +564,21 @@ In `hard` mode, `safe_context` is only returned for `transferable` results. Clar
 
 With `retrieval_mode="expand_before_ask"`, a missing slot produces `recommended_action="retrieve_more"` and `next_step="run_followup_retrieval"` before user-facing clarification. Use a bounded policy such as one follow-up round and three queries per round, then run the gate again with any newly supported `evidence_slots`.
 
+To measure whether that second retrieval pass helps:
+
+```bash
+handovergap evaluate --retrieval-mode expand-before-ask
+handovergap report --dataset all --output reports/evaluation-latest.md
+```
+
+The follow-up section reports `retrieve_more_success_rate`, `ask_reduction_rate`, `unsafe_answer_rate`, `extra_retrieval_cost`, and `final_route_accuracy`.
+
+Optional LLM-as-a-judge evaluation should stay outside runtime detection. Inspect the packaged rubric with:
+
+```bash
+handovergap judge-rubric
+```
+
 The CLI exposes the same rollout choice:
 
 ```bash
