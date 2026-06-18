@@ -15,6 +15,8 @@
 - `FollowupRetrievalQuery` and `build_followup_retrieval_queries(...)` for bounded RAG expansion before asking a user.
 - `handovergap detect --retrieval-mode expand-before-ask` for inspecting generated follow-up retrieval queries.
 - Follow-up retrieval effectiveness metrics in `evaluate --retrieval-mode expand-before-ask` and generated reports.
+- Configurable routing safety policies: default `strict`, plus `balanced` and `exploratory`.
+- `handovergap detect/evaluate --safety-policy ...` for comparing answer-permission tradeoffs.
 - Packaged LLM-as-a-judge rubric plus `handovergap judge-rubric` for optional evaluator calibration.
 
 ### Changed
@@ -39,7 +41,7 @@
 
 ### Notes
 
-- `hard` and `ask_first` remain the default routing modes, so existing answer/ask/block behavior remains unchanged unless callers opt into `shadow`, `soft`, or `expand_before_ask`.
+- `hard`, `ask_first`, and `strict` remain the default routing choices. Strict safety requires evidence support for high-risk slots when evidence slots are present.
 
 ## 1.0.0 - 2026-06-18
 

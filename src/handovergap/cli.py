@@ -27,7 +27,7 @@ from handovergap.retrieval import (
     retrieve_slot_evidence_hybrid_local,
     retrieve_slot_evidence_local,
 )
-from handovergap.routing import DeploymentMode, RetrievalMode, route_transferability_result
+from handovergap.routing import DeploymentMode, RetrievalMode, SafetyPolicy, route_transferability_result
 from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS, validate_slot_fill_mode
 from handovergap.store import InMemoryStore
 from handovergap.stores import TiDBStore
@@ -109,17 +109,31 @@ def _validate_retrieval_mode(value: str) -> RetrievalMode:
     return cast(RetrievalMode, normalized)
 
 
-def _print_route(result, deployment_mode: DeploymentMode, retrieval_mode: RetrievalMode) -> None:
+def _validate_safety_policy(value: str) -> SafetyPolicy:
+    normalized = value.replace("-", "_")
+    if normalized not in {"strict", "balanced", "exploratory"}:
+        raise typer.BadParameter("--safety-policy must be one of: strict, balanced, exploratory.")
+    return cast(SafetyPolicy, normalized)
+
+
+def _print_route(
+    result,
+    deployment_mode: DeploymentMode,
+    retrieval_mode: RetrievalMode,
+    safety_policy: SafetyPolicy,
+) -> None:
     route = route_transferability_result(
         result,
         safe_context=result.memory,
         deployment_mode=deployment_mode,
         retrieval_mode=retrieval_mode,
+        safety_policy=safety_policy,
     )
     console.print()
     console.print("[bold]Product Route:[/bold]")
     console.print(f"Deployment Mode: {route.deployment_mode}")
     console.print(f"Retrieval Mode: {route.retrieval_mode}")
+    console.print(f"Safety Policy: {route.safety_policy}")
     console.print(f"Recommended Action: {route.recommended_action}")
     console.print(f"Applied Action: {route.action}")
     console.print(f"Enforcement: {route.enforcement}")
@@ -155,10 +169,16 @@ def detect(
         "--retrieval-mode",
         help="Retrieval planning mode: ask-first or expand-before-ask.",
     ),
+    safety_policy: str = typer.Option(
+        "strict",
+        "--safety-policy",
+        help="Answer permission policy: strict, balanced, or exploratory.",
+    ),
 ) -> None:
     """Detect profile-conditioned tacit context gaps for one scenario."""
     selected_deployment_mode = _validate_deployment_mode(deployment_mode)
     selected_retrieval_mode = _validate_retrieval_mode(retrieval_mode)
+    selected_safety_policy = _validate_safety_policy(safety_policy)
     store = InMemoryStore.from_builtin_dataset()
     profiles = ProfileCatalog.from_yaml(profile_file) if profile_file else ProfileCatalog.builtins()
     if profile_file:
@@ -167,7 +187,7 @@ def detect(
     else:
         result = HandoverGapDetector(store=store, profiles=profiles).detect(scenario_id=scenario, profile=profile)
     _print_detection(result)
-    _print_route(result, selected_deployment_mode, selected_retrieval_mode)
+    _print_route(result, selected_deployment_mode, selected_retrieval_mode, selected_safety_policy)
 
 
 @profiles_app.command("validate")
@@ -230,6 +250,11 @@ def evaluate(
         "--retrieval-mode",
         help="Follow-up retrieval evaluation mode: ask-first or expand-before-ask.",
     ),
+    safety_policy: str = typer.Option(
+        "strict",
+        "--safety-policy",
+        help="Follow-up retrieval safety policy: strict, balanced, or exploratory.",
+    ),
 ) -> None:
     """Evaluate on HandoverGapBench mini."""
     try:
@@ -239,6 +264,7 @@ def evaluate(
     if selected_mode == "optional_llm" and not model_name:
         raise typer.BadParameter("--model is required when --slot-fill-mode optional_llm is used.")
     selected_retrieval_mode = _validate_retrieval_mode(retrieval_mode)
+    selected_safety_policy = _validate_safety_policy(safety_policy)
 
     if stress_filling:
         if dataset_file:
@@ -321,8 +347,11 @@ def evaluate(
             followup_store = InMemoryStore.from_builtin_dataset(dataset)
         else:
             followup_store = load_user_dataset(dataset_file) if dataset_file else InMemoryStore.from_builtin_dataset(dataset)
-        followup = HandoverGapEvaluator(store=followup_store).evaluate_followup_retrieval()
+        followup = HandoverGapEvaluator(store=followup_store).evaluate_followup_retrieval(
+            safety_policy=selected_safety_policy
+        )
         followup_table = Table(title=f"{title} / follow-up retrieval")
+        followup_table.caption = f"safety_policy={selected_safety_policy}"
         followup_table.add_column("Retrieve More Cases", justify="right", no_wrap=True)
         followup_table.add_column("Retrieve More Success", justify="right", no_wrap=True)
         followup_table.add_column("Ask Reduction", justify="right", no_wrap=True)

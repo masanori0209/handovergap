@@ -9,6 +9,7 @@ from handovergap.schemas import DetectionResult
 
 DeploymentMode = Literal["shadow", "soft", "hard"]
 RetrievalMode = Literal["ask_first", "expand_before_ask"]
+SafetyPolicy = Literal["strict", "balanced", "exploratory"]
 RouteAction = Literal["answer", "retrieve_more", "ask", "block"]
 NextStep = Literal["answer", "run_followup_retrieval", "ask_user", "block"]
 
@@ -19,6 +20,7 @@ class ProductRoute(BaseModel):
     recommended_action: RouteAction
     deployment_mode: DeploymentMode = "hard"
     retrieval_mode: RetrievalMode = "ask_first"
+    safety_policy: SafetyPolicy = "strict"
     enforcement: Literal["observe", "warn", "enforce"] = "enforce"
     should_interrupt: bool = True
     next_step: NextStep
@@ -34,6 +36,7 @@ def route_transferability_result(
     safe_context: str | None = None,
     deployment_mode: DeploymentMode = "hard",
     retrieval_mode: RetrievalMode = "ask_first",
+    safety_policy: SafetyPolicy = "strict",
     max_retrieval_queries: int = 3,
 ) -> ProductRoute:
     """Convert a DetectionResult into a product-facing answer/ask/block route."""
@@ -41,6 +44,10 @@ def route_transferability_result(
     if retrieval_mode not in {"ask_first", "expand_before_ask"}:
         raise ValueError(
             "Invalid retrieval_mode " f"'{retrieval_mode}'. Expected one of: ask_first, expand_before_ask."
+        )
+    if safety_policy not in {"strict", "balanced", "exploratory"}:
+        raise ValueError(
+            "Invalid safety_policy " f"'{safety_policy}'. Expected one of: strict, balanced, exploratory."
         )
     retrieval_queries = build_followup_retrieval_queries(result, max_queries=max_retrieval_queries)
     if result.transferability_status == "transferable":
@@ -54,6 +61,9 @@ def route_transferability_result(
             "Invalid transferability_status "
             f"'{result.transferability_status}'. Expected one of: transferable, needs_clarification, blocked."
         )
+    policy_reasons, policy_questions = _safety_policy_findings(result, safety_policy)
+    if recommended_action == "answer" and policy_reasons:
+        recommended_action = "ask"
     next_step = _next_step_for_action(recommended_action)
     if deployment_mode == "hard":
         action = recommended_action
@@ -79,14 +89,36 @@ def route_transferability_result(
         recommended_action=recommended_action,
         deployment_mode=deployment_mode,
         retrieval_mode=retrieval_mode,
+        safety_policy=safety_policy,
         enforcement=enforcement,
         should_interrupt=should_interrupt,
         next_step=next_step,
-        reason=[gap.description for gap in result.gaps],
-        questions=[question.question for question in result.questions],
+        reason=[gap.description for gap in result.gaps] + policy_reasons,
+        questions=[question.question for question in result.questions] + policy_questions,
         retrieval_queries=retrieval_queries,
         safe_context=routed_safe_context,
     )
+
+
+def _safety_policy_findings(result: DetectionResult, safety_policy: SafetyPolicy) -> tuple[list[str], list[str]]:
+    if safety_policy != "strict":
+        return [], []
+    if not result.evidence_slots:
+        return [], []
+
+    supported_slots = set(result.evidence_slots)
+    gap_slots = {gap.slot_name for gap in result.gaps}
+    high_risk_slots = set(result.high_risk_slots)
+    slots_needing_support = sorted(high_risk_slots - supported_slots - gap_slots)
+    reasons = [
+        f"High-risk slot '{slot}' is filled only by provided context; explicit evidence support is required."
+        for slot in slots_needing_support
+    ]
+    questions = [
+        f"Please provide explicit evidence supporting the high-risk slot '{slot}' before answering."
+        for slot in slots_needing_support
+    ]
+    return reasons, questions
 
 
 def _next_step_for_action(action: RouteAction) -> NextStep:

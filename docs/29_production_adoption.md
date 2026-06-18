@@ -22,6 +22,8 @@ Use `route_transferability_result(...)` to separate the gate recommendation from
 
 When the system can search again, combine the deployment mode with `retrieval_mode="expand_before_ask"`. This changes missing-slot recommendations from immediate clarification to `retrieve_more`, with generated retrieval queries that target the missing slots.
 
+Keep `safety_policy="strict"` as the default while adopting follow-up retrieval. In strict mode, a high-risk profile slot must be supported by `evidence_slots` before the final route can answer. This catches optimistic slot filling where a caller marks a critical slot as present even though the retrieved evidence does not explicitly support it. Use `balanced` only after local review shows the upstream slot filler is reliable enough for provided slots to be trusted.
+
 ```python
 from handovergap import TransferabilityGate, route_transferability_result
 
@@ -37,6 +39,7 @@ route = route_transferability_result(
     safe_context=retrieved_memory,
     deployment_mode="shadow",
     retrieval_mode="expand_before_ask",
+    safety_policy="strict",
 )
 
 audit_log.write(
@@ -46,6 +49,7 @@ audit_log.write(
         "recommended_action": route.recommended_action,
         "deployment_mode": route.deployment_mode,
         "retrieval_mode": route.retrieval_mode,
+        "safety_policy": route.safety_policy,
         "retrieval_queries": [query.model_dump() for query in route.retrieval_queries],
         "questions": route.questions,
         "reason": route.reason,
@@ -55,7 +59,7 @@ audit_log.write(
 
 For `shadow` and `soft`, your existing RAG answer can continue while HandoverGap records what it would have asked or blocked. For `hard`, `should_interrupt=True` means the product should ask questions or withhold the answer before final delivery.
 
-Follow-up retrieval should be bounded: one or two rounds, a small query limit, and explicit evidence support before a missing slot is treated as filled. If the second gate pass still has gaps, route to `ask` or `block` instead of searching indefinitely.
+Follow-up retrieval should be bounded: one or two rounds, a small query limit, and explicit evidence support before a high-risk slot is treated as answerable. If the second gate pass still has gaps or lacks evidence for high-risk slots, route to `ask` or `block` instead of searching indefinitely.
 
 Track these rollout metrics before promoting to `hard`:
 
@@ -65,7 +69,7 @@ Track these rollout metrics before promoting to `hard`:
 - `extra_retrieval_cost`
 - `final_route_accuracy`
 
-Use `handovergap evaluate --retrieval-mode expand-before-ask` and generated reports to inspect them.
+Use `handovergap evaluate --retrieval-mode expand-before-ask` and generated reports to inspect them. Compare with `--safety-policy balanced` when you need to measure the tradeoff between lower interruption and higher unsafe-answer risk.
 
 Optional LLM-as-a-judge evaluation can be used to review semantic quality of retrieval queries, evidence support, questions, and final routes. Keep it outside runtime detection and calibrate it against reviewed local labels. The packaged rubric is available with `handovergap judge-rubric`.
 

@@ -57,6 +57,10 @@ class DetectionResult(BaseModel):
     profile: Profile
     memory: str
     task_context: str
+    required_slots: list[str] = Field(default_factory=list)
+    provided_slots: list[str] = Field(default_factory=list)
+    evidence_slots: list[str] = Field(default_factory=list)
+    high_risk_slots: list[str] = Field(default_factory=list)
     gaps: list[HandoverGap]
     questions: list[ClarificationQuestion]
     transferability_score: float = Field(ge=0.0, le=1.0)
@@ -84,6 +88,7 @@ class EvalMetrics(BaseModel):
 class FollowupRetrievalMetrics(BaseModel):
     method: str = "handovergap/followup_retrieval"
     scenarios: int
+    safety_policy: Literal["strict", "balanced", "exploratory"] = "strict"
     retrieve_more_cases: int
     retrieve_more_success_rate: float = Field(ge=0.0, le=1.0)
     ask_reduction_rate: float = Field(ge=0.0, le=1.0)

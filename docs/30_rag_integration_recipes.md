@@ -48,6 +48,7 @@ route = route_transferability_result(
     result,
     safe_context=memory.text,
     retrieval_mode="expand_before_ask",
+    safety_policy="strict",
 )
 
 if route.action == "retrieve_more":
@@ -63,7 +64,7 @@ if route.action == "retrieve_more":
         provided_slots=memory.slots,
         evidence_slots=[*evidence_slots, *extra_slots],
     )
-    route = route_transferability_result(result, safe_context=memory.text)
+    route = route_transferability_result(result, safe_context=memory.text, safety_policy="strict")
 
 if route.action != "answer":
     return {
@@ -77,6 +78,8 @@ return llm.answer(user_question, context=route.safe_context)
 ```
 
 Keep follow-up retrieval bounded. A practical default is one follow-up round, at most three generated queries, and explicit evidence support before adding `evidence_slots`.
+
+The default `strict` safety policy requires high-risk profile slots to be present in `evidence_slots` before answering. If your application intentionally trusts reviewed caller-provided slots, pass `safety_policy="balanced"` and track `unsafe_answer_rate` before enforcing it in production.
 
 ## LangChain
 

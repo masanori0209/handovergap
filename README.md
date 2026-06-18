@@ -519,6 +519,14 @@ When your RAG stack can search again before asking a person, opt into follow-up 
 | `ask_first` | Default. Missing slots route to `ask` or `block`. |
 | `expand_before_ask` | Missing slots route to `retrieve_more` with bounded per-slot retrieval queries. |
 
+Choose how conservative the answer gate should be:
+
+| Safety policy | Behavior |
+| --- | --- |
+| `strict` | Default. High-risk slots marked in the profile must be explicitly supported by evidence before the route can answer. |
+| `balanced` | Accepts caller-provided slots once all profile requirements are filled. Useful after slot filling is locally reviewed. |
+| `exploratory` | Reserved for observation and experiments where the application wants the same API surface but will not enforce strict evidence support. |
+
 Roll out the gate with an explicit deployment mode:
 
 | Deployment mode | Applied action | Use when |
@@ -542,6 +550,7 @@ route = route_transferability_result(
     safe_context=result.memory,
     deployment_mode="shadow",
     retrieval_mode="expand_before_ask",
+    safety_policy="strict",
 )
 
 return {
@@ -550,6 +559,7 @@ return {
     "recommended_action": route.recommended_action,
     "deployment_mode": route.deployment_mode,
     "retrieval_mode": route.retrieval_mode,
+    "safety_policy": route.safety_policy,
     "enforcement": route.enforcement,
     "should_interrupt": route.should_interrupt,
     "next_step": route.next_step,
@@ -564,10 +574,13 @@ In `hard` mode, `safe_context` is only returned for `transferable` results. Clar
 
 With `retrieval_mode="expand_before_ask"`, a missing slot produces `recommended_action="retrieve_more"` and `next_step="run_followup_retrieval"` before user-facing clarification. Use a bounded policy such as one follow-up round and three queries per round, then run the gate again with any newly supported `evidence_slots`.
 
+With the default `safety_policy="strict"`, high-risk slots such as authority, customer communication status, fallback plan, escalation path, and contract impact must be present in `evidence_slots` before the final route can answer. Switch to `balanced` only when the upstream slot filler is reviewed enough for provided slots to be trusted.
+
 To measure whether that second retrieval pass helps:
 
 ```bash
 handovergap evaluate --retrieval-mode expand-before-ask
+handovergap evaluate --retrieval-mode expand-before-ask --safety-policy balanced
 handovergap report --dataset all --output reports/evaluation-latest.md
 ```
 
@@ -586,6 +599,7 @@ handovergap detect --scenario S001 --profile CS --deployment-mode shadow
 handovergap detect --scenario S001 --profile CS --deployment-mode soft
 handovergap detect --scenario S001 --profile CS --deployment-mode hard
 handovergap detect --scenario S001 --profile CS --retrieval-mode expand-before-ask
+handovergap detect --scenario S001 --profile CS --safety-policy balanced
 ```
 
 ### Custom Profiles

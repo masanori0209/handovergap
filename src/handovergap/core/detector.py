@@ -24,6 +24,9 @@ class HandoverGapDetector:
         required_slots = self.profiles.required_slots(scenario.profile)
         filled_slots = set(scenario.provided_slots) | set(scenario.evidence_slots)
         missing_slots = [slot for slot in required_slots if slot not in filled_slots]
+        high_risk_slots = [
+            slot for slot in required_slots if self.profiles.slot_policy(scenario.profile, slot).high_risk
+        ]
 
         gaps = [
             HandoverGap(
@@ -52,6 +55,10 @@ class HandoverGapDetector:
             profile=scenario.profile,
             memory=scenario.memory,
             task_context=scenario.task_context,
+            required_slots=required_slots,
+            provided_slots=scenario.provided_slots,
+            evidence_slots=scenario.evidence_slots,
+            high_risk_slots=high_risk_slots,
             gaps=gaps,
             questions=questions,
             transferability_score=transferability_score,

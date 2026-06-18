@@ -42,6 +42,10 @@ def test_detection_result_contract_fields_are_stable() -> None:
         "profile",
         "memory",
         "task_context",
+        "required_slots",
+        "provided_slots",
+        "evidence_slots",
+        "high_risk_slots",
         "gaps",
         "questions",
         "transferability_score",
@@ -69,6 +73,10 @@ def test_transferability_gate_contract_output_shape() -> None:
     assert payload["task_context"] == "Answer customer questions about the workaround."
     assert payload["transferability_status"] in {"transferable", "needs_clarification", "blocked"}
     assert isinstance(payload["transferability_score"], float)
+    assert isinstance(payload["required_slots"], list)
+    assert isinstance(payload["provided_slots"], list)
+    assert isinstance(payload["evidence_slots"], list)
+    assert isinstance(payload["high_risk_slots"], list)
     assert isinstance(payload["gaps"], list)
     assert isinstance(payload["questions"], list)
 
@@ -89,6 +97,7 @@ def test_product_routing_helper_is_public() -> None:
         "recommended_action",
         "deployment_mode",
         "retrieval_mode",
+        "safety_policy",
         "enforcement",
         "should_interrupt",
         "next_step",

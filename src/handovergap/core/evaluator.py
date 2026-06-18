@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from handovergap.core.baselines import BASELINES, BaselinePrediction
 from handovergap.core.detector import HandoverGapDetector
-from handovergap.routing import route_transferability_result
+from handovergap.routing import SafetyPolicy, route_transferability_result
 from handovergap.schemas import EvalMetrics, FollowupRetrievalMetrics
 from handovergap.slot_filling_modes import SlotFillMode, mode_for_slot_profile, source_for_slot_profile
 from handovergap.store import InMemoryStore
@@ -32,7 +32,12 @@ class HandoverGapEvaluator:
             self.evaluate_method("handovergap"),
         ]
 
-    def evaluate_followup_retrieval(self, *, max_retrieval_queries: int = 3) -> FollowupRetrievalMetrics:
+    def evaluate_followup_retrieval(
+        self,
+        *,
+        max_retrieval_queries: int = 3,
+        safety_policy: SafetyPolicy = "strict",
+    ) -> FollowupRetrievalMetrics:
         scenarios = self.store.list_scenarios()
         detector = HandoverGapDetector(store=self.store)
         retrieve_more_cases = 0
@@ -50,12 +55,13 @@ class HandoverGapEvaluator:
             initial_route = route_transferability_result(
                 initial_result,
                 retrieval_mode="expand_before_ask",
+                safety_policy=safety_policy,
                 max_retrieval_queries=max_retrieval_queries,
             )
-            initial_ask_first_route = route_transferability_result(initial_result)
+            initial_ask_first_route = route_transferability_result(initial_result, safety_policy=safety_policy)
 
             final_result = detector.detect_scenario(scenario)
-            final_route = route_transferability_result(final_result)
+            final_route = route_transferability_result(final_result, safety_policy=safety_policy)
 
             if initial_route.recommended_action == "retrieve_more":
                 retrieve_more_cases += 1
@@ -79,6 +85,7 @@ class HandoverGapEvaluator:
 
         return FollowupRetrievalMetrics(
             scenarios=len(scenarios),
+            safety_policy=safety_policy,
             retrieve_more_cases=retrieve_more_cases,
             retrieve_more_success_rate=_ratio(successful_retrievals, retrieve_more_cases),
             ask_reduction_rate=_ratio(ask_reduction_cases, initially_interrupted_cases),

@@ -16,6 +16,7 @@ def test_generate_evaluation_report_contains_metrics_and_integrity() -> None:
     assert "Optional LLM slot filling must be labeled" in report
     assert "Question Quality" in report
     assert "Follow-up Retrieval Metrics" in report
+    assert "Safety Policy" in report
     assert "Retrieve More Success" in report
     assert "Evaluation Integrity" in report
     assert "gold_gaps" in report

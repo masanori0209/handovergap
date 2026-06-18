@@ -39,8 +39,8 @@ def generate_evaluation_report(dataset: str = "all", dataset_file: str | None = 
         "",
         "## Follow-up Retrieval Metrics",
         "",
-        "| Dataset | Retrieve More Cases | Retrieve More Success | Ask Reduction | Unsafe Answer Rate | Extra Retrieval Cost | Final Route Accuracy |",
-        "|---|---:|---:|---:|---:|---:|---:|",
+        "| Dataset | Safety Policy | Retrieve More Cases | Retrieve More Success | Ask Reduction | Unsafe Answer Rate | Extra Retrieval Cost | Final Route Accuracy |",
+        "|---|---|---:|---:|---:|---:|---:|---:|",
     ]
     for dataset_name in datasets:
         store = load_user_dataset(dataset_file) if dataset_file else InMemoryStore.from_builtin_dataset(dataset_name)
@@ -67,7 +67,8 @@ def generate_evaluation_report(dataset: str = "all", dataset_file: str | None = 
         )
         followup = evaluator.evaluate_followup_retrieval()
         followup_rows.append(
-            f"| {dataset_name} | {followup.retrieve_more_cases} | {followup.retrieve_more_success_rate:.2f} | "
+            f"| {dataset_name} | {followup.safety_policy} | {followup.retrieve_more_cases} | "
+            f"{followup.retrieve_more_success_rate:.2f} | "
             f"{followup.ask_reduction_rate:.2f} | {followup.unsafe_answer_rate:.2f} | "
             f"{followup.extra_retrieval_cost:.2f} | {followup.final_route_accuracy:.2f} |"
         )
