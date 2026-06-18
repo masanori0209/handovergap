@@ -20,6 +20,8 @@ Use `route_transferability_result(...)` to separate the gate recommendation from
 | `soft` | Always `answer` | Same as shadow, plus a visible warning or review badge | User-facing trial after reviewer calibration |
 | `hard` | Apply `answer`, `ask`, or `block` | Enforced interruptions and their audit path | Only after local evaluation and review |
 
+When the system can search again, combine the deployment mode with `retrieval_mode="expand_before_ask"`. This changes missing-slot recommendations from immediate clarification to `retrieve_more`, with generated retrieval queries that target the missing slots.
+
 ```python
 from handovergap import TransferabilityGate, route_transferability_result
 
@@ -34,6 +36,7 @@ route = route_transferability_result(
     result,
     safe_context=retrieved_memory,
     deployment_mode="shadow",
+    retrieval_mode="expand_before_ask",
 )
 
 audit_log.write(
@@ -42,6 +45,8 @@ audit_log.write(
         "action": route.action,
         "recommended_action": route.recommended_action,
         "deployment_mode": route.deployment_mode,
+        "retrieval_mode": route.retrieval_mode,
+        "retrieval_queries": [query.model_dump() for query in route.retrieval_queries],
         "questions": route.questions,
         "reason": route.reason,
     }
@@ -49,6 +54,8 @@ audit_log.write(
 ```
 
 For `shadow` and `soft`, your existing RAG answer can continue while HandoverGap records what it would have asked or blocked. For `hard`, `should_interrupt=True` means the product should ask questions or withhold the answer before final delivery.
+
+Follow-up retrieval should be bounded: one or two rounds, a small query limit, and explicit evidence support before a missing slot is treated as filled. If the second gate pass still has gaps, route to `ask` or `block` instead of searching indefinitely.
 
 ## Data Requirements
 

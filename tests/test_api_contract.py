@@ -88,10 +88,13 @@ def test_product_routing_helper_is_public() -> None:
         "action",
         "recommended_action",
         "deployment_mode",
+        "retrieval_mode",
         "enforcement",
         "should_interrupt",
+        "next_step",
         "reason",
         "questions",
+        "retrieval_queries",
         "safe_context",
     }
 

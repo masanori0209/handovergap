@@ -1164,6 +1164,25 @@ return llm.answer(user_question, context=retrieved_memory.text)</code></pre>
               </tr>
             </tbody>
           </table>
+          <h3>Retrieval Modes</h3>
+          <table class="text-table">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Behavior</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>ask_first</code></td>
+                <td>Default. Missing slots route to <code>ask</code> or <code>block</code>.</td>
+              </tr>
+              <tr>
+                <td><code>expand_before_ask</code></td>
+                <td>Missing slots route to <code>retrieve_more</code> with bounded per-slot retrieval queries.</td>
+              </tr>
+            </tbody>
+          </table>
           <h3>Deployment Modes</h3>
           <table class="text-table">
             <thead>
@@ -1204,6 +1223,7 @@ route = route_transferability_result(
     result,
     safe_context=result.memory,
     deployment_mode="shadow",
+    retrieval_mode="expand_before_ask",
 )
 
 return {
@@ -1211,8 +1231,11 @@ return {
     "action": route.action,
     "recommended_action": route.recommended_action,
     "deployment_mode": route.deployment_mode,
+    "retrieval_mode": route.retrieval_mode,
     "enforcement": route.enforcement,
     "should_interrupt": route.should_interrupt,
+    "next_step": route.next_step,
+    "retrieval_queries": [query.model_dump() for query in route.retrieval_queries],
     "reason": route.reason,
     "questions": route.questions,
     "safe_context": route.safe_context,
@@ -1221,10 +1244,13 @@ return {
             In <code>hard</code> mode, <code>safe_context</code> is only returned for
             <code>transferable</code> results. In <code>shadow</code> and <code>soft</code> modes,
             the original context can continue while the recommended interruption is logged.
+            With <code>expand_before_ask</code>, missing slots produce <code>retrieve_more</code>
+            and <code>run_followup_retrieval</code> before user-facing clarification.
           </p>
           <pre><code>handovergap detect --scenario S001 --profile CS --deployment-mode shadow
 handovergap detect --scenario S001 --profile CS --deployment-mode soft
-handovergap detect --scenario S001 --profile CS --deployment-mode hard</code></pre>
+handovergap detect --scenario S001 --profile CS --deployment-mode hard
+handovergap detect --scenario S001 --profile CS --retrieval-mode expand-before-ask</code></pre>
         </section>
 
         <section>

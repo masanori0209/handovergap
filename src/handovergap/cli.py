@@ -25,7 +25,7 @@ from handovergap.retrieval import (
     retrieve_slot_evidence_hybrid_local,
     retrieve_slot_evidence_local,
 )
-from handovergap.routing import DeploymentMode, route_transferability_result
+from handovergap.routing import DeploymentMode, RetrievalMode, route_transferability_result
 from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS, validate_slot_fill_mode
 from handovergap.store import InMemoryStore
 from handovergap.stores import TiDBStore
@@ -100,15 +100,35 @@ def _validate_deployment_mode(value: str) -> DeploymentMode:
     return cast(DeploymentMode, value)
 
 
-def _print_route(result, deployment_mode: DeploymentMode) -> None:
-    route = route_transferability_result(result, safe_context=result.memory, deployment_mode=deployment_mode)
+def _validate_retrieval_mode(value: str) -> RetrievalMode:
+    normalized = value.replace("-", "_")
+    if normalized not in {"ask_first", "expand_before_ask"}:
+        raise typer.BadParameter("--retrieval-mode must be one of: ask-first, expand-before-ask.")
+    return cast(RetrievalMode, normalized)
+
+
+def _print_route(result, deployment_mode: DeploymentMode, retrieval_mode: RetrievalMode) -> None:
+    route = route_transferability_result(
+        result,
+        safe_context=result.memory,
+        deployment_mode=deployment_mode,
+        retrieval_mode=retrieval_mode,
+    )
     console.print()
     console.print("[bold]Product Route:[/bold]")
     console.print(f"Deployment Mode: {route.deployment_mode}")
+    console.print(f"Retrieval Mode: {route.retrieval_mode}")
     console.print(f"Recommended Action: {route.recommended_action}")
     console.print(f"Applied Action: {route.action}")
     console.print(f"Enforcement: {route.enforcement}")
     console.print(f"Should Interrupt: {route.should_interrupt}")
+    console.print(f"Next Step: {route.next_step}")
+    if route.retrieval_queries:
+        console.print()
+        console.print("[bold]Follow-up Retrieval Queries:[/bold]")
+        for index, query in enumerate(route.retrieval_queries, start=1):
+            console.print(f"{index}. [{query.severity}] {query.slot_name}")
+            console.print(f"   {query.query}")
 
 
 @app.command()
@@ -128,9 +148,15 @@ def detect(
         "--deployment-mode",
         help="Product rollout mode: shadow records decisions, soft warns without interrupting, hard enforces ask/block.",
     ),
+    retrieval_mode: str = typer.Option(
+        "ask-first",
+        "--retrieval-mode",
+        help="Retrieval planning mode: ask-first or expand-before-ask.",
+    ),
 ) -> None:
     """Detect profile-conditioned tacit context gaps for one scenario."""
     selected_deployment_mode = _validate_deployment_mode(deployment_mode)
+    selected_retrieval_mode = _validate_retrieval_mode(retrieval_mode)
     store = InMemoryStore.from_builtin_dataset()
     profiles = ProfileCatalog.from_yaml(profile_file) if profile_file else ProfileCatalog.builtins()
     if profile_file:
@@ -139,7 +165,7 @@ def detect(
     else:
         result = HandoverGapDetector(store=store, profiles=profiles).detect(scenario_id=scenario, profile=profile)
     _print_detection(result)
-    _print_route(result, selected_deployment_mode)
+    _print_route(result, selected_deployment_mode, selected_retrieval_mode)
 
 
 @profiles_app.command("validate")

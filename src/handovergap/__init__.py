@@ -5,6 +5,7 @@ __version__ = "1.0.0"
 from handovergap.core.detector import HandoverGapDetector
 from handovergap.core.evaluator import HandoverGapEvaluator
 from handovergap.core.gate import ContextReadinessGate, TransferabilityGate
+from handovergap.planning import FollowupRetrievalQuery, build_followup_retrieval_queries
 from handovergap.privacy import PrivacyFinding, scan_privacy
 from handovergap.profiles import (
     ProfileCatalog,
@@ -13,7 +14,7 @@ from handovergap.profiles import (
     SlotPolicy,
     validate_profile_file,
 )
-from handovergap.routing import DeploymentMode, ProductRoute, RouteAction, route_transferability_result
+from handovergap.routing import DeploymentMode, ProductRoute, RetrievalMode, RouteAction, route_transferability_result
 from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS, SlotFillMode
 from handovergap.slot_mapping import map_evidence_slots_by_keywords
 from handovergap.store import InMemoryStore
@@ -24,6 +25,7 @@ __all__ = [
     "ContextReadinessGate",
     "HandoverGapDetector",
     "HandoverGapEvaluator",
+    "FollowupRetrievalQuery",
     "InMemoryStore",
     "ProfileCatalog",
     "ProfileDefinition",
@@ -31,6 +33,7 @@ __all__ = [
     "ProductRoute",
     "PrivacyFinding",
     "DeploymentMode",
+    "RetrievalMode",
     "RouteAction",
     "SlotPolicy",
     "SlotFillMode",
@@ -41,6 +44,7 @@ __all__ = [
     "TransferabilityGate",
     "__version__",
     "map_evidence_slots_by_keywords",
+    "build_followup_retrieval_queries",
     "export_annotation_template",
     "import_reviewed_labels",
     "load_user_dataset",

@@ -24,10 +24,13 @@ def test_route_transferable_result_allows_answer_with_safe_context() -> None:
     assert route.action == "answer"
     assert route.recommended_action == "answer"
     assert route.deployment_mode == "hard"
+    assert route.retrieval_mode == "ask_first"
     assert route.enforcement == "enforce"
     assert route.should_interrupt is False
+    assert route.next_step == "answer"
     assert route.reason == []
     assert route.questions == []
+    assert route.retrieval_queries == []
     assert route.safe_context == result.memory
 
 
@@ -45,10 +48,13 @@ def test_route_needs_clarification_result_asks_questions_without_safe_context() 
     assert route.action == "ask"
     assert route.recommended_action == "ask"
     assert route.deployment_mode == "hard"
+    assert route.retrieval_mode == "ask_first"
     assert route.enforcement == "enforce"
     assert route.should_interrupt is True
+    assert route.next_step == "ask_user"
     assert route.reason
     assert route.questions
+    assert route.retrieval_queries
     assert route.safe_context is None
 
 
@@ -66,10 +72,38 @@ def test_route_blocked_result_blocks_without_exposing_safe_context() -> None:
     assert route.action == "block"
     assert route.recommended_action == "block"
     assert route.deployment_mode == "hard"
+    assert route.retrieval_mode == "ask_first"
     assert route.enforcement == "enforce"
     assert route.should_interrupt is True
+    assert route.next_step == "block"
     assert any("説明済み" in reason for reason in route.reason)
     assert route.questions
+    assert route.retrieval_queries
+    assert route.safe_context is None
+
+
+def test_route_expand_before_ask_recommends_followup_retrieval() -> None:
+    result = TransferabilityGate().check(
+        memory="Use CSV for this release; API support is deferred.",
+        profile="CS",
+        task_context="Answer customer questions about the workaround.",
+        provided_slots=["scope"],
+    )
+
+    route = route_transferability_result(
+        result,
+        safe_context=result.memory,
+        retrieval_mode="expand_before_ask",
+        max_retrieval_queries=2,
+    )
+
+    assert route.status == "blocked"
+    assert route.recommended_action == "retrieve_more"
+    assert route.action == "retrieve_more"
+    assert route.retrieval_mode == "expand_before_ask"
+    assert route.next_step == "run_followup_retrieval"
+    assert route.should_interrupt is True
+    assert len(route.retrieval_queries) == 2
     assert route.safe_context is None
 
 
@@ -87,8 +121,10 @@ def test_route_shadow_mode_observes_without_interrupting() -> None:
     assert route.recommended_action == "block"
     assert route.action == "answer"
     assert route.deployment_mode == "shadow"
+    assert route.retrieval_mode == "ask_first"
     assert route.enforcement == "observe"
     assert route.should_interrupt is False
+    assert route.next_step == "block"
     assert route.reason
     assert route.questions
     assert route.safe_context == result.memory
@@ -108,8 +144,34 @@ def test_route_soft_mode_warns_without_interrupting() -> None:
     assert route.recommended_action == "ask"
     assert route.action == "answer"
     assert route.deployment_mode == "soft"
+    assert route.retrieval_mode == "ask_first"
     assert route.enforcement == "warn"
     assert route.should_interrupt is False
+    assert route.next_step == "ask_user"
+    assert route.safe_context == result.memory
+
+
+def test_route_shadow_expand_before_ask_observes_retrieval_plan_without_interrupting() -> None:
+    result = TransferabilityGate().check(
+        memory="Use CSV for this release; API support is deferred.",
+        profile="CS",
+        task_context="Answer customer questions about the workaround.",
+        provided_slots=["scope"],
+    )
+
+    route = route_transferability_result(
+        result,
+        safe_context=result.memory,
+        deployment_mode="shadow",
+        retrieval_mode="expand_before_ask",
+    )
+
+    assert route.recommended_action == "retrieve_more"
+    assert route.action == "answer"
+    assert route.enforcement == "observe"
+    assert route.should_interrupt is False
+    assert route.next_step == "run_followup_retrieval"
+    assert route.retrieval_queries
     assert route.safe_context == result.memory
 
 
@@ -143,3 +205,19 @@ def test_route_invalid_deployment_mode_reports_expected_values() -> None:
     message = str(exc_info.value)
     assert "Invalid deployment_mode 'audit-only'" in message
     assert "shadow, soft, hard" in message
+
+
+def test_route_invalid_retrieval_mode_reports_expected_values() -> None:
+    result = TransferabilityGate().check(
+        memory="Use CSV for this release; API support is deferred.",
+        profile="CS",
+        task_context="Answer customer questions about the workaround.",
+        provided_slots=["scope"],
+    )
+
+    with pytest.raises(ValueError) as exc_info:
+        route_transferability_result(result, retrieval_mode="search_forever")  # type: ignore[arg-type]
+
+    message = str(exc_info.value)
+    assert "Invalid retrieval_mode 'search_forever'" in message
+    assert "ask_first, expand_before_ask" in message

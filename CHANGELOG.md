@@ -11,6 +11,9 @@
 - Deployment modes for product routing: `shadow`, `soft`, and `hard`.
 - Product route fields for rollout control: `recommended_action`, `deployment_mode`, `enforcement`, and `should_interrupt`.
 - `handovergap detect --deployment-mode ...` for checking rollout behavior from the CLI.
+- Follow-up retrieval planning for missing slots via `retrieval_mode="expand_before_ask"`.
+- `FollowupRetrievalQuery` and `build_followup_retrieval_queries(...)` for bounded RAG expansion before asking a user.
+- `handovergap detect --retrieval-mode expand-before-ask` for inspecting generated follow-up retrieval queries.
 
 ### Changed
 
@@ -34,7 +37,7 @@
 
 ### Notes
 
-- `hard` is still the default routing mode, so existing answer/ask/block behavior remains unchanged unless callers opt into `shadow` or `soft`.
+- `hard` and `ask_first` remain the default routing modes, so existing answer/ask/block behavior remains unchanged unless callers opt into `shadow`, `soft`, or `expand_before_ask`.
 
 ## 1.0.0 - 2026-06-18
 

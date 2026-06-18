@@ -512,6 +512,13 @@ Use `route_transferability_result(...)` when your application needs a structured
 | `needs_clarification` | `ask` | Ask the returned questions before finalizing the answer. |
 | `blocked` | `block` | Withhold the answer/action and show the missing context questions to the responsible user. |
 
+When your RAG stack can search again before asking a person, opt into follow-up retrieval planning:
+
+| Retrieval mode | Behavior |
+| --- | --- |
+| `ask_first` | Default. Missing slots route to `ask` or `block`. |
+| `expand_before_ask` | Missing slots route to `retrieve_more` with bounded per-slot retrieval queries. |
+
 Roll out the gate with an explicit deployment mode:
 
 | Deployment mode | Applied action | Use when |
@@ -534,6 +541,7 @@ route = route_transferability_result(
     result,
     safe_context=result.memory,
     deployment_mode="shadow",
+    retrieval_mode="expand_before_ask",
 )
 
 return {
@@ -541,8 +549,11 @@ return {
     "action": route.action,
     "recommended_action": route.recommended_action,
     "deployment_mode": route.deployment_mode,
+    "retrieval_mode": route.retrieval_mode,
     "enforcement": route.enforcement,
     "should_interrupt": route.should_interrupt,
+    "next_step": route.next_step,
+    "retrieval_queries": [query.model_dump() for query in route.retrieval_queries],
     "reason": route.reason,
     "questions": route.questions,
     "safe_context": route.safe_context,
@@ -551,12 +562,15 @@ return {
 
 In `hard` mode, `safe_context` is only returned for `transferable` results. Clarification and blocked routes omit it so applications do not accidentally expose context that is not ready to use. In `shadow` and `soft` modes, the original context can still flow through while the recommended interruption is logged.
 
+With `retrieval_mode="expand_before_ask"`, a missing slot produces `recommended_action="retrieve_more"` and `next_step="run_followup_retrieval"` before user-facing clarification. Use a bounded policy such as one follow-up round and three queries per round, then run the gate again with any newly supported `evidence_slots`.
+
 The CLI exposes the same rollout choice:
 
 ```bash
 handovergap detect --scenario S001 --profile CS --deployment-mode shadow
 handovergap detect --scenario S001 --profile CS --deployment-mode soft
 handovergap detect --scenario S001 --profile CS --deployment-mode hard
+handovergap detect --scenario S001 --profile CS --retrieval-mode expand-before-ask
 ```
 
 ### Custom Profiles

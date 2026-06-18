@@ -9,7 +9,8 @@ The core integration contract is:
 3. Decide which required slots are supported by evidence as `evidence_slots`.
 4. Run `TransferabilityGate.check(...)`.
 5. Convert the result with `route_transferability_result(...)`.
-6. Only call the final generator when `route.action == "answer"`.
+6. If `route.action == "retrieve_more"`, run bounded follow-up retrieval and check again.
+7. Only call the final generator when `route.action == "answer"`.
 
 The core runtime does not require OpenAI, TiDB, LangChain, or LlamaIndex.
 
@@ -43,7 +44,26 @@ result = TransferabilityGate().check(
     provided_slots=memory.slots,
     evidence_slots=evidence_slots,
 )
-route = route_transferability_result(result, safe_context=memory.text)
+route = route_transferability_result(
+    result,
+    safe_context=memory.text,
+    retrieval_mode="expand_before_ask",
+)
+
+if route.action == "retrieve_more":
+    extra_evidence = []
+    for query in route.retrieval_queries:
+        extra_evidence.extend(retriever.search_evidence(query.query, top_k=3))
+    extra_slots = map_evidence_slots_by_keywords(extra_evidence, slot_keywords)
+    result = TransferabilityGate().check(
+        memory=memory.text,
+        profile="CS",
+        task_context="Answer a customer question without overpromising.",
+        evidence=[*evidence, *extra_evidence],
+        provided_slots=memory.slots,
+        evidence_slots=[*evidence_slots, *extra_slots],
+    )
+    route = route_transferability_result(result, safe_context=memory.text)
 
 if route.action != "answer":
     return {
@@ -55,6 +75,8 @@ if route.action != "answer":
 
 return llm.answer(user_question, context=route.safe_context)
 ```
+
+Keep follow-up retrieval bounded. A practical default is one follow-up round, at most three generated queries, and explicit evidence support before adding `evidence_slots`.
 
 ## LangChain
 

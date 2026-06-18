@@ -18,11 +18,11 @@ Starting with `1.0.0`, the following surfaces are stable integration contracts.
 
 | Surface | Stable contract |
 | --- | --- |
-| Python API | `TransferabilityGate.check(...)`, `TransferabilityGate.from_profile_file(...)`, `route_transferability_result(...)`, deployment modes, `map_evidence_slots_by_keywords(...)`, public result fields, and public enum/string status values. |
+| Python API | `TransferabilityGate.check(...)`, `TransferabilityGate.from_profile_file(...)`, `route_transferability_result(...)`, deployment modes, retrieval modes, follow-up retrieval query planning, `map_evidence_slots_by_keywords(...)`, public result fields, and public enum/string status values. |
 | CLI | Commands used by the MVP loop: `demo`, `detect`, `evaluate`, `report`, `profiles validate`, `datasets export-template`, `datasets import-labels`, `privacy-check`, `schema`, `audit-sql`, `audit-example`, `audit-benchmark`, `retrieve-evidence`, `workload-benchmark`, and `serve`. |
 | Profile YAML | `profiles`, profile names, `required_slots`, `slot_name`, `gap_type`, `description`, `question`, `severity`, and `high_risk`. |
-| Result models | `transferability_status`, `transferability_score`, `gaps`, `questions`, `scenario_id`, `profile`, `memory`, `task_context`, gap fields, question fields, and product route fields such as `action`, `recommended_action`, `deployment_mode`, `enforcement`, and `should_interrupt`. |
-| Routing semantics | `transferable -> answer`, `needs_clarification -> ask`, and `blocked -> block`. |
+| Result models | `transferability_status`, `transferability_score`, `gaps`, `questions`, `scenario_id`, `profile`, `memory`, `task_context`, gap fields, question fields, follow-up retrieval query fields, and product route fields such as `action`, `recommended_action`, `deployment_mode`, `retrieval_mode`, `enforcement`, `should_interrupt`, and `next_step`. |
+| Routing semantics | Default `ask_first`: `transferable -> answer`, `needs_clarification -> ask`, and `blocked -> block`. Optional `expand_before_ask`: missing-slot results can route to `retrieve_more` before user clarification. |
 | Evaluation inputs | Bundled dataset names, `--dataset-file` local reviewed dataset shape, and slot-fill mode labels. |
 | TiDB audit store | Packaged table purposes, write methods for audit rows, and audit SQL expectations for tracing slot attempts, gaps, questions, and transfer assessments. |
 

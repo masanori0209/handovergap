@@ -90,6 +90,13 @@ HandoverGapは、判定結果と実際のプロダクト挙動を分けて扱え
 | `soft` | 常に `answer`。警告やレビュー表示に使う | ユーザーにリスクを見せつつ、自動停止はしない |
 | `hard` | `answer` / `ask` / `block` を実際に適用する | ローカル評価とレビュー後に、高リスク回答を止める |
 
+RAGが追加検索できる場合は、ユーザーに聞く前に不足slotを検索計画へ変換できます。
+
+| retrieval mode | 挙動 |
+| --- | --- |
+| `ask_first` | デフォルト。不足slotを `ask` または `block` に変換する |
+| `expand_before_ask` | 不足slotを `retrieve_more` と追加検索queryに変換する |
+
 ```python
 from handovergap import TransferabilityGate, route_transferability_result
 
@@ -104,10 +111,13 @@ route = route_transferability_result(
     result,
     safe_context=result.memory,
     deployment_mode="shadow",
+    retrieval_mode="expand_before_ask",
 )
 
 print(route.action)              # answer
-print(route.recommended_action)  # block / ask / answer
+print(route.recommended_action)  # retrieve_more / block / ask / answer
+print(route.next_step)
+print(route.retrieval_queries)
 print(route.questions)
 ```
 
@@ -117,6 +127,7 @@ CLIでも同じ挙動を確認できます。
 handovergap detect --scenario S001 --profile CS --deployment-mode shadow
 handovergap detect --scenario S001 --profile CS --deployment-mode soft
 handovergap detect --scenario S001 --profile CS --deployment-mode hard
+handovergap detect --scenario S001 --profile CS --retrieval-mode expand-before-ask
 ```
 
 ## デモ
