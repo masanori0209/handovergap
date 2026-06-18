@@ -17,6 +17,8 @@
 - Follow-up retrieval effectiveness metrics in `evaluate --retrieval-mode expand-before-ask` and generated reports.
 - Configurable routing safety policies: default `strict`, plus `balanced` and `exploratory`.
 - `handovergap detect/evaluate --safety-policy ...` for comparing answer-permission tradeoffs.
+- Slot-level `retrieval_hints` for profile YAML and built-in slots.
+- `preferred_source_types` and `search_terms` fields on follow-up retrieval queries for metadata filtering and query boosting.
 - Packaged LLM-as-a-judge rubric plus `handovergap judge-rubric` for optional evaluator calibration.
 
 ### Changed

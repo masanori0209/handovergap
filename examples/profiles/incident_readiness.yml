@@ -7,14 +7,41 @@ profiles:
         question: Which users, systems, and time window are impacted?
         severity: HIGH
         high_risk: true
+        retrieval_hints:
+          preferred_source_types:
+            - incident_note
+            - status_update
+            - monitoring_dashboard
+          search_terms:
+            - blast radius
+            - impacted users
+            - affected systems
       - slot_name: rollback_owner
         gap_type: rollback_owner_gap
         description: The person or team authorized to trigger rollback is not explicit.
         question: Who is authorized to trigger rollback?
         severity: HIGH
         high_risk: true
+        retrieval_hints:
+          preferred_source_types:
+            - runbook
+            - oncall_note
+            - incident_note
+          search_terms:
+            - rollback owner
+            - authorized rollback
+            - on-call
       - slot_name: customer_message
         gap_type: customer_message_gap
         description: Customer-safe incident wording is not available.
         question: What customer-facing message should be used?
         severity: MEDIUM
+        retrieval_hints:
+          preferred_source_types:
+            - customer_update
+            - status_page
+            - support_macro
+          search_terms:
+            - customer-facing message
+            - approved wording
+            - status page

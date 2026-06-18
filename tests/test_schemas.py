@@ -18,6 +18,10 @@ def test_scenario_schema_validates_representative_data() -> None:
                     "slot_name": "communication_status",
                     "description": "説明済みか不明",
                     "severity": "HIGH",
+                    "retrieval_hints": {
+                        "preferred_source_types": ["support_note"],
+                        "search_terms": ["説明済み"],
+                    },
                 }
             ],
             "gold_questions": [{"slot_name": "communication_status", "question": "説明済みですか？"}],
@@ -27,6 +31,7 @@ def test_scenario_schema_validates_representative_data() -> None:
 
     assert scenario.profile == "CS"
     assert scenario.gold_gaps[0].slot_name == "communication_status"
+    assert scenario.gold_gaps[0].retrieval_hints.preferred_source_types == ["support_note"]
 
 
 def test_scenario_schema_uses_profile_and_task_context() -> None:

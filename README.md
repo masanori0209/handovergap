@@ -629,6 +629,29 @@ handovergap detect \
 
 `profiles validate` checks required keys, duplicate slots, severity values, and missing questions before you use the profile in a gate.
 
+Profiles can also guide follow-up retrieval. Add `retrieval_hints` when a missing slot usually lives in specific source types:
+
+```yaml
+profiles:
+  CS:
+    required_slots:
+      - slot_name: fallback_plan
+        question: What fallback should be used if the workaround fails?
+        severity: HIGH
+        high_risk: true
+        retrieval_hints:
+          preferred_source_types:
+            - runbook
+            - incident_note
+            - support_playbook
+          search_terms:
+            - fallback
+            - workaround
+            - rollback
+```
+
+With `retrieval_mode="expand_before_ask"`, each `route.retrieval_queries` item includes `preferred_source_types` and `search_terms`. Use them as metadata filters or query boosts in your existing retriever.
+
 ### Actionable Errors
 
 Common configuration mistakes are reported without echoing raw evidence payloads:

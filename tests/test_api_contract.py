@@ -7,6 +7,7 @@ from handovergap import (
     ContextReadinessGate,
     ProductRoute,
     ProfileValidationResult,
+    RetrievalHints,
     TransferabilityGate,
     map_evidence_slots_by_keywords,
     route_transferability_result,
@@ -79,6 +80,7 @@ def test_transferability_gate_contract_output_shape() -> None:
     assert isinstance(payload["high_risk_slots"], list)
     assert isinstance(payload["gaps"], list)
     assert isinstance(payload["questions"], list)
+    assert "retrieval_hints" in payload["gaps"][0]
 
 
 def test_context_readiness_gate_alias_is_stable() -> None:
@@ -87,6 +89,13 @@ def test_context_readiness_gate_alias_is_stable() -> None:
 
 def test_evidence_slot_mapping_helper_is_public() -> None:
     assert callable(map_evidence_slots_by_keywords)
+
+
+def test_retrieval_hints_model_is_public() -> None:
+    hints = RetrievalHints(preferred_source_types=["runbook"], search_terms=["fallback"])
+
+    assert hints.preferred_source_types == ["runbook"]
+    assert hints.search_terms == ["fallback"]
 
 
 def test_product_routing_helper_is_public() -> None:

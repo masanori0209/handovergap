@@ -590,6 +590,15 @@
         question: Which users, systems, and time window are impacted?
         severity: HIGH
         high_risk: true
+        retrieval_hints:
+          preferred_source_types:
+            - incident_note
+            - status_update
+            - monitoring_dashboard
+          search_terms:
+            - blast radius
+            - impacted users
+            - affected systems
       - slot_name: rollback_owner
         gap_type: rollback_owner_gap
         description: The person or team authorized to trigger rollback is not explicit.
@@ -612,7 +621,10 @@ handovergap detect \
   --profile IncidentCommander \
   --profile-file examples/profiles/incident_readiness.yml</code></pre>
               <p class="small" style="margin-top: 14px">
-                Validation checks required keys, duplicate slots, severity values, and missing questions.
+                Validation checks required keys, duplicate slots, severity values, missing questions,
+                and retrieval hint shapes. Follow-up retrieval queries include
+                <code>preferred_source_types</code> and <code>search_terms</code> for metadata filters
+                or query boosts.
                 The same profile can be used in Python with <code>TransferabilityGate.from_profile_file(...)</code>.
               </p>
             </article>
@@ -1315,6 +1327,8 @@ return {
             the original context can continue while the recommended interruption is logged.
             With <code>expand_before_ask</code>, missing slots produce <code>retrieve_more</code>
             and <code>run_followup_retrieval</code> before user-facing clarification.
+            Retrieval queries include slot-level source preferences and search terms when the profile
+            defines <code>retrieval_hints</code>.
             With default <code>strict</code> safety, high-risk slots such as authority,
             fallback plan, escalation path, and contract impact must be evidence-backed before answering.
           </p>

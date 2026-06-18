@@ -23,7 +23,7 @@ from handovergap.routing import (
     SafetyPolicy,
     route_transferability_result,
 )
-from handovergap.schemas import FollowupRetrievalMetrics
+from handovergap.schemas import FollowupRetrievalMetrics, RetrievalHints
 from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS, SlotFillMode
 from handovergap.slot_mapping import map_evidence_slots_by_keywords
 from handovergap.store import InMemoryStore
@@ -44,6 +44,7 @@ __all__ = [
     "PrivacyFinding",
     "DeploymentMode",
     "RetrievalMode",
+    "RetrievalHints",
     "RouteAction",
     "SafetyPolicy",
     "SlotPolicy",

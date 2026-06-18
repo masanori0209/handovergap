@@ -6,7 +6,14 @@ from typing import Literal
 from pydantic import BaseModel, Field
 from yaml import YAMLError
 
-from handovergap.slot_rules import GAP_TYPE_BY_SLOT, HIGH_RISK_SLOTS, PROFILE_REQUIRED_SLOTS, QUESTION_BY_SLOT
+from handovergap.schemas import RetrievalHints
+from handovergap.slot_rules import (
+    GAP_TYPE_BY_SLOT,
+    HIGH_RISK_SLOTS,
+    PROFILE_REQUIRED_SLOTS,
+    QUESTION_BY_SLOT,
+    RETRIEVAL_HINTS_BY_SLOT,
+)
 
 VALID_SEVERITIES = {"LOW", "MEDIUM", "HIGH"}
 
@@ -18,6 +25,7 @@ class SlotPolicy(BaseModel):
     gap_type: str | None = None
     severity: Literal["LOW", "MEDIUM", "HIGH"] = "MEDIUM"
     high_risk: bool = False
+    retrieval_hints: RetrievalHints = Field(default_factory=RetrievalHints)
 
 
 class ProfileDefinition(BaseModel):
@@ -54,6 +62,7 @@ class ProfileCatalog:
                             gap_type=GAP_TYPE_BY_SLOT.get(slot, f"{slot}_gap"),
                             severity="HIGH" if slot in HIGH_RISK_SLOTS else "MEDIUM",
                             high_risk=slot in HIGH_RISK_SLOTS,
+                            retrieval_hints=RetrievalHints.model_validate(RETRIEVAL_HINTS_BY_SLOT.get(slot, {})),
                         )
                         for slot in slots
                     ],
@@ -217,9 +226,28 @@ def _validate_profile_payload(path: Path, profile_name: str, payload: object, er
         if not isinstance(high_risk, bool):
             errors.append(f"{slot_context}: high_risk must be true or false")
 
+        retrieval_hints = slot_payload.get("retrieval_hints", {})
+        _validate_retrieval_hints(slot_context, retrieval_hints, errors)
+
     duplicates = sorted({slot_name for slot_name in slot_names if slot_names.count(slot_name) > 1})
     for slot_name in duplicates:
         errors.append(f"{context}: duplicate slot_name '{slot_name}'")
+
+
+def _validate_retrieval_hints(slot_context: str, payload: object, errors: list[str]) -> None:
+    if payload in ({}, None):
+        return
+    if not isinstance(payload, dict):
+        errors.append(f"{slot_context}: retrieval_hints must be an object")
+        return
+    for key in ["preferred_source_types", "search_terms"]:
+        value = payload.get(key, [])
+        if not isinstance(value, list):
+            errors.append(f"{slot_context}: retrieval_hints.{key} must be a list")
+            continue
+        for index, item in enumerate(value):
+            if not isinstance(item, str) or not item.strip():
+                errors.append(f"{slot_context}: retrieval_hints.{key}[{index}] must be a non-empty string")
 
 
 def _default_description(slot: str) -> str:

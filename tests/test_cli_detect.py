@@ -56,6 +56,8 @@ def test_detect_cli_supports_followup_retrieval_mode() -> None:
     assert "Applied Action: retrieve_more" in result.output
     assert "Next Step: run_followup_retrieval" in result.output
     assert "Follow-up Retrieval Queries:" in result.output
+    assert "sources:" in result.output
+    assert "terms:" in result.output
 
 
 def test_detect_cli_supports_safety_policy() -> None:

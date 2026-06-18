@@ -34,6 +34,7 @@ class HandoverGapDetector:
                 slot_name=slot,
                 description=self.profiles.slot_policy(scenario.profile, slot).description or f"{slot} が不足しています",
                 severity=self.profiles.slot_policy(scenario.profile, slot).severity,
+                retrieval_hints=self.profiles.slot_policy(scenario.profile, slot).retrieval_hints,
             )
             for slot in missing_slots
         ]

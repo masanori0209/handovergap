@@ -158,6 +158,29 @@ handovergap detect --scenario S001 --profile CS --deployment-mode hard
 handovergap detect --scenario S001 --profile CS --retrieval-mode expand-before-ask
 ```
 
+追加検索で探しに行く場所は、profile YAML の `retrieval_hints` でslotごとに指定できます。
+
+```yaml
+profiles:
+  CS:
+    required_slots:
+      - slot_name: fallback_plan
+        question: ワークアラウンドが失敗した場合の代替手段は何ですか？
+        severity: HIGH
+        high_risk: true
+        retrieval_hints:
+          preferred_source_types:
+            - runbook
+            - incident_note
+            - support_playbook
+          search_terms:
+            - fallback
+            - workaround
+            - rollback
+```
+
+`retrieval_mode="expand_before_ask"` では、`route.retrieval_queries` に `preferred_source_types` と `search_terms` が入り、既存retrieverのmetadata filterや検索語ブーストに使えます。
+
 ## デモ
 
 ```bash

@@ -71,3 +71,74 @@ QUESTION_BY_SLOT = {
     "timeline_confidence": "提示できる時期の確度はどの程度ですか？",
     "negotiation_status": "交渉状況と未合意点は何ですか？",
 }
+
+RETRIEVAL_HINTS_BY_SLOT = {
+    "scope": {
+        "preferred_source_types": ["decision_note", "requirements_doc", "project_brief"],
+        "search_terms": ["scope", "applies to", "out of scope", "対象範囲", "適用範囲"],
+    },
+    "communication_status": {
+        "preferred_source_types": ["customer_update", "support_note", "announcement", "crm_note"],
+        "search_terms": ["notified", "sent", "customer update", "告知済み", "説明済み"],
+    },
+    "authority": {
+        "preferred_source_types": ["policy", "approval_note", "support_playbook", "decision_log"],
+        "search_terms": ["approved", "can answer", "must not promise", "権限", "承認"],
+    },
+    "fallback_plan": {
+        "preferred_source_types": ["runbook", "incident_note", "support_playbook", "escalation_doc"],
+        "search_terms": ["fallback", "workaround", "rollback", "manual recovery", "代替手段"],
+    },
+    "escalation_path": {
+        "preferred_source_types": ["runbook", "escalation_doc", "incident_note", "oncall_note"],
+        "search_terms": ["escalate", "owner", "support lead", "on-call", "エスカレーション"],
+    },
+    "customer_facing_wording": {
+        "preferred_source_types": ["customer_update", "faq", "support_macro", "approved_wording"],
+        "search_terms": ["approved wording", "customer-facing", "FAQ", "外部向け", "文面"],
+    },
+    "rationale": {
+        "preferred_source_types": ["decision_log", "design_doc", "architecture_note"],
+        "search_terms": ["because", "rationale", "tradeoff", "decision", "理由"],
+    },
+    "technical_constraint": {
+        "preferred_source_types": ["design_doc", "architecture_note", "incident_note", "runbook"],
+        "search_terms": ["constraint", "limitation", "dependency", "前提条件", "制約"],
+    },
+    "implementation_scope": {
+        "preferred_source_types": ["ticket", "design_doc", "release_plan", "pull_request"],
+        "search_terms": ["implementation scope", "included", "excluded", "実装対象", "対象外"],
+    },
+    "trigger_for_reconsideration": {
+        "preferred_source_types": ["decision_log", "runbook", "monitoring_note", "experiment_plan"],
+        "search_terms": ["reconsider", "trigger", "threshold", "再検討", "条件"],
+    },
+    "related_issue": {
+        "preferred_source_types": ["ticket", "issue", "pull_request", "incident_note"],
+        "search_terms": ["issue", "ticket", "PR", "tracking", "チケット"],
+    },
+    "failure_modes": {
+        "preferred_source_types": ["runbook", "incident_note", "test_plan", "postmortem"],
+        "search_terms": ["failure mode", "risk", "monitoring", "失敗パターン", "検知"],
+    },
+    "contract_impact": {
+        "preferred_source_types": ["crm_note", "deal_review", "legal_review", "contract_doc"],
+        "search_terms": ["contract impact", "renewal", "exception terms", "legal approval", "契約影響"],
+    },
+    "promise_boundary": {
+        "preferred_source_types": ["deal_review", "legal_review", "customer_update", "crm_note"],
+        "search_terms": ["promise", "commitment", "must not promise", "約束", "合意範囲"],
+    },
+    "customer_expectation": {
+        "preferred_source_types": ["crm_note", "customer_update", "meeting_note", "support_note"],
+        "search_terms": ["expectation", "aligned", "customer understands", "期待値", "調整済み"],
+    },
+    "timeline_confidence": {
+        "preferred_source_types": ["roadmap", "release_plan", "deal_review", "status_update"],
+        "search_terms": ["timeline", "ETA", "confidence", "時期", "確度"],
+    },
+    "negotiation_status": {
+        "preferred_source_types": ["crm_note", "deal_review", "meeting_note", "renewal_note"],
+        "search_terms": ["negotiation", "open point", "agreed", "交渉状況", "未合意"],
+    },
+}

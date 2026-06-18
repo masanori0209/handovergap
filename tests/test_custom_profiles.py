@@ -14,6 +14,12 @@ def test_profile_catalog_loads_yaml_profile() -> None:
         "customer_message",
     ]
     assert catalog.slot_policy("IncidentCommander", "blast_radius").high_risk is True
+    assert catalog.slot_policy("IncidentCommander", "blast_radius").retrieval_hints.preferred_source_types == [
+        "incident_note",
+        "status_update",
+        "monitoring_dashboard",
+    ]
+    assert "blast radius" in catalog.slot_policy("IncidentCommander", "blast_radius").retrieval_hints.search_terms
 
 
 def test_transferability_gate_uses_custom_yaml_profile() -> None:
@@ -78,6 +84,10 @@ profiles:
       - slot_name: blast_radius
         question: Who owns the blast radius check?
         high_risk: maybe
+        retrieval_hints:
+          preferred_source_types: incident_note
+          search_terms:
+            - ""
   EmptyProfile:
     required_slots: []
 """.strip()
@@ -92,6 +102,8 @@ profiles:
     assert "slot 'blast_radius'" in normalized_output
     assert "missing required key 'question'" in normalized_output
     assert "severity must be one of LOW, MEDIUM, HIGH" in normalized_output
+    assert "retrieval_hints.preferred_source_types must be a list" in normalized_output
+    assert "retrieval_hints.search_terms[0] must be a non-empty string" in normalized_output
     assert "duplicate slot_name 'blast_radius'" in normalized_output
     assert "EmptyProfile" in normalized_output
     assert "required_slots must be a non-empty list" in normalized_output

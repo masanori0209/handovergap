@@ -18,11 +18,17 @@ class EvidenceEvent(BaseModel):
     metadata: dict[str, object] = Field(default_factory=dict)
 
 
+class RetrievalHints(BaseModel):
+    preferred_source_types: list[str] = Field(default_factory=list)
+    search_terms: list[str] = Field(default_factory=list)
+
+
 class HandoverGap(BaseModel):
     gap_type: str
     slot_name: str
     description: str
     severity: Literal["LOW", "MEDIUM", "HIGH"] = "MEDIUM"
+    retrieval_hints: RetrievalHints = Field(default_factory=RetrievalHints)
 
 
 class GoldQuestion(BaseModel):

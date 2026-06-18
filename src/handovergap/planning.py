@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from handovergap.schemas import DetectionResult
 
@@ -11,6 +11,8 @@ class FollowupRetrievalQuery(BaseModel):
     question: str
     severity: str
     reason: str
+    preferred_source_types: list[str] = Field(default_factory=list)
+    search_terms: list[str] = Field(default_factory=list)
 
 
 def build_followup_retrieval_queries(
@@ -29,10 +31,14 @@ def build_followup_retrieval_queries(
             continue
         seen_slots.add(gap.slot_name)
         question = question_by_slot.get(gap.slot_name, f"What evidence confirms {gap.slot_name}?")
+        preferred_source_types = gap.retrieval_hints.preferred_source_types
+        search_terms = gap.retrieval_hints.search_terms
         query = (
             f"profile={result.profile}; task={result.task_context}; "
             f"missing_slot={gap.slot_name}; evidence_needed={gap.description}; "
-            f"clarification_question={question}"
+            f"clarification_question={question}; "
+            f"preferred_source_types={','.join(preferred_source_types) or '-'}; "
+            f"search_terms={','.join(search_terms) or '-'}"
         )
         queries.append(
             FollowupRetrievalQuery(
@@ -41,6 +47,8 @@ def build_followup_retrieval_queries(
                 question=question,
                 severity=gap.severity,
                 reason=gap.description,
+                preferred_source_types=preferred_source_types,
+                search_terms=search_terms,
             )
         )
         if len(queries) >= max_queries:

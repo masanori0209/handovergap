@@ -145,6 +145,10 @@ def _print_route(
         for index, query in enumerate(route.retrieval_queries, start=1):
             console.print(f"{index}. [{query.severity}] {query.slot_name}")
             console.print(f"   {query.query}")
+            if query.preferred_source_types:
+                console.print(f"   sources: {', '.join(query.preferred_source_types)}")
+            if query.search_terms:
+                console.print(f"   terms: {', '.join(query.search_terms)}")
 
 
 @app.command()

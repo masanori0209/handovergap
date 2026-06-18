@@ -54,7 +54,14 @@ route = route_transferability_result(
 if route.action == "retrieve_more":
     extra_evidence = []
     for query in route.retrieval_queries:
-        extra_evidence.extend(retriever.search_evidence(query.query, top_k=3))
+        extra_evidence.extend(
+            retriever.search_evidence(
+                query.query,
+                top_k=3,
+                source_type_filter=query.preferred_source_types,
+                boosted_terms=query.search_terms,
+            )
+        )
     extra_slots = map_evidence_slots_by_keywords(extra_evidence, slot_keywords)
     result = TransferabilityGate().check(
         memory=memory.text,
@@ -77,7 +84,7 @@ if route.action != "answer":
 return llm.answer(user_question, context=route.safe_context)
 ```
 
-Keep follow-up retrieval bounded. A practical default is one follow-up round, at most three generated queries, and explicit evidence support before adding `evidence_slots`.
+Keep follow-up retrieval bounded. A practical default is one follow-up round, at most three generated queries, and explicit evidence support before adding `evidence_slots`. Each follow-up query carries `preferred_source_types` and `search_terms` from the profile slot's `retrieval_hints`; use them as metadata filters, source-routing hints, or query boosts in your existing retriever.
 
 The default `strict` safety policy requires high-risk profile slots to be present in `evidence_slots` before answering. If your application intentionally trusts reviewed caller-provided slots, pass `safety_policy="balanced"` and track `unsafe_answer_rate` before enforcing it in production.
 
