@@ -83,7 +83,17 @@ def test_evidence_slot_mapping_helper_is_public() -> None:
 
 def test_product_routing_helper_is_public() -> None:
     assert callable(route_transferability_result)
-    assert set(ProductRoute.model_fields) == {"status", "action", "reason", "questions", "safe_context"}
+    assert set(ProductRoute.model_fields) == {
+        "status",
+        "action",
+        "recommended_action",
+        "deployment_mode",
+        "enforcement",
+        "should_interrupt",
+        "reason",
+        "questions",
+        "safe_context",
+    }
 
 
 def test_profile_validation_helper_is_public() -> None:

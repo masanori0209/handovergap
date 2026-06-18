@@ -22,6 +22,10 @@ def test_route_transferable_result_allows_answer_with_safe_context() -> None:
 
     assert route.status == "transferable"
     assert route.action == "answer"
+    assert route.recommended_action == "answer"
+    assert route.deployment_mode == "hard"
+    assert route.enforcement == "enforce"
+    assert route.should_interrupt is False
     assert route.reason == []
     assert route.questions == []
     assert route.safe_context == result.memory
@@ -39,6 +43,10 @@ def test_route_needs_clarification_result_asks_questions_without_safe_context() 
 
     assert route.status == "needs_clarification"
     assert route.action == "ask"
+    assert route.recommended_action == "ask"
+    assert route.deployment_mode == "hard"
+    assert route.enforcement == "enforce"
+    assert route.should_interrupt is True
     assert route.reason
     assert route.questions
     assert route.safe_context is None
@@ -56,9 +64,53 @@ def test_route_blocked_result_blocks_without_exposing_safe_context() -> None:
 
     assert route.status == "blocked"
     assert route.action == "block"
+    assert route.recommended_action == "block"
+    assert route.deployment_mode == "hard"
+    assert route.enforcement == "enforce"
+    assert route.should_interrupt is True
     assert any("説明済み" in reason for reason in route.reason)
     assert route.questions
     assert route.safe_context is None
+
+
+def test_route_shadow_mode_observes_without_interrupting() -> None:
+    result = TransferabilityGate().check(
+        memory="Use CSV for this release; API support is deferred.",
+        profile="CS",
+        task_context="Answer customer questions about the workaround.",
+        provided_slots=["scope"],
+    )
+
+    route = route_transferability_result(result, safe_context=result.memory, deployment_mode="shadow")
+
+    assert route.status == "blocked"
+    assert route.recommended_action == "block"
+    assert route.action == "answer"
+    assert route.deployment_mode == "shadow"
+    assert route.enforcement == "observe"
+    assert route.should_interrupt is False
+    assert route.reason
+    assert route.questions
+    assert route.safe_context == result.memory
+
+
+def test_route_soft_mode_warns_without_interrupting() -> None:
+    result = TransferabilityGate().check(
+        memory="The nightly job can be rerun manually.",
+        profile="Engineer",
+        task_context="Recover a failed nightly job.",
+        provided_slots=["related_issue", "failure_modes"],
+    )
+
+    route = route_transferability_result(result, safe_context=result.memory, deployment_mode="soft")
+
+    assert route.status == "needs_clarification"
+    assert route.recommended_action == "ask"
+    assert route.action == "answer"
+    assert route.deployment_mode == "soft"
+    assert route.enforcement == "warn"
+    assert route.should_interrupt is False
+    assert route.safe_context == result.memory
 
 
 def test_route_invalid_status_reports_expected_values() -> None:
@@ -75,3 +127,19 @@ def test_route_invalid_status_reports_expected_values() -> None:
     message = str(exc_info.value)
     assert "Invalid transferability_status 'paused'" in message
     assert "transferable, needs_clarification, blocked" in message
+
+
+def test_route_invalid_deployment_mode_reports_expected_values() -> None:
+    result = TransferabilityGate().check(
+        memory="Use CSV for this release; API support is deferred.",
+        profile="CS",
+        task_context="Answer customer questions about the workaround.",
+        provided_slots=["scope"],
+    )
+
+    with pytest.raises(ValueError) as exc_info:
+        route_transferability_result(result, deployment_mode="audit-only")  # type: ignore[arg-type]
+
+    message = str(exc_info.value)
+    assert "Invalid deployment_mode 'audit-only'" in message
+    assert "shadow, soft, hard" in message

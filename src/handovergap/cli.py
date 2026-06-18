@@ -6,6 +6,7 @@ from collections import Counter
 from importlib import resources
 from pathlib import Path
 from time import perf_counter
+from typing import cast
 
 import typer
 from rich.console import Console
@@ -24,6 +25,7 @@ from handovergap.retrieval import (
     retrieve_slot_evidence_hybrid_local,
     retrieve_slot_evidence_local,
 )
+from handovergap.routing import DeploymentMode, route_transferability_result
 from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS, validate_slot_fill_mode
 from handovergap.store import InMemoryStore
 from handovergap.stores import TiDBStore
@@ -92,6 +94,23 @@ def _print_detection(result) -> None:
     console.print(f"[bold]Score:[/bold] {result.transferability_score:.2f}")
 
 
+def _validate_deployment_mode(value: str) -> DeploymentMode:
+    if value not in {"shadow", "soft", "hard"}:
+        raise typer.BadParameter("--deployment-mode must be one of: shadow, soft, hard.")
+    return cast(DeploymentMode, value)
+
+
+def _print_route(result, deployment_mode: DeploymentMode) -> None:
+    route = route_transferability_result(result, safe_context=result.memory, deployment_mode=deployment_mode)
+    console.print()
+    console.print("[bold]Product Route:[/bold]")
+    console.print(f"Deployment Mode: {route.deployment_mode}")
+    console.print(f"Recommended Action: {route.recommended_action}")
+    console.print(f"Applied Action: {route.action}")
+    console.print(f"Enforcement: {route.enforcement}")
+    console.print(f"Should Interrupt: {route.should_interrupt}")
+
+
 @app.command()
 def demo() -> None:
     """Run the built-in valid-but-non-transferable memory demo."""
@@ -104,8 +123,14 @@ def detect(
     scenario: str = typer.Option(..., "--scenario", "-s", help="Built-in scenario id, e.g. S001."),
     profile: str = typer.Option(..., "--profile", "-p", help="Profile preset: CS, Engineer, or Sales."),
     profile_file: str | None = typer.Option(None, "--profile-file", help="YAML file with custom profile requirements."),
+    deployment_mode: str = typer.Option(
+        "hard",
+        "--deployment-mode",
+        help="Product rollout mode: shadow records decisions, soft warns without interrupting, hard enforces ask/block.",
+    ),
 ) -> None:
     """Detect profile-conditioned tacit context gaps for one scenario."""
+    selected_deployment_mode = _validate_deployment_mode(deployment_mode)
     store = InMemoryStore.from_builtin_dataset()
     profiles = ProfileCatalog.from_yaml(profile_file) if profile_file else ProfileCatalog.builtins()
     if profile_file:
@@ -114,6 +139,7 @@ def detect(
     else:
         result = HandoverGapDetector(store=store, profiles=profiles).detect(scenario_id=scenario, profile=profile)
     _print_detection(result)
+    _print_route(result, selected_deployment_mode)
 
 
 @profiles_app.command("validate")

@@ -8,7 +8,9 @@
 
 ### Added
 
-- None.
+- Deployment modes for product routing: `shadow`, `soft`, and `hard`.
+- Product route fields for rollout control: `recommended_action`, `deployment_mode`, `enforcement`, and `should_interrupt`.
+- `handovergap detect --deployment-mode ...` for checking rollout behavior from the CLI.
 
 ### Changed
 
@@ -32,7 +34,7 @@
 
 ### Notes
 
-- No unreleased changes yet.
+- `hard` is still the default routing mode, so existing answer/ask/block behavior remains unchanged unless callers opt into `shadow` or `soft`.
 
 ## 1.0.0 - 2026-06-18
 

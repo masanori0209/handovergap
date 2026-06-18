@@ -80,6 +80,45 @@ LangChain / LlamaIndex を含む組み込みパターンは [RAG Integration Rec
 
 最初の検索結果では代替手段とエスカレーション先が足りないため `block` になり、runbook証拠を追加すると `answer` に変わります。OpenAIによるslot fillingやTiDBへの監査保存は任意で差し替えられます。
 
+## 導入モード
+
+HandoverGapは、判定結果と実際のプロダクト挙動を分けて扱えます。既存RAGに入れる最初の段階では、いきなり回答を止めずに `shadow` または `soft` で観測するのが安全です。
+
+| mode | 実際のaction | 用途 |
+| --- | --- | --- |
+| `shadow` | 常に `answer`。`recommended_action`、gap、質問をログに残す | 既存RAGの挙動を変えずに判定品質を見る |
+| `soft` | 常に `answer`。警告やレビュー表示に使う | ユーザーにリスクを見せつつ、自動停止はしない |
+| `hard` | `answer` / `ask` / `block` を実際に適用する | ローカル評価とレビュー後に、高リスク回答を止める |
+
+```python
+from handovergap import TransferabilityGate, route_transferability_result
+
+result = TransferabilityGate().check(
+    memory="Use CSV for this release; API support is deferred.",
+    profile="CS",
+    task_context="Answer customer questions without overpromising.",
+    provided_slots=["scope"],
+)
+
+route = route_transferability_result(
+    result,
+    safe_context=result.memory,
+    deployment_mode="shadow",
+)
+
+print(route.action)              # answer
+print(route.recommended_action)  # block / ask / answer
+print(route.questions)
+```
+
+CLIでも同じ挙動を確認できます。
+
+```bash
+handovergap detect --scenario S001 --profile CS --deployment-mode shadow
+handovergap detect --scenario S001 --profile CS --deployment-mode soft
+handovergap detect --scenario S001 --profile CS --deployment-mode hard
+```
+
 ## デモ
 
 ```bash

@@ -1142,8 +1142,8 @@ return llm.answer(user_question, context=retrieved_memory.text)</code></pre>
             <thead>
               <tr>
                 <th>Status</th>
-                <th>Action</th>
-                <th>Product behavior</th>
+                <th>Recommended action</th>
+                <th>Hard-mode behavior</th>
               </tr>
             </thead>
             <tbody>
@@ -1164,6 +1164,33 @@ return llm.answer(user_question, context=retrieved_memory.text)</code></pre>
               </tr>
             </tbody>
           </table>
+          <h3>Deployment Modes</h3>
+          <table class="text-table">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Applied action</th>
+                <th>Use when</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>shadow</code></td>
+                <td>Always <code>answer</code></td>
+                <td>Record gaps, questions, and recommended action without changing existing RAG behavior.</td>
+              </tr>
+              <tr>
+                <td><code>soft</code></td>
+                <td>Always <code>answer</code></td>
+                <td>Show warnings or review badges before enforcing interruptions.</td>
+              </tr>
+              <tr>
+                <td><code>hard</code></td>
+                <td><code>answer</code>, <code>ask</code>, or <code>block</code></td>
+                <td>Interrupt risky answers after local evaluation and reviewer calibration.</td>
+              </tr>
+            </tbody>
+          </table>
           <pre><code>from handovergap import TransferabilityGate, route_transferability_result
 
 result = TransferabilityGate().check(
@@ -1173,19 +1200,31 @@ result = TransferabilityGate().check(
     provided_slots=["scope"],
 )
 
-route = route_transferability_result(result, safe_context=result.memory)
+route = route_transferability_result(
+    result,
+    safe_context=result.memory,
+    deployment_mode="shadow",
+)
 
 return {
     "status": route.status,
     "action": route.action,
+    "recommended_action": route.recommended_action,
+    "deployment_mode": route.deployment_mode,
+    "enforcement": route.enforcement,
+    "should_interrupt": route.should_interrupt,
     "reason": route.reason,
     "questions": route.questions,
     "safe_context": route.safe_context,
 }</code></pre>
           <p class="small" style="margin-top: 14px">
-            <code>safe_context</code> is only returned for <code>transferable</code> results. Ask and
-            block routes omit it so applications do not expose context that is not ready to use.
+            In <code>hard</code> mode, <code>safe_context</code> is only returned for
+            <code>transferable</code> results. In <code>shadow</code> and <code>soft</code> modes,
+            the original context can continue while the recommended interruption is logged.
           </p>
+          <pre><code>handovergap detect --scenario S001 --profile CS --deployment-mode shadow
+handovergap detect --scenario S001 --profile CS --deployment-mode soft
+handovergap detect --scenario S001 --profile CS --deployment-mode hard</code></pre>
         </section>
 
         <section>

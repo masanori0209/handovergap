@@ -13,7 +13,7 @@ from handovergap.profiles import (
     SlotPolicy,
     validate_profile_file,
 )
-from handovergap.routing import ProductRoute, route_transferability_result
+from handovergap.routing import DeploymentMode, ProductRoute, RouteAction, route_transferability_result
 from handovergap.slot_filling_modes import SLOT_FILL_MODE_DESCRIPTIONS, SlotFillMode
 from handovergap.slot_mapping import map_evidence_slots_by_keywords
 from handovergap.store import InMemoryStore
@@ -30,6 +30,8 @@ __all__ = [
     "ProfileValidationResult",
     "ProductRoute",
     "PrivacyFinding",
+    "DeploymentMode",
+    "RouteAction",
     "SlotPolicy",
     "SlotFillMode",
     "SLOT_FILL_MODE_DESCRIPTIONS",

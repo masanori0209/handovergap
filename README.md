@@ -506,11 +506,19 @@ See [docs/31_versioning_policy.md](docs/31_versioning_policy.md) for the full po
 
 Use `route_transferability_result(...)` when your application needs a structured answer/ask/block response.
 
-| `transferability_status` | `action` | Product behavior |
+| `transferability_status` | Recommended action | Product behavior in hard mode |
 | --- | --- | --- |
 | `transferable` | `answer` | Continue to answer or action generation. |
 | `needs_clarification` | `ask` | Ask the returned questions before finalizing the answer. |
 | `blocked` | `block` | Withhold the answer/action and show the missing context questions to the responsible user. |
+
+Roll out the gate with an explicit deployment mode:
+
+| Deployment mode | Applied action | Use when |
+| --- | --- | --- |
+| `shadow` | Always `answer`; record `recommended_action`, gaps, and questions | You want observation logs without changing existing RAG behavior. |
+| `soft` | Always `answer`; show warnings or review badges | You want users to see risk signals before enforcing blocks. |
+| `hard` | Apply `answer`, `ask`, or `block` | You have reviewed local data and are ready to interrupt risky answers. |
 
 ```python
 from handovergap import TransferabilityGate, route_transferability_result
@@ -522,18 +530,34 @@ result = TransferabilityGate().check(
     provided_slots=["scope"],
 )
 
-route = route_transferability_result(result, safe_context=result.memory)
+route = route_transferability_result(
+    result,
+    safe_context=result.memory,
+    deployment_mode="shadow",
+)
 
 return {
     "status": route.status,
     "action": route.action,
+    "recommended_action": route.recommended_action,
+    "deployment_mode": route.deployment_mode,
+    "enforcement": route.enforcement,
+    "should_interrupt": route.should_interrupt,
     "reason": route.reason,
     "questions": route.questions,
     "safe_context": route.safe_context,
 }
 ```
 
-`safe_context` is only returned for `transferable` results. Clarification and blocked routes omit it so applications do not accidentally expose context that is not ready to use.
+In `hard` mode, `safe_context` is only returned for `transferable` results. Clarification and blocked routes omit it so applications do not accidentally expose context that is not ready to use. In `shadow` and `soft` modes, the original context can still flow through while the recommended interruption is logged.
+
+The CLI exposes the same rollout choice:
+
+```bash
+handovergap detect --scenario S001 --profile CS --deployment-mode shadow
+handovergap detect --scenario S001 --profile CS --deployment-mode soft
+handovergap detect --scenario S001 --profile CS --deployment-mode hard
+```
 
 ### Custom Profiles
 
