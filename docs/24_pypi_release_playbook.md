@@ -24,7 +24,7 @@ python harness/validation/tidb_live_check.py --reset-schema
 python harness/validation/tidb_audit_query_check.py --reset-schema --dataset sanitized --iterations 10
 ```
 
-Use `--reset-schema` only for alpha validation databases with no user data. The validation scripts call `destructive_reset_schema(..., confirm=RESET_CONFIRMATION)`.
+Use `--reset-schema` only for validation databases with no user data. The validation scripts call `destructive_reset_schema(..., confirm=RESET_CONFIRMATION)`.
 
 ## Release Checklist
 

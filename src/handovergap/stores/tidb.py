@@ -117,7 +117,7 @@ class TiDBStore:
     def reset_schema(self, engine: Any | None = None) -> None:
         """Drop packaged HandoverGap tables.
 
-        This compatibility alias is intended for alpha validation only. Prefer
+        This compatibility alias is intended for validation-only resets. Prefer
         `destructive_reset_schema(..., confirm="drop-handovergap-tables")` in
         scripts so destructive intent is visible at the call site.
         """
@@ -127,7 +127,7 @@ class TiDBStore:
     def destructive_reset_schema(self, engine: Any | None = None, *, confirm: str) -> None:
         """Drop packaged HandoverGap tables after explicit confirmation.
 
-        Use only on alpha validation databases without user data. This removes
+        Use only on validation databases without user data. This removes
         the packaged audit tables and schema metadata.
         """
 

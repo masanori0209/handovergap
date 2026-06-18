@@ -2,7 +2,7 @@
 
 ## Supported Status
 
-HandoverGap is currently alpha software. Treat APIs and schemas as subject to change until a stable release is declared.
+HandoverGap `1.0.0` declares a stable public API, CLI, profile YAML, result model, routing, evaluation input, and TiDB audit-store contract. Incompatible changes to those surfaces require a major version.
 
 ## Data Handling
 
@@ -36,7 +36,7 @@ Before evaluating user data:
 - Remove real company names, customer names, employee names, channel names, direct user IDs, URLs, email addresses, phone numbers, payment details, and secrets.
 - Keep `.env`, reviewed labels, generated reports, and local datasets out of git.
 - Run `handovergap privacy-check` before publishing docs, examples, or packaged data.
-- Treat `--reset-schema` TiDB validation commands as alpha-only and use them only on databases without user data.
+- Treat `--reset-schema` TiDB validation commands as destructive validation-only commands and use them only on databases without user data.
 
 ## Reporting a Vulnerability
 

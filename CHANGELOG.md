@@ -34,6 +34,29 @@
 
 - No unreleased changes yet.
 
+## 1.0.0 - 2026-06-18
+
+### Added
+
+- First stable public-contract release for HandoverGap as a profile-conditioned readiness gate for RAG and agent memory systems.
+- Stable v1 contract for `TransferabilityGate.check(...)`, custom profile YAML, result fields, answer/ask/block routing, local user-dataset evaluation, and optional TiDB audit-store expectations.
+- Public documentation paths for quickstart, CLI usage, Python API, profile YAML, RAG integration, TiDB audit store, evaluation, security/privacy, and versioning.
+
+### Changed
+
+- Package metadata now declares the v1 stable release and updates the project description beyond handover-only wording.
+- User-facing docs now describe `1.0.0` as the stable public-contract baseline while preserving production-accuracy caveats.
+
+### Security
+
+- Core runtime remains local by default and does not require OpenAI, TiDB, Slack, GitHub, Streamlit, or any web app.
+- Bundled datasets remain fictional/synthetic; user data evaluation should use anonymized local files.
+
+### Notes
+
+- v1 stability covers integration contracts, not a claim that bundled synthetic metrics predict production accuracy.
+- TiDB and OpenAI remain optional integrations.
+
 ## 0.1.20 - 2026-06-18
 
 ### Added

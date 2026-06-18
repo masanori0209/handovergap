@@ -1,6 +1,6 @@
 # Versioning Policy
 
-HandoverGap is alpha software until `1.0.0`. Pre-v1 releases may still clean up API names, CLI names, profile schema, result fields, and TiDB schema details when the change improves product readiness.
+HandoverGap `1.0.0` is the first stable public-contract release. Earlier `0.x.y` releases were allowed to clean up API names, CLI names, profile schema, result fields, and TiDB schema details when the change improved product readiness.
 
 The project still treats every release as a user-facing package release: breaking changes must be called out in the changelog, migration notes, and release checklist.
 
@@ -14,7 +14,7 @@ The project still treats every release as a user-facing package release: breakin
 
 ## v1 Stable Surfaces
 
-At `1.0.0`, the following surfaces should be treated as stable integration contracts.
+Starting with `1.0.0`, the following surfaces are stable integration contracts.
 
 | Surface | Stable contract |
 | --- | --- |
@@ -63,4 +63,3 @@ Current names are intentionally profile- and task-oriented rather than handover-
 - Use `task_context`, not only handover text, so the same gate can apply to support replies, incident response, legal review, renewal workflows, and agent memory checks.
 - Use `TransferabilityGate` for the user-facing gate and keep `ContextReadinessGate` as an alias-level concept.
 - Use `provided_slots` and `evidence_slots` to make the trust boundary explicit instead of treating raw retrieved text as complete context.
-

@@ -413,7 +413,7 @@
               <span class="kicker">1. Install</span>
               <h3>Use the latest tested release</h3>
               <p>The core package has no TiDB, OpenAI, or Streamlit runtime requirement.</p>
-              <pre><code>pip install handovergap==0.1.20</code></pre>
+              <pre><code>pip install handovergap==1.0.0</code></pre>
             </article>
             <article class="card">
               <span class="kicker">2. Inspect one case</span>
@@ -709,7 +709,7 @@ handovergap serve</code></pre>
               <code>create_schema()</code> is idempotent and records packaged schema metadata in
               <code>handovergap_schema_metadata</code>. Repeated validation runs can use
               <code>persist_memory_item(...)</code> to upsert by <code>scenario_id</code>. Destructive
-              resets are alpha-only and require
+              resets are validation-only and require
               <code>destructive_reset_schema(..., confirm=RESET_CONFIRMATION)</code>.
             </p>
           </div>
@@ -1243,10 +1243,10 @@ return {
         <section id="versioning-policy">
           <h2>Versioning Policy</h2>
           <p>
-            HandoverGap is alpha software until <code>1.0.0</code>. Pre-v1 releases may still clean up
-            API names, CLI names, profile schema, result fields, and TiDB schema details when the
-            change improves product readiness. Breaking changes must still be called out in the
-            changelog and release notes.
+            HandoverGap <code>1.0.0</code> is the first stable public-contract release.
+            Earlier <code>0.x.y</code> releases were allowed to clean up API names, CLI names,
+            profile schema, result fields, and TiDB schema details when the change improved product
+            readiness. Breaking changes must be called out in the changelog and release notes.
           </p>
           <div class="grid two">
             <article class="card">

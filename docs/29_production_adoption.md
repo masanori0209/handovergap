@@ -1,6 +1,6 @@
 # Production Adoption Guide
 
-HandoverGap is an alpha readiness gate for RAG memories. The safe production posture is to start with observation and audit, not automatic blocking in critical workflows.
+HandoverGap is a stable public-contract readiness gate for RAG memories. The safe production adoption posture is still to start with observation and audit, not automatic blocking in critical workflows.
 
 ## Recommended Rollout
 
@@ -50,4 +50,4 @@ TiDB is useful when you need one auditable store for:
 
 Use `handovergap schema --dialect tidb`, `handovergap audit-sql`, and live validation scripts after credentials are configured.
 
-For alpha validation databases that may contain an older HandoverGap schema, the validation scripts support `--reset-schema`. This calls `destructive_reset_schema(..., confirm=RESET_CONFIRMATION)`, drops the packaged HandoverGap tables, and recreates them, so do not use it against a database that contains user data.
+For validation databases that may contain an older HandoverGap schema, the validation scripts support `--reset-schema`. This calls `destructive_reset_schema(..., confirm=RESET_CONFIRMATION)`, drops the packaged HandoverGap tables, and recreates them, so do not use it against a database that contains user data.
