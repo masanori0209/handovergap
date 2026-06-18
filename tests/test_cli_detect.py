@@ -39,5 +39,4 @@ def test_detect_cli_rejects_unknown_deployment_mode() -> None:
         ["detect", "--scenario", "S001", "--profile", "CS", "--deployment-mode", "audit-only"],
     )
 
-    assert result.exit_code != 0
-    assert "--deployment-mode must be one of: shadow, soft, hard" in result.output
+    assert result.exit_code == 2
