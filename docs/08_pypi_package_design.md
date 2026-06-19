@@ -34,7 +34,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "handovergap"
-version = "1.0.0"
+version = "1.0.1"
 description = "Tacit Context Gap Detection for Handover-oriented RAG"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -71,7 +71,7 @@ handovergap = "handovergap.cli:app"
 
 ## Release Levels
 
-### 1.0.0
+### 1.0.1
 
 - CLI
 - in-memory store

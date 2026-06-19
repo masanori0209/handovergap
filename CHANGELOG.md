@@ -8,6 +8,36 @@
 
 ### Added
 
+- None.
+
+### Changed
+
+- None.
+
+### Deprecated
+
+- None.
+
+### Removed
+
+- None.
+
+### Fixed
+
+- None.
+
+### Security
+
+- None.
+
+## 1.0.1 - 2026-06-19
+
+### Breaking Changes
+
+- None.
+
+### Added
+
 - Deployment modes for product routing: `shadow`, `soft`, and `hard`.
 - Product route fields for rollout control: `recommended_action`, `deployment_mode`, `enforcement`, and `should_interrupt`.
 - `handovergap detect --deployment-mode ...` for checking rollout behavior from the CLI.
